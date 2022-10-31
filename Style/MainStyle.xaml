@@ -1,0 +1,76 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+                    xmlns:thing="clr-namespace:ArkHelper.thing">
+
+    <thing:TagtoPackIconkindConverter x:Key="TagtoPackIconkindConverter" />
+
+    <!--  页面  -->
+    <Style x:Key="Window" TargetType="{x:Type Window}">
+        <Setter Property="Background" Value="White" />
+        <Setter Property="Title" Value="ArkHelper" />
+    </Style>
+    <Style x:Key="FrontMenuPage" TargetType="{x:Type Page}">
+        <Style.Triggers>
+            <EventTrigger RoutedEvent="Page.Loaded">
+                <EventTrigger.Actions>
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <ThicknessAnimation DecelerationRatio=".9"
+                                                Storyboard.TargetProperty="Margin"
+                                                From="-20,0,20,0"
+                                                To="0,0,0,0"
+                                                Duration="0:0:.35" />
+                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                             From="0"
+                                             To="1"
+                                             Duration="0:0:.25" />
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger.Actions>
+            </EventTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <!--  物品wrappanel  -->
+    <Style x:Key="thing" TargetType="{x:Type WrapPanel}">
+        <Setter Property="Orientation" Value="Vertical" />
+        <Setter Property="Margin" Value="0,0,0,20" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <!--  物品dockpanel  -->
+    <Style x:Key="object" TargetType="{x:Type WrapPanel}">
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Margin" Value="0,0,0,15" />
+        <Setter Property="Orientation" Value="Vertical" />
+    </Style>
+    <!--  标题wrappanel  -->
+    <Style x:Key="title" TargetType="{x:Type StackPanel}">
+        <Setter Property="VerticalAlignment" Value="Top" />
+        <Setter Property="Margin" Value="0,0,0,15" />
+    </Style>
+
+    <!--  卡片样式  -->
+    <Style x:Key="card" TargetType="Border">
+        <!--
+        <Setter Property="Background" Value="#fcfcff"/>
+        -->
+        <Setter Property="CornerRadius" Value="15" />
+        <Setter Property="Margin" Value="0,15,15,15" />
+    </Style>
+
+    <!--  卡片样式  -->
+    <Style x:Key="extendRBtn" TargetType="Border">
+        <Setter Property="Background" Value="#CAE6FF" />
+        <Setter Property="CornerRadius" Value="16" />
+        <Style.Triggers>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Background" Value="#f1f9ff" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+
+
+</ResourceDictionary>

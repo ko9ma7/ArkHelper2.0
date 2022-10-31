@@ -1,0 +1,65 @@
+﻿<Page x:Class="ArkHelper.Xaml.Help"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:akhc="clr-namespace:ArkHelper.Style.Control"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:local="clr-namespace:ArkHelper.Xaml"
+      xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      Title="Help"
+      d:Background="White"
+      d:DesignHeight="450"
+      d:DesignWidth="800"
+      mc:Ignorable="d">
+
+    <Page.Resources />
+    <ScrollViewer>
+        <StackPanel Orientation="Vertical">
+            <akhc:Title Icon="InfoCircle" Text="帮助和信息" />
+            <TabControl Background="White"
+                        Style="{StaticResource MaterialDesignNavigationRailTabControl}"
+                        TabStripPlacement="Left">
+
+                <TabItem Width="150" Header="SCHT">
+                    <WrapPanel Margin="10,0,0,0" Style="{StaticResource thing}">
+                        <TextBlock FontSize="{StaticResource h1}"></TextBlock>
+                        <TextBlock FontSize="{StaticResource h2}" />
+                    </WrapPanel>
+                </TabItem>
+                
+                <TabItem Width="150" Header="关于ArkHelper">
+                    <WrapPanel Margin="10,0,0,0" Style="{StaticResource thing}">
+                        <TextBlock FontSize="{StaticResource h1}">安全性</TextBlock>
+                        <TextBlock FontSize="{StaticResource h2}">使用ArkHelper，账号是否会被游戏封禁？</TextBlock>
+                        <TextBlock FontSize="{StaticResource h3}" Foreground="Gray">不会。ArkHelper基于Android Debug Bridge实现向模拟器输出模拟点击，不进行数据包和内存操作，不属于游戏定义的违规行为，因此不会被封禁。</TextBlock>
+                    </WrapPanel>
+                </TabItem>
+                
+                <TabItem Width="150" Header="模拟器">
+                    <WrapPanel Margin="10,0,0,0" Style="{StaticResource thing}">
+                        <TextBlock FontSize="{StaticResource h1}">当前连接模拟器</TextBlock>
+                        <TextBlock FontSize="{StaticResource h2}">
+                            <Run>模拟器名称：</Run>
+                            <Run x:Name="simulator_name">null</Run>
+                            <LineBreak />
+                            <Run>模拟器adb连接地址：</Run>
+                            <Run x:Name="simulator_ip">null</Run>
+                            <LineBreak />
+                            <Run>模拟器进程名：</Run>
+                            <Run x:Name="simulator_im">null</Run>
+                        </TextBlock>
+                        <TextBlock FontSize="{StaticResource h1}" >
+                            模拟器适配进度
+                        </TextBlock>
+                        <TextBlock FontSize="{StaticResource h2}">
+                            <Run>ArkHelper目前支持以下模拟器：</Run>
+                            <Run FontSize="{StaticResource h3}" x:Name="simulator_support"></Run>
+                        </TextBlock>
+                    </WrapPanel>
+                </TabItem>
+                
+
+            </TabControl>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

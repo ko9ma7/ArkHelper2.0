@@ -1,0 +1,20 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:System="clr-namespace:System;assembly=mscorlib"
+                    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
+    <!--  全局字体  -->
+    <Style TargetType="{x:Type TextBlock}">
+        <Setter Property="FontFamily" Value="{DynamicResource SourceHan}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+    <Style TargetType="{x:Type TextElement}">
+        <Setter Property="FontFamily" Value="{DynamicResource SourceHan}" />
+    </Style>
+
+    <!--  字号  -->
+    <System:Double x:Key="h1">22</System:Double>
+    <System:Double x:Key="h2">17</System:Double>
+    <System:Double x:Key="h3">15</System:Double>
+    <System:Double x:Key="p">13</System:Double>
+
+</ResourceDictionary>

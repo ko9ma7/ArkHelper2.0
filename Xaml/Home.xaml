@@ -1,0 +1,119 @@
+﻿<Page x:Class="ArkHelper.Xaml.Home"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      Title="Home"
+      d:DesignHeight="450"
+      d:DesignWidth="652"
+      Style="{StaticResource FrontMenuPage}"
+      Unloaded="Page_Unloaded"
+      mc:Ignorable="d">
+    <Page.Resources>
+
+        <!--  消息框listitem样式  -->
+        <Style x:Key="message_listbox_item" TargetType="{x:Type ListBoxItem}">
+            <Setter Property="Margin" Value="0,0,0,10" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                        <DockPanel>
+                            <materialDesign:PackIcon Width="30"
+                                                     Height="30"
+                                                     VerticalAlignment="Center"
+                                                     Kind="{TemplateBinding Tag,
+                                                                            Converter={StaticResource TagtoPackIconkindConverter}}" />
+                            <TextBlock Margin="12,0,0,0"
+                                       VerticalAlignment="Center"
+                                       FontSize="18"
+                                       Text="{TemplateBinding ContentStringFormat}"
+                                       TextWrapping="Wrap" />
+                        </DockPanel>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Page.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="3*" />
+            <ColumnDefinition Width="2*" />
+        </Grid.ColumnDefinitions>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0">
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="60" />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <Border x:Name="border"
+                        Grid.Row="1"
+                        Height="{Binding Width, ElementName=border}"
+                        Style="{DynamicResource card}">
+                    <Frame x:Name="Widget1" NavigationUIVisibility="Hidden" />
+                </Border>
+                <Grid Grid.Row="0">
+                    <DockPanel Margin="12,18.5,0,0" VerticalAlignment="Top">
+                        <materialDesign:PackIcon Width="30"
+                                                 Height="30"
+                                                 VerticalAlignment="Center"
+                                                 Kind="Computer" />
+                        <TextBlock Margin="15,0,0,0"
+                                   VerticalAlignment="Center"
+                                   FontSize="18">
+                            <Run x:Name="time_welcome">测试时间</Run>
+
+                            <Run>好，博士。</Run>
+                            <LineBreak />
+
+                            <Run FontSize="12" Foreground="LightGray">
+                                ArkHelper本地化计划任务系统和扩展管理单元正常运作中
+                            </Run>
+                        </TextBlock>
+                    </DockPanel>
+                </Grid>
+            </Grid>
+            <Border Grid.Row="1"
+                    Margin="0,0,15,15"
+                    Style="{DynamicResource card}">
+                <Frame x:Name="Widget2" NavigationUIVisibility="Hidden" />
+            </Border>
+        </Grid>
+
+        <Border Grid.Column="1"
+                Background="#fcfcff"
+                Style="{DynamicResource card}">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <WrapPanel Orientation="Vertical">
+                    <TextBlock Margin="25,20,0,0">
+                        <Run FontSize="15">现在是</Run>
+                        <Run x:Name="time_notify" FontSize="25">测试时间</Run>
+                    </TextBlock>
+
+                    <ListBox x:Name="notif_box"
+                             Margin="25,10,10,0"
+                             FontSize="13">
+
+                        <ListBoxItem x:Name="chip_notify" Style="{DynamicResource message_listbox_item}">
+                            <ListBoxItem.Tag>Chip</ListBoxItem.Tag>
+                            <ListBoxItem.ContentStringFormat>测试/测试/测试/测试/测试/测试</ListBoxItem.ContentStringFormat>
+                        </ListBoxItem>
+
+                        <ListBoxItem x:Name="material_notify" Style="{DynamicResource message_listbox_item}">
+                            <ListBoxItem.Tag>CreditCardChip</ListBoxItem.Tag>
+                            <ListBoxItem.ContentStringFormat>测试测试/测试测试/测试测试/测试测试</ListBoxItem.ContentStringFormat>
+                        </ListBoxItem>
+
+                    </ListBox>
+                </WrapPanel>
+            </ScrollViewer>
+        </Border>
+    </Grid>
+</Page>
