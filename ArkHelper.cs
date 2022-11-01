@@ -647,14 +647,6 @@ namespace ArkHelper
     }
 
     /// <summary>
-    /// 命名管理
-    /// </summary>
-    public static class GetName
-    {
-        
-    }
-
-    /// <summary>
     /// ArkHelper地址
     /// </summary>
     public static class Address
@@ -725,8 +717,8 @@ namespace ArkHelper
         public readonly static string email = @"ArkHelper@proton.me";
 
         //静态字段 地址
-        public readonly static string EULA = github + "/blob/docs/EULA";
-        public readonly static string PrivatePolicy = github + "/blob/docs/ArkHelper隐私政策.md";
+        public readonly static string EULA = github + "/blob/master/Doc/EULA.md";
+        public readonly static string PrivatePolicy = github + "/blob/master/Doc/ArkHelper隐私政策.md";
 
         public static void Create()
         {
