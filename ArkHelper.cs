@@ -13,7 +13,9 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Runtime.Remoting.Channels;
+using System.Security.RightsManagement;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -300,7 +302,7 @@ namespace ArkHelper
         public class Screenshot : IDisposable
         {
             private string Location { get; set; }
-            private Bitmap Image { get; set; }
+            private Bitmap ImgBitmap { get; set; }
             public Screenshot()
             {
                 string name = UniData.Screenshot;
@@ -326,7 +328,7 @@ namespace ArkHelper
             public string ColorPick(int x, int y)
             {
                 InitBitmap();
-                return ColorTranslator.ToHtml(Image.GetPixel(x, y));
+                return ColorTranslator.ToHtml(ImgBitmap.GetPixel(x, y));
             }
             /// <summary>
             /// 取色
@@ -341,12 +343,18 @@ namespace ArkHelper
 
             public Point[] PicToPoint(string smallimg, double errorCon = 0.7, int errorRange = 16, int num = 50)
             {
-                return PictureProcess.PicToPoint._Get(Location, smallimg, errorCon, errorRange, num);
+                if (!File.Exists(smallimg)) { return new Point[0]; }
+
+                //初始化图像类
+                InitBitmap();
+                var smallBM = new Bitmap(smallimg);
+
+                return PictureProcess.PicToPoint.GetPoint(this.ImgBitmap, smallBM, errorCon, errorRange, num);
             }
             private void InitBitmap()
             {
-                if (Image == null)
-                    Image = new Bitmap(Location);
+                if (ImgBitmap == null)
+                    ImgBitmap = new Bitmap(Location);
                 else
                     return;
             }
@@ -393,7 +401,7 @@ namespace ArkHelper
                 //清理托管资源
                 if (disposing)
                 {
-                    if (Image != null) { Image.Dispose(); Image = null; }
+                    if (ImgBitmap != null) { ImgBitmap.Dispose(); ImgBitmap = null; }
                     try
                     {
                         File.Delete(Location);
@@ -467,50 +475,19 @@ namespace ArkHelper
         /// <summary>
         /// 图像识别检出图像位置
         /// </summary>
-        public class PicToPoint
+        public static class PicToPoint
         {
-            //支持的按钮
-            public enum ArkObject
-            {
-                missionStart_blue,
-                specialOpening,
-                fourStarCp,
-                threeStarCp,
-                material_jczzjl
-            }
-            public static Point[] GetObjectLocation(ArkObject thing, string _bigpic)
-            {
-                string _smallpic;
-                double _errorCon = 0.3;
-                int _errorRange = 30;
-                int _num = 100;
-
-                if (thing.ToString().Contains("material_"))
-                    _smallpic = Address.res + @"\pic\material\" + thing.ToString().Replace("material_", "") + ".png";
-                else
-                    _smallpic = Address.res + @"\pic\" + thing.ToString() + ".png";
-
-                Point[] _result = _Get(_bigpic, _smallpic, _errorCon, _errorRange, _num);
-                return _result;
-            }
             /// <summary>
             /// 获取
             /// </summary>
-            /// <param name="bigpic">大图地址</param>
-            /// <param name="smallpic">小图地址</param>
+            /// <param name="bigBM">大图Bitmap</param>
+            /// <param name="smallBM">小图Bitmap</param>
             /// <param name="errorCon">点容差（0~1），越大越难以匹配</param>
             /// <param name="errorRange">色容差（0~255），越大越容易匹配</param>
             /// <param name="num">精确度，越大越准确</param>
             /// <returns>点数组</returns>
-            public static Point[] _Get(string bigpic, string smallpic, double errorCon = 0.6, int errorRange = 15, int num = 100)
+            public static Point[] GetPoint(Bitmap bigBM,Bitmap smallBM,double errorCon=0.6,int errorRange = 15,int num = 100)
             {
-                if (!File.Exists(bigpic)) { return new Point[0]; }
-                if (!File.Exists(smallpic)) { return new Point[0]; }
-
-                //初始化图像类
-                var bigBM = new Bitmap(bigpic);
-                var smallBM = new Bitmap(smallpic);
-
                 //声明数组，写入随机坐标
                 Point[] pointSmall = new Point[num];
                 Random rand = new Random();
@@ -642,6 +619,26 @@ namespace ArkHelper
                            colorA.G <= colorB.G + errorRange && colorA.G >= colorB.G - errorRange &&
                            colorA.B <= colorB.B + errorRange && colorA.B >= colorB.B - errorRange;
                 }
+            }
+            /// <summary>
+            /// 获取
+            /// </summary>
+            /// <param name="bigpic">大图地址</param>
+            /// <param name="smallpic">小图地址</param>
+            /// <param name="errorCon">点容差（0~1），越大越难以匹配</param>
+            /// <param name="errorRange">色容差（0~255），越大越容易匹配</param>
+            /// <param name="num">精确度，越大越准确</param>
+            /// <returns>点数组</returns>
+            public static Point[] GetPoint(string bigpic, string smallpic, double errorCon = 0.6, int errorRange = 15, int num = 100)
+            {
+                if (!File.Exists(bigpic)) { return new Point[0]; }
+                if (!File.Exists(smallpic)) { return new Point[0]; }
+
+                //初始化图像类
+                var bigBM = new Bitmap(bigpic);
+                var smallBM = new Bitmap(smallpic);
+
+                return GetPoint(bigBM, smallBM, errorCon,errorRange,num);
             }
         }
     }
