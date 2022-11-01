@@ -98,10 +98,7 @@ namespace ArkHelper.Xaml
 
         private void Button_Click_3(object sender, RoutedEventArgs e)
         {
-            /*RegistryKey registryKey = Registry.CurrentUser.OpenSubKey
-                ("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
-            registryKey.SetValue("ArkHelper", Application.Current);//"BaichuiMonitor"可以自定义*/
-            MessageBox.Show(UniData.Screenshot);
+            Update.Search();
         }
     }
 

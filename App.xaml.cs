@@ -5,6 +5,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -96,18 +97,21 @@ namespace ArkHelper
         private void Application_Startup(object sender, StartupEventArgs e)
         {
             #region 监听toast
-            // Listen to notification activation
             ToastNotificationManagerCompat.OnActivated += toastArgs =>
             {
                 ToastArguments args = ToastArguments.Parse(toastArgs.Argument);
-                ValueSet userInput = toastArgs.UserInput;
-                if (args.ToString() == "Message")
+                //ValueSet userInput = toastArgs.UserInput;
+                if (args["kind"].ToString() == "Message")
                 {
                     mainArg = new UniData.ArkHelperArg(UniData.ArgKind.Navigate, "Message", "MainWindow");
                     Application.Current.Dispatcher.Invoke(delegate
                     {
                         OpenMainWindow();
                     });
+                }
+                if (args["kind"].ToString() == "Update")
+                {
+                    Process.Start(args["url"].ToString());
                 }
             };
             #endregion
@@ -172,7 +176,7 @@ namespace ArkHelper
                                     if (_message.CreateAt > createat)
                                     {
                                         ToastContentBuilder messageToast = new ToastContentBuilder();
-                                        messageToast.AddArgument("Message");
+                                        messageToast.AddArgument("kind","Message");
                                         messageToast.AddText(user.Name + "发布了新的动态");
                                         messageToast.AddText(_message.Text);
                                         messageToast.AddCustomTimeStamp(_message.CreateAt);

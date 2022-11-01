@@ -1,4 +1,5 @@
 ﻿using MaterialDesignThemes.Wpf;
+using Microsoft.Toolkit.Uwp.Notifications;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -20,7 +21,9 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
+using System.Xml.Linq;
 using static ArkHelper.Data.SCHT;
 using Application = System.Windows.Application;
 using JsonSerializer = System.Text.Json.JsonSerializer;
@@ -39,7 +42,7 @@ namespace ArkHelper
         /// <summary>
         /// 版本号
         /// </summary>
-        public readonly static string tag = "v2.0.0.0";
+        public readonly static string tag = "v1.9.9.9";
         /// <summary>
         /// 版本种类
         /// </summary>
@@ -182,7 +185,7 @@ namespace ArkHelper
                 {
                     WithSystem.Message("模拟器连接断开", "请启动或重启模拟器");
                 });
-                Thread.Sleep(3000);
+                Thread.Sleep(2000);
             }
 
             process.StartInfo.Arguments = cmd;
@@ -210,7 +213,10 @@ namespace ArkHelper
             if (ConnectedInfo != null)
             {
                 if (Process.GetProcessesByName(ConnectedInfo.IM).Length == 0)
+                {
                     ConnectedInfo = null;
+                    Output.Log("Simulator Lost Connection");
+                }
                 else
                     return;
             }
@@ -246,7 +252,7 @@ namespace ArkHelper
         /// <param name="point">点击坐标</param>
         public static void Tap(Point point)
         {
-            Tap(point.X,point.Y);
+            Tap(point.X, point.Y);
         }
         /// <summary>
         /// adb点击
@@ -337,7 +343,7 @@ namespace ArkHelper
             /// <returns>该像素点的16进制颜色</returns>
             public string ColorPick(Point point)
             {
-                return ColorPick(point.X,point.Y);
+                return ColorPick(point.X, point.Y);
             }
             #endregion
 
@@ -486,7 +492,7 @@ namespace ArkHelper
             /// <param name="errorRange">色容差（0~255），越大越容易匹配</param>
             /// <param name="num">精确度，越大越准确</param>
             /// <returns>点数组</returns>
-            public static Point[] GetPoint(Bitmap bigBM,Bitmap smallBM,double errorCon=0.6,int errorRange = 15,int num = 100)
+            public static Point[] GetPoint(Bitmap bigBM, Bitmap smallBM, double errorCon = 0.6, int errorRange = 15, int num = 100)
             {
                 //声明数组，写入随机坐标
                 Point[] pointSmall = new Point[num];
@@ -638,7 +644,7 @@ namespace ArkHelper
                 var bigBM = new Bitmap(bigpic);
                 var smallBM = new Bitmap(smallpic);
 
-                return GetPoint(bigBM, smallBM, errorCon,errorRange,num);
+                return GetPoint(bigBM, smallBM, errorCon, errorRange, num);
             }
         }
     }
@@ -1224,54 +1230,35 @@ namespace ArkHelper
     {
         public static void Search()
         {
-            Task updateTask = Task.Run(() =>
+            //调用API 查找版本信息
+            var client = new RestClient("https://api.github.com/repos/ArkHelper/ArkHelper2.0/releases/latest");
+            var request = new RestRequest { Method = Method.Get };
+            var response = client.Execute(request);
+            var _result = JsonDocument.Parse(response.Content).RootElement;
+
+            //在json中取得最新版本号
+            string ver = _result.GetProperty("tag_name").GetString();
+            int tag = Convert.ToInt32(ver.Replace("v", "").Replace(".", ""));
+
+            if (tag >= Convert.ToInt32(Version.tag.Replace("v", "").Replace(".", "")))
             {
-                //调用API 查找版本信息
-                var client = new RestClient("https://api.github.com/repos/ArkHelper/ArkHelper2.0/releases/latest");
-                var request = new RestRequest { Method = Method.Get };
-                var response = client.Execute(request);
-                var _result = JsonConvert.DeserializeObject<JObject>(response.Content);
-
-                //在json中取得最新版本号
-                int tag = Convert.ToInt32(_result["tag_name"].ToString().Replace("v", "").Replace(".", ""));
-                if (tag > Convert.ToInt32(Version.tag.Replace("v", "").Replace(".", "")))
+                var assets = _result.GetProperty("assets").EnumerateArray();
+                string url = "";
+                foreach (var asset in assets)
                 {
-                    //下载版本更新描述
-                    for (int i = 0; ; i++)
+                    if (asset.GetProperty("name").GetString() == "ArkHelper.zip")
                     {
-                        if (_result["assets"][i]["name"].ToString() == "config.json")
-                        {
-
-                            break;
-                        }
+                        url = asset.GetProperty("browser_download_url").GetString();
                     }
                 }
-
-
-                //var URL = SearchURL(result, "test.txt");
-                //MessageBox.Show(.ToString());
-            });
-
-            //在GitHub release中找到指定文件名的browser_download_url
-            string SearchURL(JObject keys, string name)
-            {
-                for (int i = 0; ; i++)
-                {
-                    try
-                    {
-                        if (keys["assets"][i]["name"].ToString() == name)
-                        {
-                            return keys["assets"][i]["browser_download_url"].ToString();
-                        }
-                    }
-                    catch (System.NullReferenceException)
-                    {
-                        return null;
-                    }
-                }
+                new ToastContentBuilder()
+                    .AddArgument("kind","Update")
+                    .AddArgument("url",url)
+                    .AddText("提示：ArkHelper有更新")
+                    .AddText("版本：" + ver)
+                    .AddText("点击本消息下载更新")
+                    .Show(); //通知
             }
-
-
         }
     }
 

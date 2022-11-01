@@ -248,7 +248,7 @@ namespace ArkHelper.Asset
                     long speed = (new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds() - starttime_sec) / (exeingtime);
                     speed_text = "\n平均配速：" + speed + " 秒/次";
                 }
-                new ToastContentBuilder().AddArgument("MB")
+                new ToastContentBuilder().AddArgument("kind","MB")
                 .AddText("提示：连续作战指挥已结束")
                 .AddText("开始时间：" + starttime + "\n"
                 + "结束时间：" + DateTime.Now.ToString("g") + "\n" 

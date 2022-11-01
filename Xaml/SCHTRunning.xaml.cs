@@ -458,7 +458,7 @@ namespace ArkHelper.Pages.OtherList
                 WithSystem.Cmd(@"start " + Address.cmd + @" /k ""taskkill /f /t /im " + ConnectedInfo.IM + @" & exit""");
                 Info("/// 正在关闭模拟器...");
                 Info("/// 系统任务运行完毕。正在终止...");
-                new ToastContentBuilder().AddArgument("SCHT").AddText("提示：定时事项处理指挥器任务已结束").AddText("开始时间：" + starttime + "\n" + "结束时间：" + DateTime.Now.ToString("g") + "\n" + "即将关闭运行终端...").Show(); //结束通知
+                new ToastContentBuilder().AddArgument("kind","SCHT").AddText("提示：定时事项处理指挥器任务已结束").AddText("开始时间：" + starttime + "\n" + "结束时间：" + DateTime.Now.ToString("g") + "\n" + "即将关闭运行终端...").Show(); //结束通知
                 Thread.Sleep(2000);
                 Application.Current.Dispatcher.Invoke(() => App.ExitApp());
             });

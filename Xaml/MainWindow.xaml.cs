@@ -149,7 +149,7 @@ namespace ArkHelper.Xaml
                 App.IsMainWindowInShow = false;
                 if (!App.isexit)
                 {
-                    new ToastContentBuilder().AddArgument("back").AddText("提示").AddText("ArkHelper已进入后台运行").Show();
+                    new ToastContentBuilder().AddArgument("kind","Background").AddText("提示").AddText("ArkHelper已进入后台运行").Show();
                 }
 
                 WithSystem.GarbageCollect();
