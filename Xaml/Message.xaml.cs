@@ -123,12 +123,12 @@ namespace ArkHelper.Pages
                 }
                 if (Avatar != null)
                 {
-                    string[] _ava = Directory.GetFiles(Address.cache, ID + "_avatar.*");
+                    string[] _ava = Directory.GetFiles(Address.Cache.message, ID + "_avatar.*");
                     if (_ava.Length == 0)
                     {
-                        WithNet.DownloadFile(Avatar, Address.cache + "\\" + ID + "_avatar.jpg");
+                        WithNet.DownloadFile(Avatar, Address.Cache.message + "\\" + ID + "_avatar.jpg");
                     }
-                    Avatar = Address.cache + "\\" + ID + "_avatar.jpg";
+                    Avatar = Address.Cache.message + "\\" + ID + "_avatar.jpg";
                 }
                 GC.Collect();
             }
@@ -429,7 +429,7 @@ namespace ArkHelper.Pages
                         case Media.MediaType.video:
                             string filename0 = media1.Small.Substring(media1.Small.LastIndexOf(@"/") + 1);
 
-                            string smallfile0 = Address.cache + "\\" + "small_" + filename0;
+                            string smallfile0 = Address.Cache.message + "\\" + "small_" + filename0;
                             if (!File.Exists(smallfile0))
                             {
                                 WithNet.DownloadFile(media1.Small, smallfile0);
@@ -442,14 +442,14 @@ namespace ArkHelper.Pages
                         case Media.MediaType.photo:
                             string filename1 = media1.Link.Substring(media1.Link.LastIndexOf(@"/") + 1);
 
-                            string file1 = Address.cache + "\\" + filename1;
+                            string file1 = Address.Cache.message + "\\" + filename1;
                             if (!File.Exists(file1))
                             {
                                 WithNet.DownloadFile(media1.Link, file1);
                             }
                             media1.Link = file1;
 
-                            string smallfile1 = Address.cache + "\\" + "small_" + filename1;
+                            string smallfile1 = Address.Cache.message + "\\" + "small_" + filename1;
                             if (!File.Exists(smallfile1))
                             {
                                 CreateViewPic(file1, smallfile1);

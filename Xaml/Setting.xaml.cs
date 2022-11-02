@@ -55,7 +55,7 @@ namespace ArkHelper.Pages.OtherList
         {
             try
             {
-                DirectoryInfo dir = new DirectoryInfo(Address.cache);
+                DirectoryInfo dir = new DirectoryInfo(Address.Cache.main);
                 FileSystemInfo[] fileinfo = dir.GetFileSystemInfos();  //返回目录中所有文件和子目录
                 foreach (FileSystemInfo i in fileinfo)
                 {

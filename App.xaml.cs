@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 using System.Security.Policy;
 using System.Threading;
@@ -76,7 +77,7 @@ namespace ArkHelper
         public static void ExitApp()
         {
             isexit = true;
-            Current.Shutdown();
+            Application.Current.Dispatcher.Invoke(() =>Current.Shutdown());
         }
         #endregion
 
@@ -111,7 +112,10 @@ namespace ArkHelper
                 }
                 if (args["kind"].ToString() == "Update")
                 {
-                    Process.Start(args["url"].ToString());
+                    if (args["UpdateIsNecessary"] == "false")
+                    {
+                        Update.Apply(args["url"].ToString());
+                    }
                 }
             };
             #endregion
@@ -120,6 +124,13 @@ namespace ArkHelper
             ShutdownMode = ShutdownMode.OnExplicitShutdown;
             NotifyIconMenu = (ContextMenu)FindResource("NotifyIconMenu"); //右键菜单
             App.notifyIcon.MouseClick += NotifyClick; //绑定事件
+            #endregion
+
+            #region 更新
+            Task update = Task.Run(() =>
+            {
+                Update.Search();
+            });
             #endregion
 
             PinnedData.Server.Load();

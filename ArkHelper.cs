@@ -14,6 +14,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Runtime.Remoting.Channels;
 using System.Security.RightsManagement;
@@ -23,14 +24,12 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.IO.Compression;
 using System.Xml.Linq;
 using static ArkHelper.Data.SCHT;
-using Application = System.Windows.Application;
 using JsonSerializer = System.Text.Json.JsonSerializer;
-using MessageBox = System.Windows.MessageBox;
-using MouseEventArgs = System.Windows.Input.MouseEventArgs;
 using Point = System.Drawing.Point;
-using ScrollViewer = System.Windows.Controls.ScrollViewer;
+using System.Linq.Expressions;
 
 namespace ArkHelper
 {
@@ -312,7 +311,7 @@ namespace ArkHelper
             public Screenshot()
             {
                 string name = UniData.Screenshot;
-                string address = Address.cache;
+                string address = Address.Cache.main;
                 CMD(@"shell screencap -p /sdcard/DCIM/" + name); //截图
                 CMD(@"pull /sdcard/DCIM/" + name + " " + address); //pull
                 CMD(@"shell rm -f /sdcard/DCIM/" + name); //删除
@@ -470,7 +469,7 @@ namespace ArkHelper
         /// <returns>如果两点都符合对应的期望颜色值，返回<see langword="true"/>，否则返回<see langword="false"/>。</returns>
         public static bool ColorCheck(int x1, int y1, string c1, int x2, int y2, string c2)
         {
-            string _name = ADB.GetScreenshot(Address.cache, UniData.Screenshot);
+            string _name = ADB.GetScreenshot(Address.Cache.main, UniData.Screenshot);
             string[] color = ColorPick(
                 _name, x1, y1, x2, y2);
             File.Delete(_name);
@@ -679,9 +678,18 @@ namespace ArkHelper
         /// </summary>
         public readonly static string res = akhExternal + @"\res";
         /// <summary>
-        /// Cache
+        /// 升级包文件
         /// </summary>
-        public readonly static string cache = programData + @"\cache";
+        public readonly static string update = data + @"\updatePack";
+        public static class Cache
+        {
+            /// <summary>
+            /// cache根目录
+            /// </summary>
+            public readonly static string main = programData + @"\cache";
+            public readonly static string message = main + @"\message";
+            public readonly static string update = main + @"\update";
+        }
         public static class Screenshot
         {
             /// <summary>
@@ -730,15 +738,16 @@ namespace ArkHelper
 
             Directory.CreateDirectory(data);
             Directory.CreateDirectory(log);
-            Directory.CreateDirectory(cache);
-
-            //Directory.CreateDirectory(cache + @"\message");
 
             Directory.CreateDirectory(dataExternal);
 
             Directory.CreateDirectory(Screenshot.main);
             Directory.CreateDirectory(Screenshot.MB);
             Directory.CreateDirectory(Screenshot.SCHT);
+
+            Directory.CreateDirectory(Cache.main);
+            Directory.CreateDirectory(Cache.message);
+            Directory.CreateDirectory(Cache.update);
         }
     }
 
@@ -1190,13 +1199,15 @@ namespace ArkHelper
         public static void DownloadFile(string url, string address)
         {
             string cache = address + @".cache";
-            if (File.Exists(cache)) { File.Delete(cache); }
             if (!File.Exists(address))
             {
                 var web = new WebClient();
                 web.DownloadFile(url, cache);
                 Directory.Move(cache, address);
+
+                if (File.Exists(cache)) { File.Delete(cache); }
             }
+            else { return; }
         }
 
         /// <summary>
@@ -1239,8 +1250,10 @@ namespace ArkHelper
             //在json中取得最新版本号
             string ver = _result.GetProperty("tag_name").GetString();
             int tag = Convert.ToInt32(ver.Replace("v", "").Replace(".", ""));
+            var body = _result.GetProperty("body").GetString();
+            bool necessary = body.Contains("[NECESSARY]");
 
-            if (tag >= Convert.ToInt32(Version.tag.Replace("v", "").Replace(".", "")))
+            if (tag > Convert.ToInt32(Version.tag.Replace("v", "").Replace(".", "")))
             {
                 var assets = _result.GetProperty("assets").EnumerateArray();
                 string url = "";
@@ -1251,14 +1264,34 @@ namespace ArkHelper
                         url = asset.GetProperty("browser_download_url").GetString();
                     }
                 }
+                /*
+                if (body.Contains("[URL]"))
+                {
+                    
+                }*/
                 new ToastContentBuilder()
-                    .AddArgument("kind","Update")
-                    .AddArgument("url",url)
+                    .AddArgument("kind", "Update")
+                    .AddArgument("UpdateIsNecessary", necessary.ToString())
+                    .AddArgument("url", url)
                     .AddText("提示：ArkHelper有更新")
                     .AddText("版本：" + ver)
-                    .AddText("点击本消息下载更新")
+                    .AddText(necessary ? "正在更新中" : "点击本消息下载更新")
                     .Show(); //通知
+                if (necessary) Apply(url);
             }
+        }
+
+        public static void Apply(string url)
+        {
+            string address = Address.akh + "\\ArkHelper.zip";
+            WithNet.DownloadFile(url, address);//下载更新包
+            new ToastContentBuilder()
+                    .AddArgument("kind", "UpdateMessage")
+                    .AddText("提示")
+                    .AddText("ArkHelper更新完成")
+                    .AddText("正在启动中")
+                    .Show(); //通知*/
+            App.ExitApp();
         }
     }
 
