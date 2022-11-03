@@ -807,7 +807,11 @@ namespace ArkHelper
         {
             public static bool pure = false;
         }
-
+        public static class UserData
+        {
+            public static string User = "";
+            public static string Password = "";
+        }
         /// <summary>
         /// 更新数据
         /// </summary>

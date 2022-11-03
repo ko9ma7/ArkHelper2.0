@@ -129,7 +129,7 @@ namespace ArkHelper
             #region 更新
             Task update = Task.Run(() =>
             {
-                Update.Search();
+                //Update.Search();
             });
             #endregion
 

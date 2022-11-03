@@ -35,6 +35,7 @@ namespace ArkHelper.Xaml
                 new Menu("连续作战","MB",PackIconKind.MotionPlay),
                 //new Menu("RogueLike","RogueLike",PackIconKind.GamepadRoundUp),
                 new Menu("信息流终端","Message",PackIconKind.AndroidMessages),
+                new Menu("寻访记录查询","UserData_Gacha",PackIconKind.AccountCheck),
                 new Menu("SCHT控制台","SCHT",PackIconKind.ThermostatAuto),
                 //new Menu("材料计算器","MaterialCalc",PackIconKind.Material),
                 new Menu("SCHT","SCHTRunning",PackIconKind.ThermostatAuto),

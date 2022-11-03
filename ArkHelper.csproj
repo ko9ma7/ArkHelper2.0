@@ -152,6 +152,9 @@
     <Compile Include="Xaml\Test.xaml.cs">
       <DependentUpon>Test.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Xaml\UserData_Gacha.xaml.cs">
+      <DependentUpon>UserData_Gacha.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Xaml\Widget\ArkHelperSuggestion.xaml.cs">
       <DependentUpon>ArkHelperSuggestion.xaml</DependentUpon>
     </Compile>
@@ -258,6 +261,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Xaml\Test.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Xaml\UserData_Gacha.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
