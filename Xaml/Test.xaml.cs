@@ -10,6 +10,7 @@ using System.Threading;
 using Microsoft.Win32;
 using System;
 using Windows.ApplicationModel.Background;
+using System.Diagnostics;
 
 namespace ArkHelper.Xaml
 {
@@ -80,7 +81,7 @@ namespace ArkHelper.Xaml
         private void ListBoxItem_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
 
-            string[] fileArr = Directory.GetFiles(Address.cache, "777.*");
+            string[] fileArr = Directory.GetFiles(Address.Cache.main, "777.*");
             if (fileArr.Length > 0)
             {
                 MessageBox.Show("exi");
@@ -93,15 +94,12 @@ namespace ArkHelper.Xaml
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
-            new Xaml.akhcpiMaker().Show();
+            
         }
 
         private void Button_Click_3(object sender, RoutedEventArgs e)
         {
-            /*RegistryKey registryKey = Registry.CurrentUser.OpenSubKey
-                ("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
-            registryKey.SetValue("ArkHelper", Application.Current);//"BaichuiMonitor"可以自定义*/
-            MessageBox.Show(UniData.Screenshot);
+            
         }
     }
 

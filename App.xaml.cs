@@ -5,9 +5,11 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 using System.Security.Policy;
 using System.Threading;
@@ -75,7 +77,7 @@ namespace ArkHelper
         public static void ExitApp()
         {
             isexit = true;
-            Current.Shutdown();
+            Application.Current.Dispatcher.Invoke(() =>Current.Shutdown());
         }
         #endregion
 
@@ -96,18 +98,24 @@ namespace ArkHelper
         private void Application_Startup(object sender, StartupEventArgs e)
         {
             #region 监听toast
-            // Listen to notification activation
             ToastNotificationManagerCompat.OnActivated += toastArgs =>
             {
                 ToastArguments args = ToastArguments.Parse(toastArgs.Argument);
-                ValueSet userInput = toastArgs.UserInput;
-                if (args.ToString() == "Message")
+                //ValueSet userInput = toastArgs.UserInput;
+                if (args["kind"].ToString() == "Message")
                 {
                     mainArg = new UniData.ArkHelperArg(UniData.ArgKind.Navigate, "Message", "MainWindow");
                     Application.Current.Dispatcher.Invoke(delegate
                     {
                         OpenMainWindow();
                     });
+                }
+                if (args["kind"].ToString() == "Update")
+                {
+                    if (args["UpdateIsNecessary"] == "false")
+                    {
+                        Update.Apply(args["url"].ToString());
+                    }
                 }
             };
             #endregion
@@ -116,6 +124,13 @@ namespace ArkHelper
             ShutdownMode = ShutdownMode.OnExplicitShutdown;
             NotifyIconMenu = (ContextMenu)FindResource("NotifyIconMenu"); //右键菜单
             App.notifyIcon.MouseClick += NotifyClick; //绑定事件
+            #endregion
+
+            #region 更新
+            Task update = Task.Run(() =>
+            {
+                //Update.Search();
+            });
             #endregion
 
             PinnedData.Server.Load();
@@ -172,7 +187,7 @@ namespace ArkHelper
                                     if (_message.CreateAt > createat)
                                     {
                                         ToastContentBuilder messageToast = new ToastContentBuilder();
-                                        messageToast.AddArgument("Message");
+                                        messageToast.AddArgument("kind","Message");
                                         messageToast.AddText(user.Name + "发布了新的动态");
                                         messageToast.AddText(_message.Text);
                                         messageToast.AddCustomTimeStamp(_message.CreateAt);
