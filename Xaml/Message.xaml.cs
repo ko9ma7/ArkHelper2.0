@@ -31,8 +31,19 @@ namespace ArkHelper.Pages
         public Message()
         {
             InitializeComponent();
+            InitFromBlank();
+        }
+
+        private void InitFromBlank()
+        {
             Task.Run(() =>
             {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    pgb.Visibility = Visibility.Visible;
+                    MessageListDock.Children.Clear();
+                    UserListXaml.Children.Clear();
+                });
                 while (!App.isMessageInited)
                 {
                     Thread.Sleep(2000);
@@ -52,7 +63,6 @@ namespace ArkHelper.Pages
                 });
             });
         }
-
         private void InitCard(int num = 3)
         {
             for (int i = 0; i < num; i++)
@@ -718,6 +728,11 @@ namespace ArkHelper.Pages
                 isBottom = false;
             }
             if (isBottom) { InitCard(); }
+        }
+
+        private void Border_MouseRightButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            InitFromBlank();
         }
     }
 

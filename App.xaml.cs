@@ -226,7 +226,7 @@ namespace ArkHelper
                         isMessageInited = true;
                     }
                 });
-                //MessageInit.Start();
+                MessageInit.Start();
                 Task adbConnect = Task.Run(() =>
                 {
                     for (; ; Thread.Sleep(3000)) ADB.Connect();
