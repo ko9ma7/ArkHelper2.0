@@ -55,8 +55,27 @@
                                 <Button Name="TokenOauthButton"
                                         Margin="0,10,0,0"
                                         Click="FromTokenJson"
-                                        Content="认证"
-                                        Style="{StaticResource MaterialDesignOutlinedButton}" />
+                                        Style="{StaticResource MaterialDesignOutlinedButton}">
+                                    <Button.Content>
+                                        <WrapPanel HorizontalAlignment="Center">
+                                            <ProgressBar x:Name="btpgb"
+                                                         Width="15"
+                                                         Height="15"
+                                                         Margin="0,0,6,0"
+                                                         IsIndeterminate="True"
+                                                         Style="{StaticResource MaterialDesignCircularProgressBar}"
+                                                         Visibility="Collapsed"
+                                                         Value="0" />
+                                            <materialDesign:PackIcon x:Name="tokenobIcon"
+                                                                     Margin="0,0,6,0"
+                                                                     VerticalAlignment="Center"
+                                                                     Kind="Check"
+                                                                     Visibility="Visible" />
+                                            <TextBlock x:Name="tokenobText">认证</TextBlock>
+                                        </WrapPanel>
+
+                                    </Button.Content>
+                                </Button>
 
                             </StackPanel>
                         </WrapPanel>
@@ -69,17 +88,15 @@
                          Visibility="Collapsed"
                          Value="0" />
             <DataGrid Name="datagrid"
-                      Grid.Row="2"
                       Width="496"
                       AutoGenerateColumns="False"
                       Background="Transparent"
-                      CanUserDeleteRows="False"
                       FontFamily="{StaticResource SourceHan}"
                       GridLinesVisibility="Horizontal"
                       HeadersVisibility="Column"
                       IsReadOnly="True"
                       ItemsSource="{Binding GachaLog}"
-                      SelectionUnit="FullRow"
+                      SelectionUnit="CellOrRowHeader"
                       Visibility="Collapsed">
                 <DataGrid.Columns>
                     <DataGridTextColumn Width="Auto"
@@ -89,7 +106,10 @@
                     <DataGridTemplateColumn Header="干员">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <ListBox ItemsSource="{Binding Operators}" />
+                                <ListBox Cursor="Hand"
+                                         ItemsSource="{Binding Operators}"
+                                         MouseDoubleClick="ListBox_MouseDoubleClick"
+                                         ToolTip="双击查看干员详细信息" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>

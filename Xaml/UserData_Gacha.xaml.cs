@@ -61,6 +61,7 @@ namespace ArkHelper.Xaml
         /// Token
         /// </summary>
         public string Token = null;
+        public string DrName = "";
         /// <summary>
         /// 抽卡列表
         /// </summary>
@@ -108,7 +109,7 @@ namespace ArkHelper.Xaml
         public bool IsTokenUseful()
         {
             var userdata = WithNet.GetFromApi("https://as.hypergryph.com/user/info/v1/basic?token=" + Token);
-            if (!userdata.TryGetProperty("error", out var error)) return false; //Token无效返回
+            if (userdata.TryGetProperty("error", out var error)) return false; //Token无效返回
             return true;
         }
 
@@ -145,43 +146,66 @@ namespace ArkHelper.Xaml
         #endregion
         private void FromTokenJson(object sender, RoutedEventArgs e)
         {
+            //报错办法
             void Error()
             {
-                TokenOauthButton.Content = "输入错误，请重新输入......";
+                tokenobIcon.Kind = MaterialDesignThemes.Wpf.PackIconKind.Error;
+                tokenobIcon.Visibility = Visibility.Visible;
+                tokenobText.Text = "输入错误，请重新输入......";
                 Task.Run(() =>
                 {
                     Thread.Sleep(2000);
                     Application.Current.Dispatcher.Invoke(() =>
                     {
-                        if (TokenOauthButton.Content.ToString() == "输入错误，请重新输入......")
-                            TokenOauthButton.Content = "认证";
+                        if (tokenobText.Text.ToString() == "输入错误，请重新输入......")
+                        {
+                            tokenobText.Text = "认证";
+                            tokenobIcon.Kind = MaterialDesignThemes.Wpf.PackIconKind.Check;
+                        }
                     });
                 });
             }
+
+            //从json中获取Token，出问题就报错
             try
             {
                 var aa = JsonSerializer.Deserialize<JsonElement>(TokenJsonTextBox.Text);
                 Token = aa.GetProperty("data").GetProperty("content").GetString();
-                //FromToken.Visibility = Visibility.Collapsed;
-                Oauth.Visibility = Visibility.Collapsed;
-                //if (!IsTokenUseful()) { Error(); return; }
             }
             catch
             {
                 Error();
                 return;
             }
-            pgb.Visibility = Visibility.Visible;
+
+            //检验Token正确性
+            btpgb.Visibility = Visibility.Visible; //pgb
+            tokenobIcon.Visibility = Visibility.Collapsed; //不显示图标（已有pgb）
+            TokenOauthButton.IsEnabled = false;
             Task.Run(() =>
             {
-                GetResult();
+                var res = IsTokenUseful();
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    Show();
-                    pgb.Visibility = Visibility.Collapsed;
+                    btpgb.Visibility = Visibility.Collapsed; //不显示pgb
+                    tokenobIcon.Visibility = Visibility.Visible; //显示图标
+                    if (!res) { Error(); return; } //如果错误，返回报错
+
+                    //如果没错，接着执行
+                    Oauth.Visibility = Visibility.Collapsed;
+                    pgb.Visibility = Visibility.Visible;
+                    Task.Run(() =>
+                    {
+                        GetResult();
+                        Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            TokenOauthButton.IsEnabled = true;
+                            Show();
+                            pgb.Visibility = Visibility.Collapsed;
+                        });
+                    });
                 });
             });
-
         }
 
         private void Show()
@@ -190,5 +214,12 @@ namespace ArkHelper.Xaml
             datagrid.Visibility = Visibility.Visible;
         }
         #endregion
+
+        private void ListBox_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            var result = (System.Windows.Controls.ListBox)e.Source;
+            var b = result.SelectedValue;
+            Process.Start("https://prts.wiki/w/" + b);
+        }
     }
 }
