@@ -1,7 +1,10 @@
 ﻿using Newtonsoft.Json.Linq;
 using RestSharp;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing.Printing;
+using System.Globalization;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,6 +18,45 @@ namespace ArkHelper.Xaml
     /// </summary>
     public partial class UserData_Gacha : Page
     {
+        public class GachaLog
+        {
+            public string Time { get; set; }
+            public List<string> Operators { get; set; }
+            public string Pool { get; set; }
+            public GachaLog(JsonElement json)
+            {
+                long unixTimeStamp = json.GetProperty("ts").GetInt32();
+                DateTime dttime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
+                Time = dttime.AddSeconds(unixTimeStamp).ToLocalTime().ToString("g");
+
+                Pool = json.GetProperty("pool").GetString();
+                Operators = new List<string>();
+                foreach (JsonElement op in json.GetProperty("chars").EnumerateArray())
+                {
+                    Operators.Add(new Operator(op).ToString());
+                }
+            }
+        }
+        public class Operator
+        {
+            public string Name { get; set; }
+            public int Rare { get; set; }
+            public bool IsNew { get; set; }
+            public Operator(JsonElement json)
+            {
+                Name = json.GetProperty("name").GetString();
+                Rare = json.GetProperty("rarity").GetInt32();
+                IsNew = json.GetProperty("isNew").GetBoolean();
+            }
+            public override string ToString()
+            {
+                string ret = "";
+                ret += IsNew ? "[新]" : "";
+                for (int i = 0; i > Rare; ret += "⭐") ;
+                ret += Name;
+                return ret;
+            }
+        }
         /// <summary>
         /// Token
         /// </summary>
@@ -22,7 +64,7 @@ namespace ArkHelper.Xaml
         /// <summary>
         /// 抽卡列表
         /// </summary>
-        public List<JsonElement> Lists = new List<JsonElement>();
+        public List<GachaLog> Lists = new List<GachaLog>();
 
         #region List
         /// <summary>
@@ -52,7 +94,7 @@ namespace ArkHelper.Xaml
                     var aa = get(i);
                     foreach (var json in aa.GetProperty("data").GetProperty("list").EnumerateArray())
                     {
-                        Lists.Add(json);
+                        Lists.Add(new GachaLog(json));
                     }
                 }
             }
@@ -103,14 +145,7 @@ namespace ArkHelper.Xaml
         #endregion
         private void FromTokenJson(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                var aa = JsonSerializer.Deserialize<JsonElement>(TokenJsonTextBox.Text);
-                Token = aa.GetProperty("data").GetProperty("content").GetString();
-                //FromToken.Visibility = Visibility.Collapsed;
-                Oauth.Visibility = Visibility.Collapsed;
-            }
-            catch
+            void Error()
             {
                 TokenOauthButton.Content = "输入错误，请重新输入......";
                 Task.Run(() =>
@@ -123,7 +158,36 @@ namespace ArkHelper.Xaml
                     });
                 });
             }
+            try
+            {
+                var aa = JsonSerializer.Deserialize<JsonElement>(TokenJsonTextBox.Text);
+                Token = aa.GetProperty("data").GetProperty("content").GetString();
+                //FromToken.Visibility = Visibility.Collapsed;
+                Oauth.Visibility = Visibility.Collapsed;
+                //if (!IsTokenUseful()) { Error(); return; }
+            }
+            catch
+            {
+                Error();
+                return;
+            }
+            pgb.Visibility = Visibility.Visible;
+            Task.Run(() =>
+            {
+                GetResult();
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    Show();
+                    pgb.Visibility = Visibility.Collapsed;
+                });
+            });
 
+        }
+
+        private void Show()
+        {
+            datagrid.ItemsSource = this.Lists;
+            datagrid.Visibility = Visibility.Visible;
         }
         #endregion
     }
