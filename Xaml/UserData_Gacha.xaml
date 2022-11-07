@@ -10,7 +10,7 @@
       d:Background="White"
       d:DesignHeight="450"
       d:DesignWidth="800"
-      Style="{StaticResource FrontMenuPage}"
+      
       mc:Ignorable="d">
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel>

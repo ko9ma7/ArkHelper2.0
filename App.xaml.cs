@@ -142,7 +142,10 @@ namespace ArkHelper
             else //main
             {
                 Data.Load();
-                if (e.Args.Contains("SCHT"))
+                if (
+                    e.Args.Contains("SCHT")
+                    //true
+                )
                 {
                     if (!Data.SCHT.status)
                     {
@@ -155,7 +158,7 @@ namespace ArkHelper
                     MessageBox.Show("test");
                 }
                 OpenMainWindow();
-                Task userInitTask = new Task(() =>
+                Task MessageInit = new Task(() =>
                 {
                     UserList = new ArrayList
                     {
@@ -223,7 +226,7 @@ namespace ArkHelper
                         isMessageInited = true;
                     }
                 });
-                userInitTask.Start();
+                //MessageInit.Start();
                 Task adbConnect = Task.Run(() =>
                 {
                     for (; ; Thread.Sleep(3000)) ADB.Connect();

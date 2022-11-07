@@ -1,18 +1,17 @@
-﻿<Page
-    x:Class="ArkHelper.Pages.OtherList.SCHTRunning"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:akhc="clr-namespace:ArkHelper.Style.Control"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:local="clr-namespace:ArkHelper.Pages.OtherList"
-    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    Title="SCHTRunning"
-    d:Background="White"
-    d:DesignHeight="470"
-    d:DesignWidth="652"
-    Loaded="Page_Loaded"
-    mc:Ignorable="d">
+﻿<Page x:Class="ArkHelper.Pages.OtherList.SCHTRunning"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:akhc="clr-namespace:ArkHelper.Style.Control"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:local="clr-namespace:ArkHelper.Pages.OtherList"
+      xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      Title="SCHTRunning"
+      d:Background="White"
+      d:DesignHeight="470"
+      d:DesignWidth="652"
+      Loaded="Page_Loaded"
+      mc:Ignorable="d">
 
     <Grid>
 
@@ -24,27 +23,15 @@
             <StackPanel Orientation="Vertical">
                 <TextBlock FontSize="{StaticResource h1}" Text="SCHT正在运行中" />
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <ListBox x:Name="loglist" >
-                        <ListBoxItem>sss</ListBoxItem>
-                        <ListBoxItem>sss</ListBoxItem>
-                        <ListBoxItem>sss</ListBoxItem>
-                        <ListBoxItem>sss</ListBoxItem>
-                        <ListBoxItem>sss</ListBoxItem>
-                        <ListBoxItem>sss</ListBoxItem>
-                        <ListBoxItem>sss</ListBoxItem>
-                        <ListBoxItem>sss</ListBoxItem>
-                        <ListBoxItem>sss</ListBoxItem>
-                        <ListBoxItem>sss</ListBoxItem>
-                    </ListBox>
+                    <ListBox x:Name="loglist" />
                 </ScrollViewer>
             </StackPanel>
         </StackPanel>
-        <ProgressBar
-            Margin="0,0,50,50"
-            HorizontalAlignment="Right"
-            VerticalAlignment="Bottom"
-            IsIndeterminate="True"
-            Style="{StaticResource MaterialDesignCircularProgressBar}"
-            Value="0" />
+        <ProgressBar Margin="0,0,50,50"
+                     HorizontalAlignment="Right"
+                     VerticalAlignment="Bottom"
+                     IsIndeterminate="True"
+                     Style="{StaticResource MaterialDesignCircularProgressBar}"
+                     Value="0" />
     </Grid>
 </Page>
