@@ -8,7 +8,6 @@
       Title="Message"
       d:DesignHeight="450"
       d:DesignWidth="652"
-      Style="{StaticResource FrontMenuPage}"
       Unloaded="Page_Unloaded"
       mc:Ignorable="d">
     <Grid>

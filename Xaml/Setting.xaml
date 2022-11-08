@@ -10,7 +10,7 @@
       d:DesignHeight="450"
       d:DesignWidth="652"
       Background="White"
-      Style="{StaticResource FrontMenuPage}"
+      
       mc:Ignorable="d">
 
     <Grid>

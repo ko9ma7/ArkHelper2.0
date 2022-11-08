@@ -2,22 +2,13 @@
 using RestSharp;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using System.Text;
+using System.Diagnostics;
+using System.Drawing.Printing;
+using System.Globalization;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using Windows.UI.Xaml.Controls;
 using Page = System.Windows.Controls.Page;
 
 namespace ArkHelper.Xaml
@@ -27,99 +18,74 @@ namespace ArkHelper.Xaml
     /// </summary>
     public partial class UserData_Gacha : Page
     {
-        public class ArknightsUser
+        public class GachaLog
+        {
+            public string Time { get; set; }
+            public List<string> Operators { get; set; }
+            public string Pool { get; set; }
+            public GachaLog(JsonElement json)
+            {
+                long unixTimeStamp = json.GetProperty("ts").GetInt32();
+                DateTime dttime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
+                Time = dttime.AddSeconds(unixTimeStamp).ToLocalTime().ToString("g");
+
+                Pool = json.GetProperty("pool").GetString();
+                Operators = new List<string>();
+                foreach (JsonElement op in json.GetProperty("chars").EnumerateArray())
+                {
+                    Operators.Add(new Operator(op).ToString());
+                }
+            }
+        }
+        public class Operator
         {
             public string Name { get; set; }
-            public string UID { get; set; }
-            public ArknightsUser()
+            public int Rare { get; set; }
+            public bool IsNew { get; set; }
+            public Operator(JsonElement json)
             {
-
+                Name = json.GetProperty("name").GetString();
+                Rare = json.GetProperty("rarity").GetInt32();
+                IsNew = json.GetProperty("isNew").GetBoolean();
+            }
+            public override string ToString()
+            {
+                string ret = "";
+                ret += IsNew ? "[新]" : "";
+                for (int i = 0; i > Rare; ret += "⭐") ;
+                ret += Name;
+                return ret;
             }
         }
         /// <summary>
         /// Token
         /// </summary>
-        public static string Token = null;
+        public string Token = null;
+        public string DrName = "";
         /// <summary>
         /// 抽卡列表
         /// </summary>
-        public static List<JsonElement> Lists = new List<JsonElement>();
-        /// <summary>
-        /// 报错
-        /// </summary>
-        public enum errorKind
-        {
-            token_ineffective,
-            token_null,
-            password_error,
-            need_password,
-            CD,
-            succeed,
-            need_cap
-        }
+        public List<GachaLog> Lists = new List<GachaLog>();
 
-
-        /// <summary>
-        /// 是否处于CD（避免被和谐）
-        /// </summary>
-        private static bool ableToGet = true;
-        /// <summary>
-        /// 根据账号密码获取token
-        /// </summary>
-        private static errorKind _FromUserAndPassword()
-        {
-            //获取token
-            var request = new RestRequest
-            {
-                Method = Method.Post,
-                RequestFormat = RestSharp.DataFormat.Json
-            };
-            var json = new JObject()
-                    {
-                        {"phone",Data.UserData.User },
-                        {"password",Data.UserData.Password }
-                    };
-            request.AddParameter("", json, ParameterType.RequestBody);
-            var client = new RestClient("https://as.hypergryph.com/user/auth/v1/token_by_phone_password");
-            var result = client.Post(request);
-            var getJson = JsonDocument.Parse(result.Content).RootElement;
-            switch (getJson.GetProperty("status").GetInt32())
-            {
-                case 1:
-                    return errorKind.need_cap;
-                case 100:
-                    return errorKind.password_error;
-                case 0:
-                    Token = getJson.GetProperty("data").GetProperty("token").GetString();
-                    break;
-            }
-            return errorKind.succeed;
-        }
-
+        #region List
         /// <summary>
         /// 获取单页抽卡列表
         /// </summary>
         /// <param name="page"></param>
         /// <returns></returns>
-        private static JsonElement get(int page)
+        private JsonElement get(int page)
         {
             //获取结果
             var client = new RestClient("https://ak.hypergryph.com/user/api/inquiry/gacha?page=" + page + "&token=" + Token + "&channelId=1");
             var result = client.Get(new RestRequest());
             return JsonDocument.Parse(result.Content).RootElement;
         }
-
         /// <summary>
         /// 根据token获取抽卡列表
         /// </summary>
-        private static void GetResult()
+        private void GetResult()
         {
-            ableToGet = false;
-            Task.Run(() =>
-            {
-                Thread.Sleep(60000);
-                ableToGet = true;
-            });
+            Lists.Clear();
             int totalPage = get(1).GetProperty("data").GetProperty("pagination").GetProperty("total").GetInt32();
             if (totalPage == 0) return;
             else
@@ -129,38 +95,32 @@ namespace ArkHelper.Xaml
                     var aa = get(i);
                     foreach (var json in aa.GetProperty("data").GetProperty("list").EnumerateArray())
                     {
-                        Lists.Add(json);
+                        Lists.Add(new GachaLog(json));
                     }
                 }
             }
         }
+        #endregion
 
         /// <summary>
-        /// 预处理返回错误情况
+        /// 测试token是否可用 否返回无效报错
         /// </summary>
         /// <returns>错误类型</returns>
-        public static errorKind Get()
+        public bool IsTokenUseful()
         {
-            if (!ableToGet) return errorKind.CD;
-            if (Token == null)
-            {
-                if (Data.UserData.User == "" || Data.UserData.Password == "")
-                {
-                    return errorKind.need_password;
-                }
-                else
-                {
-                    var aab = _FromUserAndPassword();
-                    if (aab != errorKind.succeed) return aab;
-                }
-            }
-
-            //测试token
             var userdata = WithNet.GetFromApi("https://as.hypergryph.com/user/info/v1/basic?token=" + Token);
-            if (!userdata.TryGetProperty("error", out var error)) return errorKind.token_ineffective;
+            if (userdata.TryGetProperty("error", out var error)) return false; //Token无效返回
+            return true;
+        }
 
+        private void FreshData()
+        {
+            if (IsTokenUseful())
+            {
+                Oauth.Visibility = Visibility.Visible;
+                return;
+            }
             GetResult();
-            return errorKind.succeed;
         }
 
         #region UI
@@ -168,35 +128,98 @@ namespace ArkHelper.Xaml
         {
             InitializeComponent();
         }
+
         private void Fresh(object sender, RoutedEventArgs e)
         {
-            _Fresh();
+            FreshData();
         }
-        private void _Fresh()
+
+        #region
+        private void FT_1(object sender, RoutedEventArgs e)
         {
-            Unable.Visibility = ableToGet ? Visibility.Collapsed : Visibility.Visible;
-            var aaa = Get();
+            Process.Start("https://ak.hypergryph.com/user/login");
         }
-        private void FromUserAndPassword(object sender, RoutedEventArgs e)
+        private void FT_2(object sender, RoutedEventArgs e)
         {
-            Data.UserData.User = User.Text;
-            Data.UserData.Password = Password.Password;
-            var aa = _FromUserAndPassword();
-            switch (aa)
+            Process.Start("https://web-api.hypergryph.com/account/info/hg");
+        }
+        #endregion
+        private void FromTokenJson(object sender, RoutedEventArgs e)
+        {
+            //报错办法
+            void Error()
             {
-                case errorKind.succeed:
-                    FromUser.Visibility = Visibility.Collapsed;
-                    break;
-                case errorKind.password_error:
-                    WithSystem.Message("账号或密码错误", "请重新输入");
-                    break;
-                case errorKind.need_cap:
-                    WithSystem.Message("单位时间查询次数已达到上限", "请稍等");
-                    break;
+                tokenobIcon.Kind = MaterialDesignThemes.Wpf.PackIconKind.Error;
+                tokenobIcon.Visibility = Visibility.Visible;
+                tokenobText.Text = "输入错误，请重新输入......";
+                Task.Run(() =>
+                {
+                    Thread.Sleep(2000);
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        if (tokenobText.Text.ToString() == "输入错误，请重新输入......")
+                        {
+                            tokenobText.Text = "认证";
+                            tokenobIcon.Kind = MaterialDesignThemes.Wpf.PackIconKind.Check;
+                        }
+                    });
+                });
             }
+
+            //从json中获取Token，出问题就报错
+            try
+            {
+                var aa = JsonSerializer.Deserialize<JsonElement>(TokenJsonTextBox.Text);
+                Token = aa.GetProperty("data").GetProperty("content").GetString();
+            }
+            catch
+            {
+                Error();
+                return;
+            }
+
+            //检验Token正确性
+            btpgb.Visibility = Visibility.Visible; //pgb
+            tokenobIcon.Visibility = Visibility.Collapsed; //不显示图标（已有pgb）
+            TokenOauthButton.IsEnabled = false;
+            Task.Run(() =>
+            {
+                var res = IsTokenUseful();
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    btpgb.Visibility = Visibility.Collapsed; //不显示pgb
+                    tokenobIcon.Visibility = Visibility.Visible; //显示图标
+                    if (!res) { Error(); return; } //如果错误，返回报错
+
+                    //如果没错，接着执行
+                    Oauth.Visibility = Visibility.Collapsed;
+                    pgb.Visibility = Visibility.Visible;
+                    Task.Run(() =>
+                    {
+                        GetResult();
+                        Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            TokenOauthButton.IsEnabled = true;
+                            Show();
+                            pgb.Visibility = Visibility.Collapsed;
+                        });
+                    });
+                });
+            });
+        }
+
+        private void Show()
+        {
+            datagrid.ItemsSource = this.Lists;
+            datagrid.Visibility = Visibility.Visible;
         }
         #endregion
 
-
+        private void ListBox_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            var result = (System.Windows.Controls.ListBox)e.Source;
+            var b = result.SelectedValue;
+            Process.Start("https://prts.wiki/w/" + b);
+        }
     }
 }

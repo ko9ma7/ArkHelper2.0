@@ -7,8 +7,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         Width="980"
         Height="580"
-        MinWidth="980"
-        MinHeight="580"
+        MinWidth="0"
+        MinHeight="0"
         Closing="Window_Closing"
         ResizeMode="CanResize"
         Style="{StaticResource Window}"
@@ -45,10 +45,12 @@
             </Grid>
         </ScrollViewer>
 
-        <!--  页面  -->
-        <Frame x:Name="frame"
-               Grid.Column="1"
-               NavigationUIVisibility="Hidden" />
+        <Grid Name="framegrid" Grid.Column="1">
+            <!--  页面  -->
+            <Frame x:Name="frame"
+                   NavigationUIVisibility="Hidden"
+                   Tag="通用" />
+        </Grid>
 
     </Grid>
 </Window>

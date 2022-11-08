@@ -9,7 +9,7 @@
       Title="MB"
       d:DesignHeight="470"
       d:DesignWidth="652"
-      Style="{StaticResource FrontMenuPage}"
+      
       mc:Ignorable="d">
 
     <Grid>
