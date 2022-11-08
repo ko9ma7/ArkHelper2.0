@@ -27,30 +27,13 @@ namespace ArkHelper.Pages.OtherList
             InitializeComponent();
         }
 
-        //方法 AKH指令转换器
-        // 指令格式：adb语句(####延迟时间#;)($$$$重复次数$;)(&&&&显示文本&;)
-        // 方法格式：akh指令,延迟时间,重复次数,显示文本
-        // （必填，默认0，默认1，默认null，其中延迟时间的单位是秒、允许有三位及以内的小数，null为string格式且不显示，文本有值时会以info形式打印到前端和log）
-        // 冲突处理：当同一参数被设置两次时，akh指令限定的参数优先
-        void Akhcmd(string text, string show = "null", int wait = 0, int repeat = 1)
+        void Akhcmd(string body, string show = "null", int wait = 0, int repeat = 1)
         {
-            if (text == "null") { }
-            else
-            {
-                //解析
-                if (text.Contains("####") && text.Contains("#;")) { wait = Convert.ToInt32(text.Substring(text.IndexOf("####") + 4, text.IndexOf("#;") - text.IndexOf("####") - 4)); }
-                if (text.Contains("$$$$") && text.Contains("$;")) { repeat = Convert.ToInt32(text.Substring(text.IndexOf("$$$$") + 4, text.IndexOf("$;") - text.IndexOf("$$$$") - 4)); }
-                if (text.Contains("&&&&") && text.Contains("&;")) { show = text.Substring(text.IndexOf("&&&&") + 4, text.IndexOf("&;") - text.IndexOf("&&&&") - 4); }
-                string cmd = text.Replace("####" + wait + "#;", "").Replace("$$$$" + repeat + "$;", "").Replace("&&&&" + repeat + "&;", "");
-                for (int i = 1; i <= repeat; i++)
-                {
-                    ADB.CMD(cmd);
-                    if (show == "null") { } else { Info(show); }
-                    Thread.Sleep(wait * 1000);
-                }
-            }
+            var akhcmd = new UniData.AKHcmd(body,show,wait,repeat);
+            Info(akhcmd.OutputText);
+            akhcmd.RunCmd();
         }
-        //方法 表达 + Output.Log
+        //表达 + Log
         void Info(string content, bool show = true, Output.InfoKind infokind = Output.InfoKind.Infomational)
         {
             Output.Log(content, "SCHT", infokind);
@@ -103,7 +86,6 @@ namespace ArkHelper.Pages.OtherList
                 string unit = "null";
                 string cp = "null";
                 string name = "null";
-                //int timeout1; int timeout2; int timeout3; int timeout4; int timeout5; int timeout6; int timeout7; int timeout8; int timeout9; int timeout10;
                 string adcmd1; string adcmd2; string adcmd3; string adcmd4; string adcmd5; string adcmd6; string adcmd7; string adcmd8; string adcmd9; string adcmd10;
                 if (first.unit == "LS") { abx = "L0"; }
                 if (first.unit == "custom") { abx = "custom"; }

@@ -14,29 +14,21 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices.WindowsRuntime;
-using System.Runtime.Remoting.Channels;
-using System.Security.RightsManagement;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
-using System.IO.Compression;
-using System.Xml.Linq;
 using static ArkHelper.Data.SCHT;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 using Point = System.Drawing.Point;
-using System.Linq.Expressions;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace ArkHelper
 {
     /// <summary>
     /// 版本信息
     /// </summary>
-    public class Version
+    public static class Version
     {
         /// <summary>
         /// 版本号
@@ -135,6 +127,41 @@ namespace ArkHelper
                 return Arg + ":" + ArgContent + "(" + Discribe + ")," + Target;
             }
         }
+
+        public class AKHcmd
+        {
+            string ADBcmd { get; set; } = "";
+            string Discribe { get; set; } = "";
+            public string OutputText { get; set; } = "";
+            int WaitTime { get; set; } = 0;
+            int ForTimes { get; set; } = 0;
+
+            public AKHcmd(string body, string outputText = "null", int waitTime = 0, int forTimes = 1)
+            {
+                if (body == "null") { }
+                else
+                {
+                    //解析
+                    if (body.Contains("####") && body.Contains("#;")) { waitTime = Convert.ToInt32(body.Substring(body.IndexOf("####") + 4, body.IndexOf("#;") - body.IndexOf("####") - 4)); }
+                    if (body.Contains("$$$$") && body.Contains("$;")) { forTimes = Convert.ToInt32(body.Substring(body.IndexOf("$$$$") + 4, body.IndexOf("$;") - body.IndexOf("$$$$") - 4)); }
+                    if (body.Contains("&&&&") && body.Contains("&;")) { outputText = body.Substring(body.IndexOf("&&&&") + 4, body.IndexOf("&;") - body.IndexOf("&&&&") - 4); }
+                    ADBcmd = body.Replace("####" + waitTime + "#;", "").Replace("$$$$" + forTimes + "$;", "").Replace("&&&&" + outputText + "&;", "");
+                }
+                OutputText = outputText;
+                WaitTime = waitTime;
+                ForTimes = forTimes;
+            }
+
+            public void RunCmd()
+            {
+                for (int i = 1; i <= ForTimes; i++)
+                {
+                    ADB.CMD(ADBcmd);
+                    Thread.Sleep(WaitTime * 1000);
+                }
+            }
+
+        }
     }
 
     /// <summary>
@@ -180,7 +207,7 @@ namespace ArkHelper
         {
             while (!cmd.Contains("connect") && ConnectedInfo == null)
             {
-                Application.Current.Dispatcher.Invoke(() =>
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
                 {
                     WithSystem.Message("模拟器连接断开", "请启动或重启模拟器");
                 });
