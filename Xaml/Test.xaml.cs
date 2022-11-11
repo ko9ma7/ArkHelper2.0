@@ -11,6 +11,7 @@ using Microsoft.Win32;
 using System;
 using Windows.ApplicationModel.Background;
 using System.Diagnostics;
+using System.Text.Json;
 
 namespace ArkHelper.Xaml
 {
@@ -95,6 +96,15 @@ namespace ArkHelper.Xaml
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
             
+
+
+
+            var ac = JsonSerializer.Serialize(App.Data);
+            var jsonString = @"{""Simulator"":{}}";
+            
+            ArkHelperDataStandard.Data bb =
+                JsonSerializer.Deserialize<ArkHelperDataStandard.Data>(ac);
+            bb.ToString();
         }
 
         private void Button_Click_3(object sender, RoutedEventArgs e)

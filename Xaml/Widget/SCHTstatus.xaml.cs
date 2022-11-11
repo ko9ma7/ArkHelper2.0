@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Windows.Controls;
-using static ArkHelper.Data.SCHT;
+using static ArkHelper.Data.scht;
 
 namespace ArkHelper.Xaml.Widget
 {

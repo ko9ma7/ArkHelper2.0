@@ -24,7 +24,7 @@ namespace ArkHelper.Pages.OtherList
 
             address.Text = Address.programData;
 
-            pure.IsChecked = Data.ArkHelper.pure;
+            pure.IsChecked = Data.arkHelper.pure;
             im.Text = Data.simulator.custom.im;
             port.Text = Data.simulator.custom.port.ToString();
             custom.IsChecked = Data.simulator.custom.status;
@@ -92,7 +92,7 @@ namespace ArkHelper.Pages.OtherList
             }
         }
         #endregion
-        private void pure_Click(object sender, RoutedEventArgs e) => Data.ArkHelper.pure = (bool)pure.IsChecked;
+        private void pure_Click(object sender, RoutedEventArgs e) => Data.arkHelper.pure = (bool)pure.IsChecked;
 
         private void port_TextChanged(object sender, TextChangedEventArgs e)
         {

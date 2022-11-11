@@ -12,7 +12,7 @@ using Newtonsoft.Json.Linq;
 using System.Threading;
 using Microsoft.Toolkit.Uwp.Notifications;
 using static ArkHelper.ADB;
-using static ArkHelper.Data.SCHT;
+using static ArkHelper.Data.scht;
 
 namespace ArkHelper.Pages.OtherList
 {
@@ -29,7 +29,7 @@ namespace ArkHelper.Pages.OtherList
 
         void Akhcmd(string body, string show = "null", int wait = 0, int repeat = 1)
         {
-            var akhcmd = new UniData.AKHcmd(body,show,wait,repeat);
+            var akhcmd = new ArkHelperDataStandard.AKHcmd(body,show,wait,repeat);
             Info(akhcmd.OutputText);
             akhcmd.RunCmd();
         }
@@ -416,7 +416,7 @@ namespace ArkHelper.Pages.OtherList
                         }
                     }
 
-                    GetScreenshot(Address.Screenshot.MB, UniData.Screenshot);
+                    GetScreenshot(Address.Screenshot.MB, ArkHelperDataStandard.Screenshot);
 
                     for (int i = 1; i <= 2; i++)
                     {
@@ -436,7 +436,7 @@ namespace ArkHelper.Pages.OtherList
                     Akhcmd("shell input tap 1246 168", "/// 指令：收集", 2, 3);
                 }
                 Akhcmd("shell input tap 109 51", "/// 指令：返回", 2);
-                GetScreenshot(Address.Screenshot.SCHT, UniData.Screenshot);
+                GetScreenshot(Address.Screenshot.SCHT, ArkHelperDataStandard.Screenshot);
                 WithSystem.Cmd(@"start " + Address.cmd + @" /k ""taskkill /f /t /im " + ConnectedInfo.IM + @" & exit""");
                 Info("/// 正在关闭模拟器...");
                 Info("/// 系统任务运行完毕。正在终止...");

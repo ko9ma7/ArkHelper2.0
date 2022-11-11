@@ -24,11 +24,12 @@ using Application = System.Windows.Application;
 
 namespace ArkHelper
 {
-    /// <summary>
-    /// App.xaml 的交互逻辑
-    /// </summary>
     public partial class App : Application
     {
+        #region 应用配置数据
+        public static ArkHelperDataStandard.Data Data = new ArkHelperDataStandard.Data();
+        #endregion
+
         #region 托盘和后台
         public static System.Windows.Forms.NotifyIcon notifyIcon = new System.Windows.Forms.NotifyIcon()
         {
@@ -77,12 +78,12 @@ namespace ArkHelper
         public static void ExitApp()
         {
             isexit = true;
-            Application.Current.Dispatcher.Invoke(() =>Current.Shutdown());
+            Application.Current.Dispatcher.Invoke(() => Current.Shutdown());
         }
         #endregion
 
         #region Arg
-        public static UniData.ArkHelperArg mainArg = new UniData.ArkHelperArg();
+        public static ArkHelperDataStandard.ArkHelperArg mainArg = new ArkHelperDataStandard.ArkHelperArg();
         #endregion
 
         #region 消息
@@ -104,7 +105,7 @@ namespace ArkHelper
                 //ValueSet userInput = toastArgs.UserInput;
                 if (args["kind"].ToString() == "Message")
                 {
-                    mainArg = new UniData.ArkHelperArg(UniData.ArgKind.Navigate, "Message", "MainWindow");
+                    mainArg = new ArkHelperDataStandard.ArkHelperArg(ArkHelperDataStandard.ArkHelperArg.ArgKind.Navigate, "Message", "MainWindow");
                     Application.Current.Dispatcher.Invoke(delegate
                     {
                         OpenMainWindow();
@@ -141,17 +142,17 @@ namespace ArkHelper
             }
             else //main
             {
-                Data.Load();
+                ArkHelper.Data.Load();
                 if (
                     e.Args.Contains("SCHT")
-                    //true
+                //true
                 )
                 {
-                    if (!Data.SCHT.status)
+                    if (!ArkHelper.Data.scht.status)
                     {
                         ExitApp();
                     }
-                    mainArg = new UniData.ArkHelperArg(UniData.ArgKind.Navigate, "SCHTRunning", "MainWindow");
+                    mainArg = new ArkHelperDataStandard.ArkHelperArg(ArkHelperDataStandard.ArkHelperArg.ArgKind.Navigate, "SCHTRunning", "MainWindow");
                 }
                 if (e.Args.Contains("test"))
                 {
@@ -162,13 +163,14 @@ namespace ArkHelper
                 {
                     UserList = new ArrayList
                     {
-                        new Pages.Message.User(UniData.MessageSource.weibo, "7745672941"),//ENT
-                        new Pages.Message.User(UniData.MessageSource.weibo, "6441489862"),//CHO
-                        new Pages.Message.User(UniData.MessageSource.weibo, "7499841383"),//TLM
-                        new Pages.Message.User(UniData.MessageSource.weibo, "7506039414"),//OMT
-                        new Pages.Message.User(UniData.MessageSource.weibo, "7461423907"),//HYP
-                        new Pages.Message.User(UniData.MessageSource.weibo, "6279793937"),//ARK
-                        new Pages.Message.User(UniData.MessageSource.official_communication,""), //COM
+                        new Pages.Message.User(ArkHelperDataStandard.MessageSource.weibo, "7745672941"),//END
+                        new Pages.Message.User(ArkHelperDataStandard.MessageSource.weibo, "6441489862"),//CHO
+                        new Pages.Message.User(ArkHelperDataStandard.MessageSource.weibo, "7499841383"),//TER
+                        new Pages.Message.User(ArkHelperDataStandard.MessageSource.weibo, "7506039414"),//MOU
+                        new Pages.Message.User(ArkHelperDataStandard.MessageSource.weibo, "7461423907"),//HYP
+                        new Pages.Message.User(ArkHelperDataStandard.MessageSource.weibo, "6279793937"),//ARK
+                        new Pages.Message.User(ArkHelperDataStandard.MessageSource.weibo, "7753678921"),//GAW
+                        new Pages.Message.User(ArkHelperDataStandard.MessageSource.official_communication,""), //COM
                         //new Pages.Message.User(UniData.MessageSource.weibo, "7404330062") //test
                     };
 
@@ -190,7 +192,7 @@ namespace ArkHelper
                                     if (_message.CreateAt > createat)
                                     {
                                         ToastContentBuilder messageToast = new ToastContentBuilder();
-                                        messageToast.AddArgument("kind","Message");
+                                        messageToast.AddArgument("kind", "Message");
                                         messageToast.AddText(user.Name + "发布了新的动态");
                                         messageToast.AddText(_message.Text);
                                         messageToast.AddCustomTimeStamp(_message.CreateAt);

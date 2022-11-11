@@ -8,7 +8,7 @@ using System.Data;
 using System;
 using Microsoft.Win32;
 using System.IO;
-using static ArkHelper.Data.SCHT;
+using static ArkHelper.Data.scht;
 
 namespace ArkHelper.Pages.OtherList
 {

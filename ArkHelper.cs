@@ -18,7 +18,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using static ArkHelper.Data.SCHT;
+using static ArkHelper.Data.scht;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 using Point = System.Drawing.Point;
 using static System.Net.Mime.MediaTypeNames;
@@ -37,47 +37,34 @@ namespace ArkHelper
         /// <summary>
         /// 版本种类
         /// </summary>
-        public readonly static Kind kind = Kind.alpha;
+        public readonly static Kind kind = Kind.realese;
         /// <summary>
         /// ArkHelperConfig版本
         /// </summary>
         public readonly static double ArkHelperConfig = 1.0;
         public enum Kind
         {
-            alpha,
+            realese,
             beta,
-            release,
         }
     }
 
     /// <summary>
-    /// 数据传输
+    /// ArkHelper数据
     /// </summary>
-    public static class UniData
+    public class ArkHelperDataStandard
     {
-        /// <summary>
-        /// 从文件中读取json
-        /// </summary>
-        /// <param name="address">文件地址</param>
-        /// <returns></returns>
-        public static JsonElement ReadJson(string address)
-        {
-            if (!File.Exists(address)) { return new JsonElement(); }
-            var _text = File.ReadAllText(address);
-            var _result = JsonSerializer.Deserialize<JsonElement>(_text);
-            return _result;
-        }
         /// <summary>
         /// 截图名称获取
         /// </summary>
         /// <returns>四位数年+两位数月+两位数日+两位数时分秒+三位毫秒+“.png”</returns>
-        public static string Screenshot => DateTime.Now.ToString("yyyyMMdd") + DateTime.Now.ToString("HHmmssfff") + @".png";
-
+        public static string Screenshot => DateTime.Now.ToString("yyyyMMddHHmmssfff") + @".png";
         /// <summary>
         /// log名称获取
         /// </summary>
         /// <returns></returns>
         public static string Log => Address.log + @"\" + DateTime.Now.ToString("yyyyMMdd") + @".log";
+
         /// <summary>
         /// 消息来源类型
         /// </summary>
@@ -92,14 +79,10 @@ namespace ArkHelper
             web,
             official_communication
         }
-        public enum ArgKind
-        {
-            Navigate,
-            ActiveFunc,
-            Shut,
-            none
-        }
 
+        /// <summary>
+        /// ArkHelperArg
+        /// </summary>
         public class ArkHelperArg
         {
             //public static string Creator { get; set; }
@@ -126,8 +109,20 @@ namespace ArkHelper
             {
                 return Arg + ":" + ArgContent + "(" + Discribe + ")," + Target;
             }
+            /// <summary>
+            /// ArkHelperArg类型
+            /// </summary>
+            public enum ArgKind
+            {
+                Navigate,
+                ActiveFunc,
+                Shut,
+                none
+            }
         }
-
+        /// <summary>
+        /// Akhcmd
+        /// </summary>
         public class AKHcmd
         {
             string ADBcmd { get; set; } = "";
@@ -162,18 +157,72 @@ namespace ArkHelper
             }
 
         }
-    }
 
-    /// <summary>
-    /// 参数
-    /// </summary>
-    public static class Param
-    {
-        /// <summary>
-        /// 参数
-        /// </summary>
-        public readonly static string start_page = "Home";
-        public readonly static bool logAdvanceOutput = true;
+        #region 配置数据
+        public class Data
+        {
+            public Simulator simulator { get; set; } = new Simulator();
+            public class Simulator
+            {
+                public Custom custom { get; set; } = new Custom();
+                public class Custom
+                {
+                    public bool status { get; set; } = false;
+                    public int port { get; set; } = 0;
+                    public string im { get; set; } = "";
+                }
+            }
+
+            public SCHT scht { get; set; } = new SCHT();
+            public class SCHT
+            {
+                public bool status { get; set; } = false;
+
+                public CpRefer first { get; set; } = new CpRefer();
+                public CpRefer second { get; set; } = new CpRefer();
+                public class CpRefer
+                {
+                    public string unit { get; set; } = "LS";
+                    public string cp { get; set; } = "1";
+                }
+
+                public Ann ann { get; set; } = new Ann();
+                public class Ann
+                {
+                    public bool status { get; set; } = false;
+                    public string select { get; set; } = "TT";
+                    public bool customTime { get; set; } = false;
+                    public int[] time { get; set; } = new int[7] { 0, 0, 0, 0, 0, 0, 0 }; //周一为每周的第一天
+                }
+
+                public Server server { get; set; } = new Server();
+                public class Server
+                {
+                    public string id { get; set; } = "CO";
+                }
+
+                public Fcm fcm { get; set; } = new Fcm();
+                public class Fcm
+                {
+                    public bool status { get; set; } = false;
+                }
+            }
+
+            public ArkHelper arkHelper { get; set; } = new ArkHelper();
+            public class ArkHelper
+            {
+                public bool pure { get; set; } = true;
+            }
+        }
+        public void Load()
+        {
+            App.Data = JsonSerializer.Deserialize<Data>(File.ReadAllText(Address.config));
+        }
+        public void Save()
+        {
+            File.WriteAllText(Address.config, JsonSerializer.Serialize(App.Data));
+        }
+        #endregion
     }
 
     /// <summary>
@@ -205,6 +254,7 @@ namespace ArkHelper
         /// <returns>adb的返回结果</returns>
         public static string CMD(string cmd)
         {
+            //未连接报错
             while (!cmd.Contains("connect") && ConnectedInfo == null)
             {
                 System.Windows.Application.Current.Dispatcher.Invoke(() =>
@@ -214,19 +264,22 @@ namespace ArkHelper
                 Thread.Sleep(2000);
             }
 
+            //cmd
             process.StartInfo.Arguments = cmd;
+            if (true) Output.Log(cmd, "ADB");
 
-            if (Param.logAdvanceOutput) Output.Log(cmd, "ADB");
-
+            //启动命令并读取结果
             process.Start();
             var end = process.StandardOutput.ReadToEnd();
 
-            if (Param.logAdvanceOutput) Output.Log("=>" + end.Replace("\n", "[linebreak]").Replace("\r", ""), "ADB");
-
+            //log结果
+            if (true) Output.Log("=>" + end.Replace("\n", "[linebreak]").Replace("\r", ""), "ADB");
+            //等待退出
             process.WaitForExit();
+            //log退出
+            if (true) Output.Log("=>" + "Exited", "ADB");
 
-            if (Param.logAdvanceOutput) Output.Log("=>" + "Exited", "ADB");
-
+            //返回结果
             return end;
         }
 
@@ -317,7 +370,7 @@ namespace ArkHelper
         #endregion
 
         /// <summary>
-        /// 截图
+        /// 简单截图
         /// </summary>
         /// <param name="address">截图输出地址</param>
         /// <param name="name">截图名称</param>
@@ -337,7 +390,7 @@ namespace ArkHelper
             private Bitmap ImgBitmap { get; set; }
             public Screenshot()
             {
-                string name = UniData.Screenshot;
+                string name = ArkHelperDataStandard.Screenshot;
                 string address = Address.Cache.main;
                 CMD(@"shell screencap -p /sdcard/DCIM/" + name); //截图
                 CMD(@"pull /sdcard/DCIM/" + name + " " + address); //pull
@@ -496,7 +549,7 @@ namespace ArkHelper
         /// <returns>如果两点都符合对应的期望颜色值，返回<see langword="true"/>，否则返回<see langword="false"/>。</returns>
         public static bool ColorCheck(int x1, int y1, string c1, int x2, int y2, string c2)
         {
-            string _name = ADB.GetScreenshot(Address.Cache.main, UniData.Screenshot);
+            string _name = ADB.GetScreenshot(Address.Cache.main, ArkHelperDataStandard.Screenshot);
             string[] color = ColorPick(
                 _name, x1, y1, x2, y2);
             File.Delete(_name);
@@ -781,7 +834,7 @@ namespace ArkHelper
     /// <summary>
     /// 运行数据
     /// </summary>
-    public static class Data
+    public class Data
     {
         public static class simulator
         {
@@ -792,7 +845,7 @@ namespace ArkHelper
                 public static string im = "";
             }
         }
-        public static class SCHT
+        public static class scht
         {
             public static bool status = false;
             public static class first
@@ -830,15 +883,11 @@ namespace ArkHelper
                 public static bool status = true;
             }
         }
-        public static class ArkHelper
+        public static class arkHelper
         {
             public static bool pure = false;
         }
-        public static class UserData
-        {
-            public static string User = "";
-            public static string Password = "";
-        }
+
         /// <summary>
         /// 更新数据
         /// </summary>
@@ -863,7 +912,7 @@ namespace ArkHelper
                 }
                 //akh
                 JObject _akh = (JObject)config["ArkHelper"];
-                ArkHelper.pure = (bool)_akh["pure"];
+                arkHelper.pure = (bool)_akh["pure"];
                 //SCHT
                 JObject _SCHT = (JObject)config["SCHT"];
                 status = (bool)_SCHT["status"];
@@ -914,7 +963,7 @@ namespace ArkHelper
             JObject config = new JObject();
             JObject akh = new JObject()
             {
-                {"pure",ArkHelper.pure }
+                {"pure",arkHelper.pure }
             };
             config.Add("ArkHelper", akh);
 
@@ -1037,7 +1086,7 @@ namespace ArkHelper
                 + "[" + infokind.ToString() + "]"
                 + " "
                 + content
-                , UniData.Log
+                , ArkHelperDataStandard.Log
                 );
         }
     }

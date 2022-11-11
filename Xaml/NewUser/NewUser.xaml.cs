@@ -41,7 +41,7 @@ namespace ArkHelper
                 case @"\Xaml\NewUser\SCHT.xaml":
                     if (Pages.NewUserList.SCHT.enabled)
                     {
-                        Data.SCHT.status = true;
+                        Data.scht.status = true;
                     }
                     else
                     {

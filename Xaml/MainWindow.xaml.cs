@@ -104,7 +104,7 @@ namespace ArkHelper.Xaml
 
             if (App.mainArg.Target == "MainWindow")
             {
-                if (App.mainArg.Arg == UniData.ArgKind.Navigate)
+                if (App.mainArg.Arg == ArkHelperDataStandard.ArkHelperArg.ArgKind.Navigate)
                 {
                     Navigate(App.mainArg.ArgContent);
                     foreach (RadioButton rb in FuncList.Children)
@@ -186,6 +186,7 @@ namespace ArkHelper.Xaml
                     //加进framegrid里
                     framegrid.Children.Add(newFrame);
                 }
+                frame.Navigate(new Uri(@"\Xaml\" + "Home" + ".xaml", UriKind.RelativeOrAbsolute));
                 Animation(ThisFrame);
             }
             else
@@ -243,7 +244,7 @@ namespace ArkHelper.Xaml
                 return;
             }
             Data.Save();
-            if (Data.ArkHelper.pure && !Data.SCHT.status)
+            if (Data.arkHelper.pure && !Data.scht.status)
             {
                 Application.Current.Shutdown();
             }

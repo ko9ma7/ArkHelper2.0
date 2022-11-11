@@ -224,7 +224,7 @@ namespace ArkHelper.Asset
                 }
 
                 //截图
-                ADB.GetScreenshot(Address.Screenshot.MB, ArkHelper.UniData.Screenshot);
+                ADB.GetScreenshot(Address.Screenshot.MB, ArkHelper.ArkHelperDataStandard.Screenshot);
 
                 //退出作战
                 for (int i = 1; i <= 2; i++)

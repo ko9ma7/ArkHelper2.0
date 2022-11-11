@@ -109,10 +109,10 @@ namespace ArkHelper.Pages
             public string ID { get; set; }
             public string Name { get; set; }
             public string Avatar { get; set; }
-            public UniData.MessageSource Source { get; set; }
+            public ArkHelperDataStandard.MessageSource Source { get; set; }
             public string UID { get; set; }
 
-            public User(UniData.MessageSource source, string uid)
+            public User(ArkHelperDataStandard.MessageSource source, string uid)
             {
                 Source = source;
                 UID = uid;
@@ -120,12 +120,12 @@ namespace ArkHelper.Pages
                 switch (Source)
                 {
                     // 微博
-                    case UniData.MessageSource.weibo:
+                    case ArkHelperDataStandard.MessageSource.weibo:
                         JsonElement _userinfo = WithNet.GetFromApi("https://m.weibo.cn/api/container/getIndex?type=uid&value=" + UID).GetProperty("data").GetProperty("userInfo");
                         Avatar = _userinfo.GetProperty("profile_image_url").GetString();
                         Name = _userinfo.GetProperty("screen_name").GetString();
                         break;
-                    case UniData.MessageSource.official_communication:
+                    case ArkHelperDataStandard.MessageSource.official_communication:
 
                         Avatar = null;//
                         Name = "制作组通讯";
@@ -151,7 +151,7 @@ namespace ArkHelper.Pages
                 List<ArkHelperMessage> back = new List<ArkHelperMessage>();
                 switch (Source)
                 {
-                    case UniData.MessageSource.weibo:
+                    case ArkHelperDataStandard.MessageSource.weibo:
                         for (int page = 1; ; page++)
                         {
                             var _getresult = WithNet.GetFromApi("https://m.weibo.cn/api/container/getIndex?type=uid&value=" + UID + @"&containerid=107603" + UID + "&page=" + page);
@@ -179,7 +179,7 @@ namespace ArkHelper.Pages
                             if (page == 1) { break; }
                         }
                         break;
-                    case UniData.MessageSource.official_communication:
+                    case ArkHelperDataStandard.MessageSource.official_communication:
                         var _aa = new RestClient("https://ak.hypergryph.com/news");
                         var _ab = _aa.Get(new RestRequest { Method = Method.Get });
                         string _aaa = _ab.Content.ToString();
@@ -247,9 +247,9 @@ namespace ArkHelper.Pages
             /// </summary>
             /// <param name="source">来源</param>
             /// <param name="json">消息</param>
-            public ArkHelperMessage(UniData.MessageSource source, object content)
+            public ArkHelperMessage(ArkHelperDataStandard.MessageSource source, object content)
             {
-                if (source == UniData.MessageSource.weibo)
+                if (source == ArkHelperDataStandard.MessageSource.weibo)
                 {
                     var json = (JsonElement)content;
                     if (json.GetProperty("isLongText").GetBoolean())
@@ -343,7 +343,7 @@ namespace ArkHelper.Pages
                                 goto repend;
                             }
                         }
-                        Repost = new ArkHelperMessage(UniData.MessageSource.weibo, _ret);
+                        Repost = new ArkHelperMessage(ArkHelperDataStandard.MessageSource.weibo, _ret);
                     repend:;
                     }
                     //图片/视频获取
@@ -400,7 +400,7 @@ namespace ArkHelper.Pages
                     }
                     goto end;
                 }
-                if (source == UniData.MessageSource.official_communication)
+                if (source == ArkHelperDataStandard.MessageSource.official_communication)
                 {
                     int num = 0;
 

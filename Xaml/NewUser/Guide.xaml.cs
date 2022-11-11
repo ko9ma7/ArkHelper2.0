@@ -14,7 +14,7 @@ namespace ArkHelper.Pages.NewUserList
         public Guide()
         {
             InitializeComponent();
-            if (Data.SCHT.status) { guidea.Visibility = Visibility.Visible;  }
+            if (Data.scht.status) { guidea.Visibility = Visibility.Visible;  }
         }
 
     }
