@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media.Media3D;
 using System.Windows.Threading;
-using Windows.UI.Xaml.Controls;
 using Page = System.Windows.Controls.Page;
 
 namespace ArkHelper.Xaml

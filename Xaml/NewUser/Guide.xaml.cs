@@ -1,8 +1,5 @@
 ﻿using System.Windows.Controls;
 using System.Windows;
-using Microsoft.Win32;
-using System.Diagnostics;
-using System.IO;
 
 namespace ArkHelper.Pages.NewUserList
 {

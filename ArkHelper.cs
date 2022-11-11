@@ -1,8 +1,6 @@
 ﻿using MaterialDesignThemes.Wpf;
 using Microsoft.Toolkit.Uwp.Notifications;
 using Microsoft.Win32;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using RestSharp;
 using System;
 using System.Collections;
@@ -18,10 +16,8 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using static ArkHelper.Data.scht;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 using Point = System.Drawing.Point;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace ArkHelper
 {
@@ -893,156 +889,14 @@ namespace ArkHelper
         /// </summary>
         public static void Load()
         {
-            if (File.Exists(Address.config))
-            {
-                //读取配置
-                JObject config = (JObject)JToken.ReadFrom(
-                    new JsonTextReader(
-                        File.OpenText(Address.config)
-                        )
-                    );
 
-                //模拟器
-                JObject _simulator = (JObject)config["simulator"]["custom"];
-                simulator.custom.status = (bool)_simulator["status"];
-                if (simulator.custom.status)
-                {
-                    simulator.custom.port = Convert.ToInt32(_simulator["port"]);
-                    simulator.custom.im = _simulator["im"].ToString();
-                }
-                //akh
-                JObject _akh = (JObject)config["ArkHelper"];
-                arkHelper.pure = (bool)_akh["pure"];
-                //SCHT
-                JObject _SCHT = (JObject)config["SCHT"];
-                status = (bool)_SCHT["status"];
-                if (status)
-                {
-                    first.unit = _SCHT["first"]["unit"].ToString();
-                    first.cp = _SCHT["first"]["cp"].ToString();
-
-                    if (first.unit != "LS" && first.unit != "custom")
-                    {
-                        second.unit = _SCHT["second"]["unit"].ToString();
-                        second.cp = _SCHT["second"]["cp"].ToString();
-                    }
-
-                    ann.status = (bool)_SCHT["ann"]["status"];
-                    if (ann.status)
-                    {
-                        ann.select = _SCHT["ann"]["select"].ToString();
-                        JObject _time = (JObject)_SCHT["ann"]["time"];
-                        ann.time.custom = (bool)_time["custom"];
-                        if (ann.time.custom)
-                        {
-                            ann.time.Mon = Convert.ToInt32(_time["Mon"].ToString());
-                            ann.time.Tue = Convert.ToInt32(_time["Tue"].ToString());
-                            ann.time.Wed = Convert.ToInt32(_time["Wed"].ToString());
-                            ann.time.Thu = Convert.ToInt32(_time["Thu"].ToString());
-                            ann.time.Fri = Convert.ToInt32(_time["Fri"].ToString());
-                            ann.time.Sat = Convert.ToInt32(_time["Sat"].ToString());
-                            ann.time.Sun = Convert.ToInt32(_time["Sun"].ToString());
-                        }
-                    }
-                    server.id = _SCHT["server"]["id"].ToString();
-                    fcm.status = (bool)_SCHT["fcm"]["status"];
-                }
-            }
         }
 
         /// <summary>
         /// 保存数据
         /// </summary>
         public static void Save()
-        {
-            if (!File.Exists(Address.config))
-            {
-                File.Create(Address.config).Close();
-            }
-
-            JObject config = new JObject();
-            JObject akh = new JObject()
-            {
-                {"pure",arkHelper.pure }
-            };
-            config.Add("ArkHelper", akh);
-
-            JObject simu = new JObject();
-            JObject custom = new JObject();
-            custom.Add("status", simulator.custom.status);
-            if (simulator.custom.status)
-            {
-                custom.Add("im", simulator.custom.im);
-                custom.Add("port", simulator.custom.port);
-            }
-            simu.Add("custom", custom);
-            config.Add("simulator", simu);
-
-            JObject SCHT = new JObject();
-            SCHT.Add("status", status);
-            if (status)
-            {
-                JObject _first = new JObject()
-                {
-                    {"unit",first.unit },
-                    {"cp",first.cp }
-                };
-                SCHT.Add("first", _first);
-
-                if (first.unit != "custom" && first.unit != "LS")
-                {
-                    JObject _second = new JObject()
-                    {
-                        {"unit",second.unit },
-                        {"cp",second.cp }
-                    };
-                    SCHT.Add("second", _second);
-                }
-
-                //剿灭
-                JObject _ann = new JObject()
-                {
-                    {"status",ann.status }
-                };
-                if (ann.status)
-                {
-                    _ann.Add("select", ann.select);
-                    JObject _time = new JObject()
-                    {
-                        {"custom",ann.time.custom }
-                    };
-                    if (ann.time.custom)
-                    {
-                        _time.Add("Mon", ann.time.Mon);
-                        _time.Add("Tue", ann.time.Tue);
-                        _time.Add("Wed", ann.time.Wed);
-                        _time.Add("Thu", ann.time.Thu);
-                        _time.Add("Fri", ann.time.Fri);
-                        _time.Add("Sat", ann.time.Sat);
-                        _time.Add("Sun", ann.time.Sun);
-                    }
-                    _ann.Add("time", _time);
-                }
-                SCHT.Add("ann", _ann);
-
-                //服务器
-                JObject _server = new JObject()
-                {
-                    {"id",server.id }
-                };
-                SCHT.Add("server", _server);
-
-                //防沉迷
-                JObject _fcm = new JObject()
-                {
-                    {"status",fcm.status }
-                };
-                SCHT.Add("fcm", _fcm);
-            }
-            config.Add("SCHT", SCHT);
-            //保存
-            File.WriteAllText(Address.config, JsonConvert.SerializeObject(config, Formatting.Indented));
-        }
+        { }
     }
 
     /// <summary>

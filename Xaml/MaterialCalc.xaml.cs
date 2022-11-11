@@ -5,10 +5,7 @@
 
 /*using IronPython.Hosting;
 using Microsoft.Scripting.Hosting;*/
-using System;
 using System.Windows.Controls;
-using System.Windows;
-using Newtonsoft.Json.Linq;
 
 namespace ArkHelper.Xaml
 {

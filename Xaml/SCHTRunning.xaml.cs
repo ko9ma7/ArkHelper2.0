@@ -4,11 +4,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Shapes;
-using System.Drawing;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System.Threading;
 using Microsoft.Toolkit.Uwp.Notifications;
 using static ArkHelper.ADB;
@@ -109,6 +105,7 @@ namespace ArkHelper.Pages.OtherList
                 }
                 if (unit == "custom")
                 {
+                    //
                     StreamReader ctreader = File.OpenText(cp);
                     JsonTextReader ctjsonTextReader = new JsonTextReader(ctreader);
                     JObject ctjsonObject = (JObject)JToken.ReadFrom(ctjsonTextReader);

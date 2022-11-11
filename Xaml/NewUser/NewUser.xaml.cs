@@ -1,11 +1,6 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
-using System.IO;
+﻿using System;
 using System.Windows;
 using System.Diagnostics;
-using System.Text;
-using System.Windows.Documents;
 using System.Collections.Generic;
 
 namespace ArkHelper

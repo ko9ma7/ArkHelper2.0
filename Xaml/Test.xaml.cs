@@ -1,16 +1,10 @@
 ﻿using System.Windows;
 using RestSharp;
-using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.IO;
 using RoutedEventArgs = System.Windows.RoutedEventArgs;
 using Page = System.Windows.Controls.Page;
 using DataFormat = RestSharp.DataFormat;
-using System.Threading;
-using Microsoft.Win32;
-using System;
-using Windows.ApplicationModel.Background;
-using System.Diagnostics;
 using System.Text.Json;
 
 namespace ArkHelper.Xaml
