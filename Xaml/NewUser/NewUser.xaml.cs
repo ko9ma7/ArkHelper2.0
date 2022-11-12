@@ -36,7 +36,7 @@ namespace ArkHelper
                 case @"\Xaml\NewUser\SCHT.xaml":
                     if (Pages.NewUserList.SCHT.enabled)
                     {
-                        Data.scht.status = true;
+                        App.Data.scht.status = true;
                     }
                     else
                     {
@@ -47,7 +47,7 @@ namespace ArkHelper
                     PagesNavigation.Margin = new Thickness(0);
                     break;
                 case @"\Xaml\NewUser\Guide.xaml":
-                    Data.Save();
+                    App.SaveData();
                     Close();
                     Process.Start(Address.akh + "\\ArkHelper.exe");
                     return;

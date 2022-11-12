@@ -2,10 +2,13 @@
 using RestSharp;
 using System.Collections.Generic;
 using System.IO;
-using RoutedEventArgs = System.Windows.RoutedEventArgs;
-using Page = System.Windows.Controls.Page;
-using DataFormat = RestSharp.DataFormat;
+using System.Windows.Controls;
 using System.Text.Json;
+using System;
+using OpenCvSharp;
+using Point = OpenCvSharp.Point;
+using Rect = OpenCvSharp.Rect;
+using Size = OpenCvSharp.Size;
 
 namespace ArkHelper.Xaml
 {
@@ -60,13 +63,13 @@ namespace ArkHelper.Xaml
             var request = new RestRequest
             {
                 Method = Method.Post,
-                RequestFormat = DataFormat.Json
+                RequestFormat = RestSharp.DataFormat.Json
             };
-            var json = new JObject()
-            {
+            var json = new JsonElement();
+            /*{
                 {"phone",user },
                 {"password",pswd }
-            };
+            };*/
             request.AddParameter("", json, ParameterType.RequestBody);
             var client = new RestClient("https://as.hypergryph.com/user/auth/v1/token_by_phone_password");
             var result = client.Post(request);
@@ -89,51 +92,43 @@ namespace ArkHelper.Xaml
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
-            
 
 
 
+            /*
             var ac = JsonSerializer.Serialize(App.Data);
             var jsonString = @"{""Simulator"":{}}";
-            
+
             ArkHelperDataStandard.Data bb =
                 JsonSerializer.Deserialize<ArkHelperDataStandard.Data>(ac);
-            bb.ToString();
+            bb.ToString();*/
+
+            /*ArkHelperDataStandard.Data cc =
+                JsonSerializer.Deserialize<ArkHelperDataStandard.Data>( new ArkHelper.ArkHelperDataStandard.AKHcpi());*/
+            var aaaa = new ArkHelperDataStandard.AKHcpi();
+            aaaa.adcmd.Add(new ArkHelperDataStandard.AKHcmd("shell input tap 66 66", "", 3, 3));
+            var ac = JsonSerializer.Serialize(aaaa);
+            string aba = "";
         }
 
         private void Button_Click_3(object sender, RoutedEventArgs e)
         {
-            
-        }
-    }
-
-    public class UserModel
-    {
-        public bool IsEnabled { get; set; }
-        public string UserName { get; set; }
-        public UserModel() { }
-        public UserModel(string name)
-        {
-            UserName = name;
-        }
-    }
-    /*public class UserDBModel : INotifyPropertyChanged
-    {
-        public event PropertyChangedEventHandler PropertyChanged;
-        public void OnPropertyChanged(PropertyChangedEventArgs e)
-        {
-            if (PropertyChanged != null)
-                PropertyChanged(this, e);
-        }
-        private ObservableCollection<UserModel> userdb = new ObservableCollection<UserModel>();
-        public ObservableCollection<UserModel> UserDB
-        {
-            get { return userdb; }
-            set
+            //var aa = GetSmallPicLocationUsingOpenCV(@"C:\Users\SurFace\Desktop\屏幕截图 2022-11-12 174043.png", @"C:\Users\SurFace\Desktop\MuMu20220906000022255201.png");
+            /*foreach (var ab in aa)
             {
-                userdb = value;
-                OnPropertyChanged(new PropertyChangedEventArgs("UserDB"));
-            }
+                MessageBox.Show(ab.ToString());
+            }*/
         }
-    }*/
+    }
+}
+
+public class UserModel
+{
+    public bool IsEnabled { get; set; }
+    public string UserName { get; set; }
+    public UserModel() { }
+    public UserModel(string name)
+    {
+        UserName = name;
+    }
 }

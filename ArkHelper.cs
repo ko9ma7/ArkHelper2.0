@@ -1,6 +1,7 @@
 ﻿using MaterialDesignThemes.Wpf;
 using Microsoft.Toolkit.Uwp.Notifications;
 using Microsoft.Win32;
+using OpenCvSharp;
 using RestSharp;
 using System;
 using System.Collections;
@@ -13,9 +14,12 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using Windows.ApplicationModel.Appointments;
+using Windows.Storage.Streams;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 using Point = System.Drawing.Point;
 
@@ -121,16 +125,21 @@ namespace ArkHelper
         /// </summary>
         public class AKHcmd
         {
-            string ADBcmd { get; set; } = "";
-            string Discribe { get; set; } = "";
-            public string OutputText { get; set; } = "";
-            int WaitTime { get; set; } = 0;
-            int ForTimes { get; set; } = 0;
+            private string ADBcmd { get; set; } = null;
+            private string Discribe { get; set; } = "";
+            public string OutputText { get; } = "";
+            private int WaitTime { get; set; } = 0;
+            private int ForTimes { get; set; } = 0;
 
-            public AKHcmd(string body, string outputText = "null", int waitTime = 0, int forTimes = 1)
+            public AKHcmd(string body, string outputText = "", int waitTime = 0, int forTimes = 1)
             {
-                if (body == "null") { }
-                else
+                if (body == "zhongduan") body = "shell input tap 1090 185 ####2#;";
+                if (body == "zhongduan_menu_zhongduan") body = "shell input tap 90 757 ####1#;";
+                if (body == "ziyuanshouji") body = "shell input tap 806 756####1#;";
+                if (body == "menu") body = "shell input tap 300 42####1#;";
+                if (body == "menu_home") body = "shell input tap 103 194####2#;";
+
+                if (body != null)
                 {
                     //解析
                     if (body.Contains("####") && body.Contains("#;")) { waitTime = Convert.ToInt32(body.Substring(body.IndexOf("####") + 4, body.IndexOf("#;") - body.IndexOf("####") - 4)); }
@@ -147,11 +156,17 @@ namespace ArkHelper
             {
                 for (int i = 1; i <= ForTimes; i++)
                 {
-                    ADB.CMD(ADBcmd);
+                    if(ADBcmd != null) ADB.CMD(ADBcmd);
                     Thread.Sleep(WaitTime * 1000);
                 }
             }
 
+        }
+
+        public class AKHcpi
+        {
+            public string name { get; set; } = "null";
+            public List<AKHcmd> adcmd { get; set; } = new List<AKHcmd>();
         }
 
         #region 配置数据
@@ -179,7 +194,6 @@ namespace ArkHelper
                 public class CpRefer
                 {
                     public string unit { get; set; } = "LS";
-                    public string cp { get; set; } = "1";
                 }
 
                 public Ann ann { get; set; } = new Ann();
@@ -209,14 +223,6 @@ namespace ArkHelper
             {
                 public bool pure { get; set; } = true;
             }
-        }
-        public void Load()
-        {
-            App.Data = JsonSerializer.Deserialize<Data>(File.ReadAllText(Address.config));
-        }
-        public void Save()
-        {
-            File.WriteAllText(Address.config, JsonSerializer.Serialize(App.Data));
         }
         #endregion
     }
@@ -298,10 +304,10 @@ namespace ArkHelper
 
             //尝试遍历寻找在线的模拟器
             PinnedData.Simulator.SimuInfo ConnectThis = new PinnedData.Simulator.SimuInfo();
-            if (Data.simulator.custom.status)
+            if (App.Data.simulator.custom.status)
             {
-                if (Process.GetProcessesByName(Data.simulator.custom.im).Length != 0)
-                    ConnectThis = new PinnedData.Simulator.SimuInfo("custom", "自定义", Data.simulator.custom.port, Data.simulator.custom.im);
+                if (Process.GetProcessesByName(App.Data.simulator.custom.im).Length != 0)
+                    ConnectThis = new PinnedData.Simulator.SimuInfo("custom", "自定义", App.Data.simulator.custom.port, App.Data.simulator.custom.im);
                 else return;
             }
             else
@@ -422,15 +428,15 @@ namespace ArkHelper
             }
             #endregion
 
-            public Point[] PicToPoint(string smallimg, double errorCon = 0.7, int errorRange = 16, int num = 50)
+            public List<Point> PicToPoint(string smallimg, double errorCon = 0.7, int errorRange = 16, int num = 50)
             {
-                if (!File.Exists(smallimg)) { return new Point[0]; }
+                if (!File.Exists(smallimg)) { return new List<Point>(); }
 
-                //初始化图像类
+                /*//初始化图像类
                 InitBitmap();
                 var smallBM = new Bitmap(smallimg);
-
-                return PictureProcess.PicToPoint.GetPoint(this.ImgBitmap, smallBM, errorCon, errorRange, num);
+                return PictureProcess.PicToPoint.GetPointUsingNative(this.ImgBitmap, smallBM, errorCon, errorRange, num);*/
+                return PictureProcess.PicToPoint.GetPointUsingOpenCV(this.Location, smallimg);
             }
             private void InitBitmap()
             {
@@ -566,8 +572,8 @@ namespace ArkHelper
             /// <param name="errorCon">点容差（0~1），越大越难以匹配</param>
             /// <param name="errorRange">色容差（0~255），越大越容易匹配</param>
             /// <param name="num">精确度，越大越准确</param>
-            /// <returns>点数组</returns>
-            public static Point[] GetPoint(Bitmap bigBM, Bitmap smallBM, double errorCon = 0.6, int errorRange = 15, int num = 100)
+            /// <returns>所有匹配矩形的中心点在大图中的坐标</returns>
+            public static List<Point> GetPointUsingNative(Bitmap bigBM, Bitmap smallBM, double errorCon = 0.6, int errorRange = 15, int num = 100)
             {
                 //声明数组，写入随机坐标
                 Point[] pointSmall = new Point[num];
@@ -672,10 +678,10 @@ namespace ArkHelper
                         }
                     }
                     //存储
-                    Point[] _points = new Point[FinallyPoints.Count];
-                    for (int i = 0; i < FinallyPoints.Count; i++)
+                    List<Point> _points = new List<Point>();
+                    foreach(Point _point in FinallyPoints)
                     {
-                        _points[i] = (Point)FinallyPoints[i];
+                        _points.Add(_point);
                     }
                     bigBM.Dispose(); smallBM.Dispose();
                     return _points;
@@ -683,7 +689,7 @@ namespace ArkHelper
                 else
                 {
                     bigBM.Dispose(); smallBM.Dispose();
-                    return new Point[0];
+                    return new List<Point>();
                 }
 
                 //坐标相减
@@ -710,16 +716,59 @@ namespace ArkHelper
             /// <param name="errorRange">色容差（0~255），越大越容易匹配</param>
             /// <param name="num">精确度，越大越准确</param>
             /// <returns>点数组</returns>
-            public static Point[] GetPoint(string bigpic, string smallpic, double errorCon = 0.6, int errorRange = 15, int num = 100)
+            public static List<Point> GetPointUsingNative(string bigpic, string smallpic, double errorCon = 0.6, int errorRange = 15, int num = 100)
             {
-                if (!File.Exists(bigpic)) { return new Point[0]; }
-                if (!File.Exists(smallpic)) { return new Point[0]; }
+                if (!File.Exists(bigpic)) { return new List<Point>(); }
+                if (!File.Exists(smallpic)) { return new List<Point>(); }
 
                 //初始化图像类
                 var bigBM = new Bitmap(bigpic);
                 var smallBM = new Bitmap(smallpic);
 
-                return GetPoint(bigBM, smallBM, errorCon, errorRange, num);
+                return GetPointUsingNative(bigBM, smallBM, errorCon, errorRange, num);
+            }
+
+            /// <summary>
+            /// 获取
+            /// </summary>
+            /// <param name="bigPicLocation">大图地址</param>
+            /// <param name="smallPicLocation">小图地址</param>
+            /// <returns></returns>
+            public static List<Point> GetPointUsingOpenCV(string bigPicLocation, string smallPicLocation)
+            {
+                List<Point> @return = new List<Point>();
+
+                using (Mat bigPic = new Mat(bigPicLocation))//大图
+                using (Mat smallPic = new Mat(smallPicLocation))//小图
+                using (Mat res = new Mat(bigPic.Rows - smallPic.Rows + 1, bigPic.Cols - smallPic.Cols + 1, MatType.CV_32FC1))
+                {
+                    //灰度化
+                    Mat gref = bigPic.CvtColor(ColorConversionCodes.BGR2GRAY);
+                    Mat gtpl = smallPic.CvtColor(ColorConversionCodes.BGR2GRAY);
+
+                    Cv2.MatchTemplate(gref, gtpl, res, TemplateMatchModes.CCoeffNormed);
+                    Cv2.Threshold(res, res, 0.8, 1.0, ThresholdTypes.Tozero);
+
+                    while (true)
+                    {
+                        double minval, maxval, threshold = 0.8;
+                        OpenCvSharp.Point minloc, maxloc;
+                        Cv2.MinMaxLoc(res, out minval, out maxval, out minloc, out maxloc);
+
+                        if (maxval >= threshold)
+                        {
+                            Point newPoint = new Point(maxloc.X + smallPic.Width / 2, maxloc.Y + smallPic.Height / 2);
+                            @return.Add(newPoint);
+
+                            //去重
+                            OpenCvSharp.Rect outRect;
+                            Cv2.FloodFill(res, maxloc, new Scalar(0), out outRect, new Scalar(0.1), new Scalar(1.0));
+                        }
+                        else
+                            break;
+                    }
+                }
+                return @return;
             }
         }
     }
@@ -825,78 +874,6 @@ namespace ArkHelper
             Directory.CreateDirectory(Cache.message);
             Directory.CreateDirectory(Cache.update);
         }
-    }
-
-    /// <summary>
-    /// 运行数据
-    /// </summary>
-    public class Data
-    {
-        public static class simulator
-        {
-            public static class custom
-            {
-                public static bool status = false;
-                public static int port = 0;
-                public static string im = "";
-            }
-        }
-        public static class scht
-        {
-            public static bool status = false;
-            public static class first
-            {
-                public static string unit = "LS";
-                public static string cp = "1";
-            }
-            public static class second
-            {
-                public static string unit = "LS";
-                public static string cp = "1";
-            }
-            public static class ann
-            {
-                public static bool status = false;
-                public static string select = "TT";
-                public static class time
-                {
-                    public static bool custom = true;
-                    public static int Mon = 0;
-                    public static int Tue = 0;
-                    public static int Wed = 0;
-                    public static int Thu = 0;
-                    public static int Fri = 0;
-                    public static int Sat = 0;
-                    public static int Sun = 0;
-                }
-            }
-            public static class server
-            {
-                public static string id = "CO";
-            }
-            public static class fcm
-            {
-                public static bool status = true;
-            }
-        }
-        public static class arkHelper
-        {
-            public static bool pure = false;
-        }
-
-        /// <summary>
-        /// 更新数据
-        /// </summary>
-        public static void Load()
-        {
-
-        }
-
-        /// <summary>
-        /// 保存数据
-        /// </summary>
-        public static void Save()
-        { }
     }
 
     /// <summary>

@@ -39,7 +39,7 @@ namespace ArkHelper.Xaml
                 //new Menu("RogueLike","RogueLike",PackIconKind.GamepadRoundUp),
                 new Menu("信息流终端","Message",PackIconKind.AndroidMessages,false),
                 new Menu("寻访记录查询","UserData_Gacha",PackIconKind.AccountCheck),
-                new Menu("SCHT控制台","SCHT",PackIconKind.ThermostatAuto,true),
+                new Menu("SCHT控制台","SCHT",PackIconKind.ThermostatAuto,false),
                 //new Menu("材料计算器","MaterialCalc",PackIconKind.Material),
                 new Menu("SCHT","SCHTRunning",PackIconKind.ThermostatAuto,true),
             },
@@ -51,7 +51,7 @@ namespace ArkHelper.Xaml
         };
         #endregion
         #region 切页
-        public static Frame ThisFrame = null;
+        public Frame ThisFrame = null;
         #endregion
         #region 动画
         ThicknessAnimation FrameThicknessAnimation = new ThicknessAnimation()
@@ -242,8 +242,8 @@ namespace ArkHelper.Xaml
                 WithSystem.Message("任务正在运行，暂时无法关闭ArkHelper");
                 return;
             }
-            Data.Save();
-            if (Data.arkHelper.pure && !Data.scht.status)
+            App.SaveData();
+            if (App.Data.arkHelper.pure && !App.Data.scht.status)
             {
                 Application.Current.Shutdown();
             }

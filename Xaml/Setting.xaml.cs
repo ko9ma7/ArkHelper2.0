@@ -18,10 +18,10 @@ namespace ArkHelper.Pages.OtherList
 
             address.Text = Address.programData;
 
-            pure.IsChecked = Data.arkHelper.pure;
-            im.Text = Data.simulator.custom.im;
-            port.Text = Data.simulator.custom.port.ToString();
-            custom.IsChecked = Data.simulator.custom.status;
+            pure.IsChecked = App.Data.arkHelper.pure;
+            im.Text = App.Data.simulator.custom.im;
+            port.Text = App.Data.simulator.custom.port.ToString();
+            custom.IsChecked = App.Data.simulator.custom.status;
             /*if (Data.SCHT.status)
             {
                 pure.IsChecked = true;
@@ -86,13 +86,13 @@ namespace ArkHelper.Pages.OtherList
             }
         }
         #endregion
-        private void pure_Click(object sender, RoutedEventArgs e) => Data.arkHelper.pure = (bool)pure.IsChecked;
+        private void pure_Click(object sender, RoutedEventArgs e) => App.Data.arkHelper.pure = (bool)pure.IsChecked;
 
         private void port_TextChanged(object sender, TextChangedEventArgs e)
         {
             try
             {
-                Data.simulator.custom.port = Convert.ToInt32(port.Text);
+                App.Data.simulator.custom.port = Convert.ToInt32(port.Text);
             }
             catch
             {
@@ -102,12 +102,12 @@ namespace ArkHelper.Pages.OtherList
 
         private void im_TextChanged(object sender, TextChangedEventArgs e)
         {
-            Data.simulator.custom.im = im.Text;
+            App.Data.simulator.custom.im = im.Text;
         }
 
         private void custom_Click(object sender, RoutedEventArgs e)
         {
-            Data.simulator.custom.status = (bool)custom.IsChecked;
+            App.Data.simulator.custom.status = (bool)custom.IsChecked;
         }
 
         public static string SelectSimu()

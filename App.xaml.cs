@@ -5,10 +5,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using static ArkHelper.ArkHelperDataStandard;
 using static ArkHelper.Pages.Message;
 using Application = System.Windows.Application;
 
@@ -17,7 +19,15 @@ namespace ArkHelper
     public partial class App : Application
     {
         #region 应用配置数据
-        public static ArkHelperDataStandard.Data Data = new ArkHelperDataStandard.Data();
+        public static Data Data = new Data();
+        public static void LoadData()
+        {
+            App.Data = JsonSerializer.Deserialize<Data>(File.ReadAllText(Address.config));
+        }
+        public static void SaveData()
+        {
+            File.WriteAllText(Address.config, JsonSerializer.Serialize(App.Data));
+        }
         #endregion
 
         #region 托盘和后台
@@ -73,7 +83,7 @@ namespace ArkHelper
         #endregion
 
         #region Arg
-        public static ArkHelperDataStandard.ArkHelperArg mainArg = new ArkHelperDataStandard.ArkHelperArg();
+        public static ArkHelperArg mainArg = new ArkHelperArg();
         #endregion
 
         #region 消息
@@ -95,7 +105,7 @@ namespace ArkHelper
                 //ValueSet userInput = toastArgs.UserInput;
                 if (args["kind"].ToString() == "Message")
                 {
-                    mainArg = new ArkHelperDataStandard.ArkHelperArg(ArkHelperDataStandard.ArkHelperArg.ArgKind.Navigate, "Message", "MainWindow");
+                    mainArg = new ArkHelperArg(ArkHelperDataStandard.ArkHelperArg.ArgKind.Navigate, "Message", "MainWindow");
                     Application.Current.Dispatcher.Invoke(delegate
                     {
                         OpenMainWindow();
@@ -125,42 +135,43 @@ namespace ArkHelper
             #endregion
 
             PinnedData.Server.Load();
-            if (!File.Exists(Address.config) || File.Exists(Address.programData + @"\data\new.ini")) //配置文件缺失或未正确配置
+            if (!File.Exists(Address.config)) //配置文件缺失
             {
                 if (Directory.Exists(Address.programData)) { Directory.Delete(Address.programData, true); } //删除残缺的数据文件
                 new NewUser().ShowDialog(); //导航到新用户窗口
             }
             else //main
             {
-                ArkHelper.Data.Load();
+                App.LoadData();
                 if (
-                    e.Args.Contains("SCHT")
-                //true
+                   e.Args.Contains("SCHT")
+                   //||true
                 )
                 {
-                    if (!ArkHelper.Data.scht.status)
+                    if (!Data.scht.status)
                     {
                         ExitApp();
                     }
-                    mainArg = new ArkHelperDataStandard.ArkHelperArg(ArkHelperDataStandard.ArkHelperArg.ArgKind.Navigate, "SCHTRunning", "MainWindow");
+                    mainArg = new ArkHelperArg(ArkHelperDataStandard.ArkHelperArg.ArgKind.Navigate, "SCHTRunning", "MainWindow");
                 }
                 if (e.Args.Contains("test"))
                 {
                     MessageBox.Show("test");
                 }
                 OpenMainWindow();
+                #region 启动message装载
                 Task MessageInit = new Task(() =>
                 {
                     UserList = new ArrayList
                     {
-                        new Pages.Message.User(ArkHelperDataStandard.MessageSource.weibo, "7745672941"),//END
-                        new Pages.Message.User(ArkHelperDataStandard.MessageSource.weibo, "6441489862"),//CHO
-                        new Pages.Message.User(ArkHelperDataStandard.MessageSource.weibo, "7499841383"),//TER
-                        new Pages.Message.User(ArkHelperDataStandard.MessageSource.weibo, "7506039414"),//MOU
-                        new Pages.Message.User(ArkHelperDataStandard.MessageSource.weibo, "7461423907"),//HYP
-                        new Pages.Message.User(ArkHelperDataStandard.MessageSource.weibo, "6279793937"),//ARK
-                        new Pages.Message.User(ArkHelperDataStandard.MessageSource.weibo, "7753678921"),//GAW
-                        new Pages.Message.User(ArkHelperDataStandard.MessageSource.official_communication,""), //COM
+                        new User(ArkHelperDataStandard.MessageSource.weibo, "7745672941"),//END
+                        new User(ArkHelperDataStandard.MessageSource.weibo, "6441489862"),//CHO
+                        new User(ArkHelperDataStandard.MessageSource.weibo, "7499841383"),//TER
+                        new User(ArkHelperDataStandard.MessageSource.weibo, "7506039414"),//MOU
+                        new User(ArkHelperDataStandard.MessageSource.weibo, "7461423907"),//HYP
+                        new User(ArkHelperDataStandard.MessageSource.weibo, "6279793937"),//ARK
+                        new User(ArkHelperDataStandard.MessageSource.weibo, "7753678921"),//GAW
+                        new User(ArkHelperDataStandard.MessageSource.official_communication,""), //COM
                         //new Pages.Message.User(UniData.MessageSource.weibo, "7404330062") //test
                     };
 
@@ -171,7 +182,7 @@ namespace ArkHelper
                         var createat = DateTime.Now;
                         if (_a > 0) createat = messages[0].CreateAt;
                         messages.Clear();
-                        foreach (Pages.Message.User user in UserList)
+                        foreach (User user in UserList)
                         {
                             var _me = user.UpdateMessage();
                             if (_a > 0)
@@ -219,10 +230,13 @@ namespace ArkHelper
                     }
                 });
                 MessageInit.Start();
+                #endregion
+                #region 启动ADB连接
                 Task adbConnect = Task.Run(() =>
                 {
                     for (; ; Thread.Sleep(3000)) ADB.Connect();
                 });
+                #endregion
             }
         }
     }

@@ -8,11 +8,9 @@
       xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       Title="SCHT"
-      
       d:Background="White"
       d:DesignHeight="900"
       d:DesignWidth="652"
-      
       mc:Ignorable="d">
     <Page.Resources>
         <!--  作战单元样式  -->
@@ -228,24 +226,6 @@
                     </WrapPanel>
                 </StackPanel>
 
-                <StackPanel Name="first_cp"
-                            Grid.Row="2"
-                            Grid.Column="0"
-                            Style="{StaticResource title}">
-                    <TextBlock FontSize="{StaticResource h1}">作战关卡</TextBlock>
-                </StackPanel>
-                <WrapPanel Grid.Row="2"
-                           Grid.Column="1"
-                           Style="{StaticResource object}"
-                           Visibility="{Binding ElementName=first_cp, Path=Visibility}">
-                    <ComboBox x:Name="first_cp_combobox"
-                              MinWidth="80"
-                              VerticalAlignment="Top"
-                              DisplayMemberPath="name"
-                              FontSize="15"
-                              SelectionChanged="first_cp_combobox_SelectionChanged" />
-                </WrapPanel>
-
                 <StackPanel x:Name="second_unit"
                             Grid.Row="3"
                             Grid.Column="0"
@@ -284,27 +264,6 @@
                         </RadioButton>
                     </WrapPanel>
                 </StackPanel>
-
-                <StackPanel x:Name="second_cp"
-                            Grid.Row="4"
-                            Grid.Column="0"
-                            Orientation="Vertical"
-                            Style="{StaticResource title}"
-                            Visibility="{Binding ElementName=second_unit, Path=Visibility}">
-
-                    <TextBlock FontSize="{StaticResource h1}">备选关卡</TextBlock>
-                </StackPanel>
-                <WrapPanel Grid.Row="4"
-                           Grid.Column="1"
-                           Style="{StaticResource object}"
-                           Visibility="{Binding ElementName=second_cp, Path=Visibility}">
-                    <ComboBox x:Name="second_cp_combobox"
-                              MinWidth="80"
-                              VerticalAlignment="Top"
-                              DisplayMemberPath="name"
-                              FontSize="15"
-                              SelectionChanged="second_cp_combobox_SelectionChanged" />
-                </WrapPanel>
 
                 <StackPanel x:Name="ann_stack"
                             Grid.Row="5"
@@ -381,52 +340,10 @@
                                            FontSize="{StaticResource h2}"
                                            Text="自定义执行次数" />
                             </WrapPanel>
-                            <WrapPanel VerticalAlignment="Center"
-                                       Orientation="Horizontal"
-                                       Visibility="{Binding ElementName=ann_custom_time_status_checkbox, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                <TextBox x:Name="w1"
-                                         MinWidth="20"
-                                         Margin="0,0,5,5"
-                                         materialDesign:HintAssist.Hint="星期一"
-                                         Style="{StaticResource MaterialDesignFloatingHintTextBox}"
-                                         TextChanged="TextChanged" />
-                                <TextBox x:Name="w2"
-                                         MinWidth="20"
-                                         Margin="0,0,5,5"
-                                         materialDesign:HintAssist.Hint="星期二"
-                                         Style="{StaticResource MaterialDesignFloatingHintTextBox}"
-                                         TextChanged="TextChanged" />
-                                <TextBox x:Name="w3"
-                                         MinWidth="20"
-                                         Margin="0,0,5,5"
-                                         materialDesign:HintAssist.Hint="星期三"
-                                         Style="{StaticResource MaterialDesignFloatingHintTextBox}"
-                                         TextChanged="TextChanged" />
-                                <TextBox x:Name="w4"
-                                         MinWidth="20"
-                                         Margin="0,0,5,5"
-                                         materialDesign:HintAssist.Hint="星期四"
-                                         Style="{StaticResource MaterialDesignFloatingHintTextBox}"
-                                         TextChanged="TextChanged" />
-                                <TextBox x:Name="w5"
-                                         MinWidth="20"
-                                         Margin="0,0,5,5"
-                                         materialDesign:HintAssist.Hint="星期五"
-                                         Style="{StaticResource MaterialDesignFloatingHintTextBox}"
-                                         TextChanged="TextChanged" />
-                                <TextBox x:Name="w6"
-                                         MinWidth="20"
-                                         Margin="0,0,5,5"
-                                         materialDesign:HintAssist.Hint="星期六"
-                                         Style="{StaticResource MaterialDesignFloatingHintTextBox}"
-                                         TextChanged="TextChanged" />
-                                <TextBox x:Name="w7"
-                                         MinWidth="20"
-                                         Margin="0,0,5,5"
-                                         materialDesign:HintAssist.Hint="星期日"
-                                         Style="{StaticResource MaterialDesignFloatingHintTextBox}"
-                                         TextChanged="TextChanged" />
-                            </WrapPanel>
+                            <WrapPanel Name="WeekBox"
+                                       VerticalAlignment="Center"
+                                       Orientation="Vertical"
+                                       Visibility="{Binding ElementName=ann_custom_time_status_checkbox, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
                         </WrapPanel>
                     </WrapPanel>

@@ -8,7 +8,10 @@ using System.Threading.Tasks;
 using System.Threading;
 using Microsoft.Toolkit.Uwp.Notifications;
 using static ArkHelper.ADB;
-using static ArkHelper.Data.scht;
+using Windows.Data.Json;
+using System.Text.Json;
+using System.Collections.Generic;
+using Windows.ApplicationModel.VoiceCommands;
 
 namespace ArkHelper.Pages.OtherList
 {
@@ -17,18 +20,23 @@ namespace ArkHelper.Pages.OtherList
     /// </summary>
     public partial class SCHTRunning : Page
     {
-
         public SCHTRunning()
         {
             InitializeComponent();
         }
 
-        void Akhcmd(string body, string show = "null", int wait = 0, int repeat = 1)
+        #region standard
+        void Akhcmd(ArkHelperDataStandard.AKHcmd akhcmd)
         {
-            var akhcmd = new ArkHelperDataStandard.AKHcmd(body,show,wait,repeat);
             Info(akhcmd.OutputText);
             akhcmd.RunCmd();
         }
+        void Akhcmd(string body, string show = "null", int wait = 0, int repeat = 1)
+        {
+            var akhcmd = new ArkHelperDataStandard.AKHcmd(body, show, wait, repeat);
+            Akhcmd(akhcmd);
+        }
+
         //表达 + Log
         void Info(string content, bool show = true, Output.InfoKind infokind = Output.InfoKind.Infomational)
         {
@@ -51,6 +59,8 @@ namespace ArkHelper.Pages.OtherList
             }
         }
 
+        #endregion
+
         void Page_Loaded(object sender, RoutedEventArgs e)
         {
             //开始工作
@@ -61,134 +71,32 @@ namespace ArkHelper.Pages.OtherList
                 long starttime_sec = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
 
                 //游戏
-                string packname = ArkHelper.PinnedData.Server.dataSheet.Select("id = '" + server.id + "'")[0][3].ToString();
+                string packname = PinnedData.Server.dataSheet.Select("id = '" + App.Data.scht.server.id + "'")[0][3].ToString();
 
                 //周期
-                string week = DateTime.Now.DayOfWeek.ToString();
                 bool AMmode;
                 if (4 < DateTime.Now.Hour && 16 > DateTime.Now.Hour) { AMmode = true; } else { AMmode = false; }
                 //外服适配
                 //EN时差-1（天数），早晚反转
-                if (server.id == "EN") { DateTime.Now.AddDays(-1).DayOfWeek.ToString(); AMmode = !AMmode; }
+                if (App.Data.scht.server.id == "EN") { DateTime.Now.AddDays(-1).DayOfWeek.ToString(); AMmode = !AMmode; }
 
                 //代理指挥位置调整
                 //适用场景 外服开始作战块跟进下沉之前
                 int scht_mb_adjust_check_daili_xy_y1 = 680;
                 int scht_mb_adjust_check_daili_xy_y2 = 684;
-                if (server.id == "CO" || server.id == "CB") { } else { scht_mb_adjust_check_daili_xy_y1 = 669; scht_mb_adjust_check_daili_xy_y2 = 665; }
+                if (App.Data.scht.server.id == "CO" || App.Data.scht.server.id == "CB") { } else { scht_mb_adjust_check_daili_xy_y1 = 669; scht_mb_adjust_check_daili_xy_y2 = 665; }
 
                 //adcmd计算
-                string abx = "null";
-                string unit = "null";
-                string cp = "null";
-                string name = "null";
-                string adcmd1; string adcmd2; string adcmd3; string adcmd4; string adcmd5; string adcmd6; string adcmd7; string adcmd8; string adcmd9; string adcmd10;
-                if (first.unit == "LS") { abx = "L0"; }
-                if (first.unit == "custom") { abx = "custom"; }
-                if (week == "Monday") { if (first.unit == "AP") { abx = "L2"; } if (first.unit == "SK") { abx = "L1"; } if (first.unit == "PR-A") { abx = "R1"; } if (first.unit == "PR-B") { abx = "R2"; } }
-                if (week == "Tuesday") { if (first.unit == "CE") { abx = "L1"; } if (first.unit == "CA") { abx = "L2"; } if (first.unit == "PR-B") { abx = "R1"; } if (first.unit == "PR-D") { abx = "R2"; } }
-                if (week == "Wednesday") { if (first.unit == "SK") { abx = "L1"; } if (first.unit == "CA") { abx = "L2"; } if (first.unit == "PR-C") { abx = "R1"; } if (first.unit == "PR-D") { abx = "R2"; } }
-                if (week == "Thursday") { if (first.unit == "CE") { abx = "L1"; } if (first.unit == "AP") { abx = "L2"; } if (first.unit == "PR-A") { abx = "R1"; } if (first.unit == "PR-C") { abx = "R2"; } }
-                if (week == "Friday") { if (first.unit == "SK") { abx = "L1"; } if (first.unit == "CA") { abx = "L2"; } if (first.unit == "PR-A") { abx = "R1"; } if (first.unit == "PR-B") { abx = "R2"; } }
-                if (week == "Saturday") { if (first.unit == "CE") { abx = "L1"; } if (first.unit == "AP") { abx = "L3"; } if (first.unit == "SK") { abx = "L2"; } if (first.unit == "PR-B") { abx = "R1"; } if (first.unit == "PR-C") { abx = "R2"; } if (first.unit == "PR-D") { abx = "R3"; } }
-                if (week == "Sunday") { if (first.unit == "CE") { abx = "L1"; } if (first.unit == "AP") { abx = "L3"; } if (first.unit == "CA") { abx = "L2"; } if (first.unit == "PR-A") { abx = "R1"; } if (first.unit == "PR-C") { abx = "R2"; } if (first.unit == "PR-D") { abx = "R3"; } }
-                if (abx == "null")
-                {
-                    unit = second.unit;
-                    cp = second.cp;
-                    if (second.unit == "LS") { abx = "L0"; }
-                }
-                else
-                {
-                    unit = first.unit;
-                    cp = first.cp;
-                }
-                if (unit == "custom")
-                {
-                    //
-                    StreamReader ctreader = File.OpenText(cp);
-                    JsonTextReader ctjsonTextReader = new JsonTextReader(ctreader);
-                    JObject ctjsonObject = (JObject)JToken.ReadFrom(ctjsonTextReader);
-                    adcmd1 = ctjsonObject["adcmd1"].ToString(); adcmd2 = ctjsonObject["adcmd2"].ToString(); adcmd3 = ctjsonObject["adcmd3"].ToString(); adcmd4 = ctjsonObject["adcmd4"].ToString(); adcmd5 = ctjsonObject["adcmd5"].ToString(); adcmd6 = ctjsonObject["adcmd6"].ToString(); adcmd7 = ctjsonObject["adcmd7"].ToString(); adcmd8 = ctjsonObject["adcmd8"].ToString(); adcmd9 = ctjsonObject["adcmd9"].ToString(); adcmd10 = ctjsonObject["adcmd10"].ToString();
-                    //timeout1 = Convert.ToInt32(jsonObject["timeout1"].ToString()); timeout2 = Convert.ToInt32(jsonObject["timeout2"].ToString()); timeout3 = Convert.ToInt32(jsonObject["timeout3"].ToString()); timeout4 = Convert.ToInt32(jsonObject["timeout4"].ToString()); timeout5 = Convert.ToInt32(jsonObject["timeout5"].ToString()); timeout6 = Convert.ToInt32(jsonObject["timeout6"].ToString()); timeout7 = Convert.ToInt32(jsonObject["timeout7"].ToString()); timeout8 = Convert.ToInt32(jsonObject["timeout8"].ToString()); timeout9 = Convert.ToInt32(jsonObject["timeout9"].ToString()); timeout10 = Convert.ToInt32(jsonObject["timeout10"].ToString());
-                    name = ctjsonObject["name"].ToString();
-                    ctreader.Close();
-                }
-                else
-                {
-                    name = unit + "-" + cp;
-                    adcmd1 = "zhongduan";
-                    adcmd2 = "ziyuanshouji";
-                    adcmd3 = "null";
-                    if (abx == "L0") { adcmd3 = "721 376"; }
-                    if (abx == "L1") { adcmd3 = "489 376"; }
-                    if (abx == "L2") { adcmd3 = "253 376"; }
-                    if (abx == "L3") { adcmd3 = "48 376"; }
-                    if (abx == "R1") { adcmd3 = "965 376"; }
-                    if (abx == "R2") { adcmd3 = "1183 376"; }
-                    if (abx == "R3") { adcmd3 = "1414 376"; }
-                    adcmd3 = "shell input tap " + adcmd3 + "####2#;";
-                    adcmd4 = "null";
-                    if (unit == "PR-A" || unit == "PR-B" || unit == "PR-C" || unit == "PR-D")
-                    {
-                        if (cp == "1") { adcmd4 = "487 499"; }
-                        else { adcmd4 = "932 293"; }
-                    }
-                    else
-                    {
-                        if (unit == "LS" || unit == "CE")
-                        {
-                            if (cp == "1") { adcmd4 = "249 645"; }
-                            if (cp == "2") { adcmd4 = "545 618"; }
-                            if (cp == "3") { adcmd4 = "785 547"; }
-                            if (cp == "4") { adcmd4 = "980 453"; }
-                            if (cp == "5") { adcmd4 = "1105 326"; }
-                            if (cp == "6") { adcmd4 = "1166 191"; }
-                        }
-                        else
-                        {
-                            if (cp == "1") { adcmd4 = "219 641"; }
-                            if (cp == "2") { adcmd4 = "538 577"; }
-                            if (cp == "3") { adcmd4 = "764 462"; }
-                            if (cp == "4") { adcmd4 = "951 330"; }
-                            if (cp == "5") { adcmd4 = "1054 203"; }
-                        }
-                    }
-                    adcmd4 = "shell input tap " + adcmd4 + "####2#;";
-                    adcmd5 = "null";
-                    adcmd6 = "null";
-                    adcmd7 = "null";
-                    adcmd8 = "null";
-                    adcmd9 = "null";
-                    adcmd10 = "null";
-                }
-                if (adcmd1 == "zhongduan") { adcmd1 = "shell input tap 1090 185 ####2#;"; }
-                if (adcmd1 == "huodongfengmian") { adcmd1 = "shell input tap 1320 158 ####4#;"; }
-                if (adcmd2 == "ziyuanshouji") { adcmd2 = "shell input tap 806 756####1#;"; }
-                if (adcmd2 == "zhutiqu") { adcmd2 = "shell input tap 266 756####1#;"; }
-                if (adcmd2 == "chaqu") { adcmd2 = "shell input tap 447 756####1#;"; }
-                if (adcmd2 == "biezhuan") { adcmd2 = "shell input tap 627 756####1#;"; }
-                if (adcmd3 == "act0") { adcmd3 = "shell input tap 72 151####2#;"; }
-                if (adcmd3 == "act1") { adcmd3 = "shell input tap 72 151####2#; $$$$2$;"; }
-                if (adcmd4 == "jinruhuodong") { adcmd3 = "shell input tap 1304 589####2#;;"; }
-                if (adcmd4 == "actno1") { adcmd4 = "shell input tap 162 461####2#;"; }
-                if (adcmd4 == "actno2") { adcmd4 = "shell input tap 369 756####2#;"; }
-                if (adcmd4 == "actno3") { adcmd4 = "shell input tap 699 756####2#;"; }
-                if (adcmd4 == "actno4") { adcmd4 = "shell input tap 1074 756####2#;"; }
+                var week = DateTime.Now.DayOfWeek;
+
                 //剿灭次数
                 int anntime = 0;
-                if (DateTime.Now.DayOfWeek == DayOfWeek.Monday) { anntime = ann.time.Mon; }
-                if (DateTime.Now.DayOfWeek == DayOfWeek.Tuesday) { anntime = ann.time.Tue; }
-                if (DateTime.Now.DayOfWeek == DayOfWeek.Wednesday) { anntime = ann.time.Wed; }
-                if (DateTime.Now.DayOfWeek == DayOfWeek.Thursday) { anntime = ann.time.Thu; }
-                if (DateTime.Now.DayOfWeek == DayOfWeek.Friday) { anntime = ann.time.Fri; }
-                if (DateTime.Now.DayOfWeek == DayOfWeek.Saturday) { anntime = ann.time.Sat; }
-                if (DateTime.Now.DayOfWeek == DayOfWeek.Sunday) { anntime = ann.time.Sun; }
+                if (App.Data.scht.ann.customTime) anntime = App.Data.scht.ann.time[(int)week -1];
 
                 //输出到log
-                Info("name=" + name + "," + "ann.status=" + ann.status + "," + "ann.select=" + ann.select + "," + "anntime=" + anntime, false);
+                //Info("name=" + name + "," + "ann.status=" + ann.status + "," + "ann.select=" + ann.select + "," + "anntime=" + anntime, false);
 
-                //模拟器未启动则启动它
+                //模拟器未启动则启动
                 Info("/// 正在启动神经网络依托平台...");
                 Process.Start(Address.dataExternal + @"\simulator.lnk");
                 while (ADB.ConnectedInfo == null) Thread.Sleep(2000);
@@ -204,12 +112,12 @@ namespace ArkHelper.Pages.OtherList
 
                 for (; ; )
                 {
-                    if (DateTime.Now.Hour >= 20 || !fcm.status) { break; }
+                    if (DateTime.Now.Hour >= 20 || !App.Data.scht.fcm.status) { break; }
                     Thread.Sleep(2000);
                 }
 
                 Akhcmd("shell input tap 934 220", "/// 指令：START", 9);
-                if (server.id != "CB") { Akhcmd("shell input tap 721 574", "/// 指令：开始唤醒", 15); }
+                if (App.Data.scht.server.id != "CB") { Akhcmd("shell input tap 721 574", "/// 指令：开始唤醒", 15); }
                 Akhcmd("shell input tap 722 719", "/// 指令：收取", 3);
                 Akhcmd("shell input tap 1354 90", "/// 指令：退出签到界面", 3);
                 Akhcmd("shell input tap 1389 64", "/// 指令：关闭公告", 3);
@@ -295,19 +203,19 @@ namespace ArkHelper.Pages.OtherList
                 }
 
                 //剿灭
-                if (ann.status)
+                if (App.Data.scht.ann.status)
                 {
                     Akhcmd("shell input tap 921 214", "/// 指令：终端", 2);
                     Akhcmd("shell input tap 986 754", "/// 指令：常态事务", 2);
                     Akhcmd("shell input tap 706 517", "/// 指令：当期委托", 3);
 
-                    if (ann.select != "TT")
+                    if (App.Data.scht.ann.select != "TT")
                     {
                         Akhcmd("shell input tap 109 51", "/// 指令：返回", 2);
                         Akhcmd("shell input tap 1270 763", "/// 指令：切换", 3);
-                        if (ann.select == "CHNB") { Akhcmd("shell input tap 1009 529", "/// 指令：切尔诺伯格", 3); }
-                        if (ann.select == "LMOB") { Akhcmd("shell input tap 1044 295", "/// 指令：龙门外环", 3); }
-                        if (ann.select == "LMDT") { Akhcmd("shell input tap 1086 417", "/// 指令：龙门市区", 3); }
+                        if (App.Data.scht.ann.select == "CHNB") { Akhcmd("shell input tap 1009 529", "/// 指令：切尔诺伯格", 3); }
+                        if (App.Data.scht.ann.select == "LMOB") { Akhcmd("shell input tap 1044 295", "/// 指令：龙门外环", 3); }
+                        if (App.Data.scht.ann.select == "LMDT") { Akhcmd("shell input tap 1086 417", "/// 指令：龙门市区", 3); }
                     }
 
                     for (int i = 0; i < anntime; i++)
@@ -372,17 +280,63 @@ namespace ArkHelper.Pages.OtherList
                     Akhcmd("shell input tap 103 305", "/// 指令：首页", 3);
                 }
 
-                //打仗
-                Akhcmd(adcmd1);
-                Akhcmd(adcmd2);
-                Akhcmd(adcmd3);
-                Akhcmd(adcmd4);
-                Akhcmd(adcmd5);
-                Akhcmd(adcmd6);
-                Akhcmd(adcmd7);
-                Akhcmd(adcmd8);
-                Akhcmd(adcmd9);
-                Akhcmd(adcmd10);
+                //准备作战 //fu关卡
+                //first
+                if (App.Data.scht.first.unit != "custom")
+                {
+                    new ArkHelperDataStandard.AKHcmd("zhongduan").RunCmd();
+                    new ArkHelperDataStandard.AKHcmd("ziyuanshouji").RunCmd();
+
+                    if (App.Data.scht.first.unit == "LS")
+                    {
+                        ADB.Tap(717, 374);
+                        goto OKToBattle;
+                    }
+                    else
+                    {
+                        if (App.Data.scht.first.unit.Contains("-"))
+                        {
+                            //左滑找PR
+                            ADB.Swipe(1404, 591, 0, 591);
+                        }
+                        else
+                        {
+                            //右滑找本
+                            ADB.Swipe(0, 591, 1404, 591);
+                        }
+                        using (var _screenshot = new ADB.Screenshot())
+                        {
+                            var _point = _screenshot.PicToPoint(Address.res + "\\pic\\battle\\" + App.Data.scht.first.unit + ".png");
+                            if (_point.Count != 0)
+                            {
+                                ADB.Tap(_point[0]);
+                                goto OKToBattle;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    //custom
+                }
+                //second
+                if (App.Data.scht.second.unit != "custom")
+                {
+                    new ArkHelperDataStandard.AKHcmd("zhongduan_menu_zhongduan").RunCmd();
+                    new ArkHelperDataStandard.AKHcmd("ziyuanshouji").RunCmd();
+                    if (App.Data.scht.second.unit == "LS")
+                    {
+                        ADB.Tap(717, 374);
+                        goto OKToBattle;
+                    }
+                }
+                else
+                {
+                    new ArkHelperDataStandard.AKHcmd("menu").RunCmd();
+                    new ArkHelperDataStandard.AKHcmd("menu_home").RunCmd();
+                    //custom
+                }
+            OKToBattle:;
 
                 if (PictureProcess.ColorCheck(1200, scht_mb_adjust_check_daili_xy_y1, "#FFFFFF", 1196, scht_mb_adjust_check_daili_xy_y2, "#FFFFFF")) { }
                 else //检测代理指挥是否已经勾选，否则勾选
@@ -391,7 +345,7 @@ namespace ArkHelper.Pages.OtherList
                 }
                 for (; ; )
                 {
-                    if (fcm.status && Convert.ToInt32(DateTime.Now.Minute) > 56) { break; }
+                    if (App.Data.scht.fcm.status && Convert.ToInt32(DateTime.Now.Minute) > 56) { break; }
                     Akhcmd(@"shell input tap 1266 753", "/// 指令：开始行动", 1);//开始作战
 
                     if (PictureProcess.ColorCheck(1241, 449, "#313131", 859, 646, "#313131"))
@@ -427,17 +381,17 @@ namespace ArkHelper.Pages.OtherList
                 Akhcmd("shell input tap 908 676", "/// 指令：任务", 2);
                 Akhcmd("shell input tap 767 41", "/// 指令：日常任务", 3);
                 Akhcmd("shell input tap 1246 168", "/// 指令：收集", 2, 3);
-                if (week == "Sunday")
+                if (week == DayOfWeek.Sunday)
                 {
                     Akhcmd("shell input tap 1051 51", "/// 指令：周常任务", 3);
                     Akhcmd("shell input tap 1246 168", "/// 指令：收集", 2, 3);
                 }
                 Akhcmd("shell input tap 109 51", "/// 指令：返回", 2);
                 GetScreenshot(Address.Screenshot.SCHT, ArkHelperDataStandard.Screenshot);
-                WithSystem.Cmd(@"start " + Address.cmd + @" /k ""taskkill /f /t /im " + ConnectedInfo.IM + @" & exit""");
+                WithSystem.KillSimulator();
                 Info("/// 正在关闭模拟器...");
                 Info("/// 系统任务运行完毕。正在终止...");
-                new ToastContentBuilder().AddArgument("kind","SCHT").AddText("提示：定时事项处理指挥器任务已结束").AddText("开始时间：" + starttime + "\n" + "结束时间：" + DateTime.Now.ToString("g") + "\n" + "即将关闭运行终端...").Show(); //结束通知
+                new ToastContentBuilder().AddArgument("kind", "SCHT").AddText("提示：定时事项处理指挥器任务已结束").AddText("开始时间：" + starttime + "\n" + "结束时间：" + DateTime.Now.ToString("g") + "\n" + "即将关闭运行终端...").Show(); //结束通知
                 Thread.Sleep(2000);
                 Application.Current.Dispatcher.Invoke(() => App.ExitApp());
             });
