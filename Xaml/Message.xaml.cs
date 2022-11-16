@@ -560,6 +560,16 @@ namespace ArkHelper.Pages
                     Margin = new Thickness(0, 5, 0, 0),
                     HorizontalAlignment = HorizontalAlignment.Left
                 };
+
+                if(_message.Medias.Count > 3)
+                {
+                    imageWrapPanel.MaxWidth = 315;
+                }
+                else
+                {
+                    imageWrapPanel.MaxWidth = 470;
+                }
+
                 foreach (var media in _message.Medias)
                 {
                     Image image = new Image()
@@ -569,30 +579,33 @@ namespace ArkHelper.Pages
                         Cursor = System.Windows.Input.Cursors.Hand,
                     };
 
+                    bool isUsingBigImage = false;
                     var bitimg = GetBitmapImage(media.Small);
-                    if (_message.Medias.Count == 1 && media.Type != ArkHelperMessage.Media.MediaType.video)
+
+                    if (media.Type == ArkHelperMessage.Media.MediaType.video)
                     {
-                        var _bitimg = GetBitmapImage(media.Link);
-                        if (_bitimg.Height <= _bitimg.Width)
-                        {
-                            bitimg = _bitimg;
-                            if (_bitimg.Height == _bitimg.Width)
-                            {
-                                image.MaxWidth = 300;
-                                imageWrapPanel.MaxWidth = 450;
-                            }
-                        }
-                        else
-                        {
-                            imageWrapPanel.MaxWidth = 315;
-                            image.Height = image.Width = 100;
-                        }
-                            
+                        isUsingBigImage = true;
                     }
                     else
                     {
-                        imageWrapPanel.MaxWidth = 315;
-                        image.Height = image.Width = 100;
+                        if (_message.Medias.Count == 1)
+                        {
+                            var _bitimg = GetBitmapImage(media.Link);
+                            if (_bitimg.Height <= _bitimg.Width)
+                            {
+                                bitimg = _bitimg;
+                                isUsingBigImage = true;
+                                if (_bitimg.Height == _bitimg.Width)
+                                {
+                                    image.MaxWidth = 300;
+                                }
+                            }
+                        }
+                    }
+
+                    if (!isUsingBigImage)
+                    {
+                        image.Width = image.Height = 100;
                     }
 
                     image.Source = bitimg;
