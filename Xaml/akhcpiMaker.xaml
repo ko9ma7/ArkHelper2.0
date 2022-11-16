@@ -11,15 +11,65 @@
         Height="555"
         mc:Ignorable="d">
     <Grid>
-        <Button Margin="0,0,50,50"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Bottom"
-                Background="{DynamicResource MaterialDesignTextFieldBoxBackground}"
-                Style="{StaticResource MaterialDesignIconButton}">
-            <materialDesign:PackIcon Kind="ContentSave" />
-        </Button>
-        <StackPanel Margin="10,0,10,0">
-            <akhc:Title Icon="Edit" Text="自定义作战方案生成器" />
-        </StackPanel>
+        <ScrollViewer MinHeight="300">
+            <StackPanel Margin="10,0,10,0" Orientation="Vertical">
+                <akhc:Title Icon="Edit" Text="自定义作战方案生成器" />
+                <WrapPanel HorizontalAlignment="Center" Orientation="Vertical">
+                    
+                    <materialDesign:Card Margin="0,0,0,10"
+                                         Padding="30,10,30,10"
+                                         UniformCornerRadius="6">
+                        <WrapPanel>
+                            <WrapPanel VerticalAlignment="Center" Orientation="Vertical">
+                                <TextBlock Margin="0,0,0,5" FontSize="{StaticResource h3}">第1条指令</TextBlock>
+                                <ComboBox Width="200" Style="{StaticResource MaterialDesignFilledComboBox}" />
+                                <WrapPanel Margin="0,-10,0,0">
+                                    <TextBox Width="60"
+                                             Margin="0,10,10,10"
+                                             materialDesign:HintAssist.Hint="X坐标"
+                                             Style="{StaticResource MaterialDesignFloatingHintTextBox}" />
+                                    <TextBox Width="60"
+                                             Margin="0,10,10,10"
+                                             materialDesign:HintAssist.Hint="Y坐标"
+                                             Style="{StaticResource MaterialDesignFloatingHintTextBox}" />
+                                </WrapPanel>
+                            </WrapPanel>
+                            <WrapPanel Margin="30,0,0,0"
+                                       VerticalAlignment="Center"
+                                       Orientation="Vertical">
+                                <Button Margin="0,0,0,5" Style="{StaticResource MaterialDesignOutlinedButton}">× 删除</Button>
+                                <Button Margin="0,5,0,5" Style="{StaticResource MaterialDesignOutlinedButton}">↑ 上移</Button>
+                                <Button Margin="0,5,0,0" Style="{StaticResource MaterialDesignOutlinedButton}">↓ 下移</Button>
+                            </WrapPanel>
+                        </WrapPanel>
+                    </materialDesign:Card>
+                    
+                </WrapPanel>
+
+
+            </StackPanel>
+        </ScrollViewer>
+        <WrapPanel Margin="0,0,50,50"
+                   HorizontalAlignment="Right"
+                   VerticalAlignment="Bottom"
+                   Orientation="Vertical">
+            <Button Margin="0,0,0,10"
+                    Background="{DynamicResource MaterialDesignTextFieldBoxBackground}"
+                    Style="{StaticResource MaterialDesignIconButton}"
+                    ToolTip="新增">
+                <materialDesign:PackIcon Kind="Add" />
+            </Button>
+            <Button Margin="0,0,0,10"
+                    Background="{DynamicResource MaterialDesignTextFieldBoxBackground}"
+                    Style="{StaticResource MaterialDesignIconButton}"
+                    ToolTip="清空">
+                <materialDesign:PackIcon Kind="Delete" />
+            </Button>
+            <Button Background="{DynamicResource MaterialDesignTextFieldBoxBackground}"
+                    Style="{StaticResource MaterialDesignIconButton}"
+                    ToolTip="保存并退出">
+                <materialDesign:PackIcon Kind="ContentSave" />
+            </Button>
+        </WrapPanel>
     </Grid>
 </Window>

@@ -32,7 +32,7 @@
                                     CornerRadius="5"
                                     Visibility="Visible" />
                             <Border x:Name="A"
-                                    BorderBrush="#3f76b2"
+                                    BorderBrush="#DE3f76b2"
                                     BorderThickness="2"
                                     CornerRadius="4"
                                     Visibility="Collapsed" />
@@ -41,7 +41,7 @@
                                        FontSize="15"
                                        Text="{TemplateBinding ContentStringFormat}">
                                 <TextBlock.Foreground>
-                                    <SolidColorBrush Opacity="0.9" Color="Black" />
+                                    <SolidColorBrush Opacity="0.85" Color="#EE000000" />
                                 </TextBlock.Foreground>
                             </TextBlock>
                         </Grid>
@@ -217,7 +217,7 @@
                                      Checked="First_Unit_Selected"
                                      Style="{DynamicResource cpbtn}">
                             <RadioButton.Background>
-                                <SolidColorBrush Color="LightGray" />
+                                <SolidColorBrush Color="#DDDDDD" />
                             </RadioButton.Background>
                             <RadioButton.ContentStringFormat>
                                 自定义
@@ -231,7 +231,7 @@
                             Grid.Column="0"
                             Orientation="Vertical"
                             Style="{StaticResource title}">
-                    <akhc:Break />
+
                     <TextBlock FontSize="{StaticResource h1}" Text="备选单元" />
                     <materialDesign:PackIcon Style="{DynamicResource help}" ToolTip="[作战单元]中指定的单元不总是开放。在这里指定的关卡会成为其不开放时的备选方案。" />
                 </StackPanel>
@@ -241,7 +241,7 @@
                             Orientation="Vertical"
                             Style="{StaticResource title}"
                             Visibility="{Binding ElementName=second_unit, Path=Visibility}">
-                    <akhc:Break />
+
                     <WrapPanel Margin="0,7,0,-10">
                         <RadioButton x:Name="LSSecond"
                                      Checked="Second_Unit_Selected"
@@ -256,7 +256,7 @@
                                      Checked="Second_Unit_Selected"
                                      Style="{DynamicResource cpbtn}">
                             <RadioButton.Background>
-                                <SolidColorBrush Color="LightGray" />
+                                <SolidColorBrush Color="#DDDDDD" />
                             </RadioButton.Background>
                             <RadioButton.ContentStringFormat>
                                 自定义
@@ -322,7 +322,7 @@
                                          Checked="ann_Selected"
                                          Style="{DynamicResource cpbtn}">
                                 <RadioButton.Background>
-                                    <SolidColorBrush Color="LightGray" />
+                                    <SolidColorBrush Color="#DDDDDD" />
                                 </RadioButton.Background>
                                 <RadioButton.ContentStringFormat>
                                     当期委托
@@ -393,6 +393,26 @@
                                   HorizontalAlignment="Left"
                                   Click="fcm_status_togglebutton_Click"
                                   Style="{StaticResource MaterialDesignSwitchToggleButton}" />
+                </StackPanel>
+
+                <StackPanel Grid.Row="8"
+                            Grid.Column="0"
+                            Orientation="Vertical"
+                            Style="{StaticResource title}">
+                    <akhc:Break />
+                    <TextBlock FontSize="{StaticResource h1}">自定义</TextBlock>
+                </StackPanel>
+                <StackPanel Grid.Row="8"
+                            Grid.Column="1"
+                            Style="{StaticResource title}">
+                    <akhc:Break />
+                    <Button Width="172"
+                            Margin="0,3,0,0"
+                            HorizontalAlignment="Left"
+                            Click="Button_Click"
+                            Style="{StaticResource MaterialDesignOutlinedButton}">
+                        自定义作战方案生成器
+                    </Button>
                 </StackPanel>
 
             </Grid>

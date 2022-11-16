@@ -91,7 +91,29 @@ namespace ArkHelper.Pages.OtherList
 
                 //剿灭次数
                 int anntime = 0;
-                if (App.Data.scht.ann.customTime) anntime = App.Data.scht.ann.time[(int)week -1];
+
+                anntime = 1; //normal
+
+                if (App.Data.scht.fcm.status)
+                {
+                    switch ((int)week)
+                    {
+                        case 5:
+                        case 6:
+                            anntime = 2;
+                            break;
+                        case 0:
+                            anntime = 1;
+                            break;
+                    }
+                }//fcm
+
+                if (App.Data.scht.ann.customTime)
+                {
+                    var _wek = (int)week - 1;
+                    if (_wek < 0) { _wek += 7; }
+                    anntime = App.Data.scht.ann.time[_wek];
+                }//custom
 
                 //输出到log
                 //Info("name=" + name + "," + "ann.status=" + ann.status + "," + "ann.select=" + ann.select + "," + "anntime=" + anntime, false);
@@ -281,6 +303,33 @@ namespace ArkHelper.Pages.OtherList
                 }
 
                 //准备作战 //fu关卡
+                void TouchCp()
+                {
+                    using (var _screenshot = new ADB.Screenshot())
+                    {
+                        var _point = _screenshot.PicToPoint(Address.res + "\\pic\\battle\\" + "threeStarCp" + ".png");
+                        if (_point.Count != 0)
+                        {
+                            System.Drawing.Point point1 = new System.Drawing.Point(0, 10000);
+                            foreach (var point in _point)
+                            {
+                                if (point.Y < point1.Y) point1 = point;
+                            }
+
+                            ADB.Tap(point1);
+                        }
+                    }
+                }
+                void GetCustomCp(string _unit)
+                {
+                    var akhcpiaddress = _unit.Replace("custom:", "");
+                    var json = JsonSerializer.Deserialize<JsonElement>(File.ReadAllText(akhcpiaddress));
+                    var akhcmds = json.GetProperty("akhcmd").EnumerateArray();
+                    foreach (var akhcmd in akhcmds)
+                    {
+                        Akhcmd(akhcmd.GetString());
+                    }
+                }
                 //first
                 if (App.Data.scht.first.unit != "custom")
                 {
@@ -290,7 +339,7 @@ namespace ArkHelper.Pages.OtherList
                     if (App.Data.scht.first.unit == "LS")
                     {
                         ADB.Tap(717, 374);
-                        goto OKToBattle;
+                        goto NativeUnitInited;
                     }
                     else
                     {
@@ -309,15 +358,32 @@ namespace ArkHelper.Pages.OtherList
                             var _point = _screenshot.PicToPoint(Address.res + "\\pic\\battle\\" + App.Data.scht.first.unit + ".png");
                             if (_point.Count != 0)
                             {
-                                ADB.Tap(_point[0]);
-                                goto OKToBattle;
+                                var allowEnter = true;
+                                using (var _screenshot2 = new ADB.Screenshot())
+                                {
+                                    var point2 = _screenshot2.PicToPoint(Address.res + "\\pic\\battle\\cannotEnter.png");
+                                    foreach (var point in point2)
+                                    {
+                                        if (Math.Abs(point.X - _point[0].X) < 100)
+                                        {
+                                            allowEnter = false;
+                                        }
+                                    }
+                                }
+                                if (allowEnter)
+                                {
+                                    ADB.Tap(_point[0]);
+                                    goto NativeUnitInited;
+                                }
+                                    
                             }
                         }
                     }
                 }
                 else
                 {
-                    //custom
+                    GetCustomCp(App.Data.scht.first.unit);
+                    goto UnitInited;
                 }
                 //second
                 if (App.Data.scht.second.unit != "custom")
@@ -327,16 +393,19 @@ namespace ArkHelper.Pages.OtherList
                     if (App.Data.scht.second.unit == "LS")
                     {
                         ADB.Tap(717, 374);
-                        goto OKToBattle;
+                        goto NativeUnitInited;
                     }
                 }
                 else
                 {
                     new ArkHelperDataStandard.AKHcmd("menu").RunCmd();
                     new ArkHelperDataStandard.AKHcmd("menu_home").RunCmd();
-                    //custom
+                    GetCustomCp(App.Data.scht.second.unit);
+                    goto UnitInited;
                 }
-            OKToBattle:;
+            NativeUnitInited:;
+                TouchCp();
+            UnitInited:;
 
                 if (PictureProcess.ColorCheck(1200, scht_mb_adjust_check_daili_xy_y1, "#FFFFFF", 1196, scht_mb_adjust_check_daili_xy_y2, "#FFFFFF")) { }
                 else //检测代理指挥是否已经勾选，否则勾选

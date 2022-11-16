@@ -12,21 +12,17 @@
       d:DesignWidth="652"
       Loaded="Page_Loaded"
       mc:Ignorable="d">
-
     <Grid>
+        <ScrollViewer VerticalScrollBarVisibility="Visible">
 
 
-        <StackPanel Orientation="Vertical">
-            <!--  标题  -->
-            <akhc:Title Icon="ThermostatAuto" Text="RHODES ISLAND™ 定时事项处理指挥器" />
-            <!--  运行列表  -->
             <StackPanel Orientation="Vertical">
-                <TextBlock FontSize="{StaticResource h1}" Text="SCHT正在运行中" />
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <ListBox x:Name="loglist" />
-                </ScrollViewer>
+                <!--  标题  -->
+                <akhc:Title Icon="ThermostatAuto" Text="RHODES ISLAND™ 定时事项处理指挥器运行中" />
+                <!--  运行列表  -->
+                <ListBox x:Name="loglist" />
             </StackPanel>
-        </StackPanel>
+        </ScrollViewer>
         <ProgressBar Margin="0,0,50,50"
                      HorizontalAlignment="Right"
                      VerticalAlignment="Bottom"

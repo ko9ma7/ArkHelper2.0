@@ -125,11 +125,11 @@ namespace ArkHelper
         /// </summary>
         public class AKHcmd
         {
-            private string ADBcmd { get; set; } = null;
+            public string ADBcmd { get; set; } = null;
             private string Discribe { get; set; } = "";
             public string OutputText { get; } = "";
-            private int WaitTime { get; set; } = 0;
-            private int ForTimes { get; set; } = 0;
+            public int WaitTime { get; set; } = 0;
+            public int ForTimes { get; set; } = 0;
 
             public AKHcmd(string body, string outputText = "", int waitTime = 0, int forTimes = 1)
             {
@@ -161,12 +161,6 @@ namespace ArkHelper
                 }
             }
 
-        }
-
-        public class AKHcpi
-        {
-            public string name { get; set; } = "null";
-            public List<AKHcmd> adcmd { get; set; } = new List<AKHcmd>();
         }
 
         #region 配置数据

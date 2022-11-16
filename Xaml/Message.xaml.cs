@@ -8,6 +8,7 @@ using System.IO;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -25,85 +26,7 @@ namespace ArkHelper.Pages
     /// </summary>
     public partial class Message : Page
     {
-        public int AlreadyInitedCards = 0;
-        public List<DateTime> DTList = new List<DateTime>();
-        public List<ArkHelperMessage> Messages = new List<ArkHelperMessage>();
-        public Message()
-        {
-            InitializeComponent();
-            InitFromBlank();
-        }
-
-        private void InitFromBlank()
-        {
-            Task.Run(() =>
-            {
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    pgb.Visibility = Visibility.Visible;
-                    MessageListDock.Children.Clear();
-                    UserListXaml.Children.Clear();
-                });
-                while (!App.isMessageInited)
-                {
-                    Thread.Sleep(2000);
-                }
-                foreach (ArkHelperMessage akms in App.messages)
-                {
-                    Messages.Add(akms);
-                }
-                Messages.Sort();
-
-                Thread.Sleep(300);
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    pgb.IsIndeterminate = false;
-                    InitCard(3);
-                    pgb.Visibility = Visibility.Collapsed;
-                });
-            });
-        }
-        private void InitCard(int num = 3)
-        {
-            for (int i = 0; i < num; i++)
-            {
-                //pgb.Value = i / num;
-                if (AlreadyInitedCards >= Messages.Count) break;
-                ArkHelperMessage message = Messages[AlreadyInitedCards];
-                var messageCard = MakeMessageCard(message);
-
-                DockPanel.SetDock(messageCard, Dock.Top);
-                MessageListDock.Children.Add(messageCard);
-
-                bool _exist = false;
-                foreach (DateTime dt in DTList)
-                {
-                    if (dt.Day == message.CreateAt.Day && dt.Month == message.CreateAt.Month)
-                    {
-                        _exist = true;
-                        break;
-                    }
-                }
-
-                if (!_exist)
-                {
-                    DTList.Add(message.CreateAt);
-                    RadioButton radioButton = new RadioButton
-                    {
-                        Width = 220,
-                        Tag = messageCard,
-                        ContentStringFormat = message.CreateAt.Month + "月" + message.CreateAt.Day + "日",
-                        Style = (System.Windows.Style)FindResource("RadioButtonDock")
-                    };
-                    radioButton.Click += Btn_Click;
-                    if (AlreadyInitedCards == 0) { radioButton.IsChecked = true; };
-                    UserListXaml.Children.Add(radioButton);
-                }
-                AlreadyInitedCards++;
-            }
-        }
-
-        #region 模板
+        #region class
         public class User
         {
             public string ID { get; set; }
@@ -236,9 +159,8 @@ namespace ArkHelper.Pages
             {
                 if (null == other)
                 {
-                    return 1;//空值比较大，返回1
+                    return 1;
                 }
-                //return this.Id.CompareTo(other.Id);//升序
                 return other.CreateAt.CompareTo(this.CreateAt);//降序
             }
 
@@ -252,7 +174,9 @@ namespace ArkHelper.Pages
                 if (source == ArkHelperDataStandard.MessageSource.weibo)
                 {
                     var json = (JsonElement)content;
-                    if (json.GetProperty("isLongText").GetBoolean())
+                    if (json.GetProperty("isLongText").GetBoolean()
+                        //||true
+                        )
                     {
                         string response;
                     start:;
@@ -275,19 +199,17 @@ namespace ArkHelper.Pages
                         json = JsonSerializer.Deserialize<JsonElement>(response).GetProperty("status");
                     }
                     //解析作者
-                    var _au = json.GetProperty("user");
-                    var _aua = _au.GetProperty("id");
-                    var _aub = _aua.GetDouble();
+                    var userID = json.GetProperty("user").GetProperty("id").GetDouble();
                     foreach (User user in App.UserList)
                     {
-                        if (_aub.ToString() == user.UID)
+                        if (userID.ToString() == user.UID)
                         {
                             User = user;
-                            goto auend;
+                            goto userFindEnd;
                         }
                     }
-                    User = new User(source, _aub.ToString());
-                auend:;
+                    User = new User(source, userID.ToString());
+                userFindEnd:;
                     //解析时间
                     CultureInfo cultureInfo = CultureInfo.CreateSpecificCulture("en-US");
                     CreateAt = DateTime.ParseExact(json.GetProperty("created_at").GetString(), "ddd MMM d HH:mm:ss zz00 yyyy", cultureInfo);
@@ -297,28 +219,21 @@ namespace ArkHelper.Pages
                     //获取文字
                     Text = json.GetProperty("text").GetString();
 
-                    var links = new List<string>();
+                    //链接
                     while (Text.Contains(@"href="""))
                     {
-                        int _herfadd = Text.IndexOf(@"href=""");
-                        string _html = Text.Substring(_herfadd + 6, Text.IndexOf(@"""", _herfadd + 10) - _herfadd - 6);
+                        int _herfAddress = Text.IndexOf(@"href=""");
+                        string link = Text.Substring(_herfAddress + 6, Text.IndexOf(@"""", _herfAddress + 10) - _herfAddress - 6);
 
-                        links.Add(_html);
-                        Text = Text.Replace(@"href=""" + _html + @"""", "");
-                    }
-                    foreach (var a in links)
-                    {
-                        if (a.Contains(@"m.weibo.cn/p")
-                            || a.Contains(@"m.weibo.cn/search"))
+                        if (!link.Contains(@"m.weibo.cn/p")
+                            && !link.Contains(@"m.weibo.cn/search"))
                         {
+                            var _decodeResult = HttpUtility.UrlDecode(link.Replace("https://weibo.cn/sinaurl?u=", ""));
+                            Links.Add(_decodeResult);
+                        }
+                        Text = Text.Replace(@"href=""" + link + @"""", "");
+                    }
 
-                        }
-                        else
-                        {
-                            var ab = a.Replace("https://weibo.cn/sinaurl?u=", "").Replace("%3A", ":").Replace("%2F", "/");
-                            Links.Add(ab);
-                        }
-                    }
                     //文字处理（html转段落）//future解决误杀正常文字
                     while (Text.Contains("<") && Text.Contains(">"))
                     {
@@ -330,7 +245,8 @@ namespace ArkHelper.Pages
                         }
                         catch { }
                     }
-                    Text = Text.Replace("&lt;", "<").Replace("&gt;", ">").Replace("&quot;", @"""").Replace("&amp;", "&");//从html反转义 // future
+                    Text = System.Net.WebUtility.HtmlDecode(Text);//从html反转义
+
                     //转发状态
                     if (json.TryGetProperty("retweeted_status", out var _ret))
                     {
@@ -346,6 +262,7 @@ namespace ArkHelper.Pages
                         Repost = new ArkHelperMessage(ArkHelperDataStandard.MessageSource.weibo, _ret);
                     repend:;
                     }
+
                     //图片/视频获取
                     if (json.TryGetProperty("pics", out var _pics))
                     {
@@ -398,7 +315,6 @@ namespace ArkHelper.Pages
                             }
                         }
                     }
-                    goto end;
                 }
                 if (source == ArkHelperDataStandard.MessageSource.official_communication)
                 {
@@ -425,209 +341,277 @@ namespace ArkHelper.Pages
                     CreateAt = new DateTime(_dt.Year, _dt.Month, _dt.Day, 16, 0, 0);
 
                     Text = "第" + num + "期制作组通讯已经发布。";
-
-                    goto end;
                 }
 
-            end:;
                 //处理图片确定缩略图
-                foreach (Media media1 in Medias)
+                foreach (Media media in Medias)
                 {
-                    switch (media1.Type)
+                    //视频缩略图即为封面图
+                    if (media.Type == Media.MediaType.video)
                     {
-                        //视频缩略图即为封面图
-                        case Media.MediaType.video:
-                            string filename0 = media1.Small.Substring(media1.Small.LastIndexOf(@"/") + 1);
+                        string filename = media.Small.Substring(media.Small.LastIndexOf(@"/") + 1);
 
-                            string smallfile0 = Address.Cache.message + "\\" + "small_" + filename0;
-                            if (!File.Exists(smallfile0))
-                            {
-                                WithNet.DownloadFile(media1.Small, smallfile0);
-                            }
-                            media1.Small = smallfile0;
-
-                            break;
-
-                        //图片缩略图
-                        case Media.MediaType.photo:
-                            string filename1 = media1.Link.Substring(media1.Link.LastIndexOf(@"/") + 1);
-
-                            string file1 = Address.Cache.message + "\\" + filename1;
-                            if (!File.Exists(file1))
-                            {
-                                WithNet.DownloadFile(media1.Link, file1);
-                            }
-                            media1.Link = file1;
-
-                            string smallfile1 = Address.Cache.message + "\\" + "small_" + filename1;
-                            if (!File.Exists(smallfile1))
-                            {
-                                CreateViewPic(file1, smallfile1);
-                            }
-                            bool _longpic = (media1.Height > 400 && media1.Width < media1.Height);
-                            media1.Small = (Medias.Count == 1 && !_longpic) ? file1 : smallfile1;
-
-                            break;
+                        string smallfile = Address.Cache.message + "\\" + "small_" + filename;
+                        if (!File.Exists(smallfile))
+                        {
+                            WithNet.DownloadFile(media.Small, smallfile);
+                        }
+                        media.Small = smallfile;
                     }
-                }
-                void CreateViewPic(string inputAddress, string outputAddress)
-                {
-                    //制作缩略图
-                    int size = 200;
-                    Bitmap input = new Bitmap(inputAddress);
-                    var output = new Bitmap(size, size);
 
-                    int a = input.Width > input.Height ? input.Height : input.Width;
-                    var area = input.Width > input.Height ?
-                        new Rectangle((input.Width - a) / 2, 0, a, a)
-                        : new Rectangle(0, (input.Height - a) / 2, a, a);
-                    using (Graphics g = Graphics.FromImage(output))
+                    //图片缩略图判断
+                    if (media.Type == Media.MediaType.photo)
                     {
-                        g.DrawImage(input, new Rectangle(0, 0, size, size),
-                              area,
-                              GraphicsUnit.Pixel);
-                    };
-                    output.Save(outputAddress);
+                        string filename = media.Link.Substring(media.Link.LastIndexOf(@"/") + 1);
 
-                    input.Dispose();
-                    output.Dispose();
-                    WithSystem.GarbageCollect();
+                        string file = Address.Cache.message + "\\" + filename;
+                        if (!File.Exists(file))
+                        {
+                            WithNet.DownloadFile(media.Link, file);
+                        }
+                        media.Link = file;
+
+                        string smallfile = Address.Cache.message + "\\" + "small_" + filename;
+                        if (!File.Exists(smallfile))
+                        {
+                            CreateViewPic(file, smallfile);
+                        }
+                        media.Small = smallfile;
+                    }
+
+                    //制作缩略图
+                    void CreateViewPic(string inputAddress, string outputAddress)
+                    {
+                        int size = 200;
+                        using (Bitmap input = new Bitmap(inputAddress))
+                        using (Bitmap output = new Bitmap(size, size))
+                        {
+                            int a = input.Width > input.Height ? input.Height : input.Width;
+                            var area = input.Width > input.Height ?
+                                new Rectangle((input.Width - a) / 2, 0, a, a)
+                                : new Rectangle(0, (input.Height - a) / 2, a, a);
+                            using (Graphics g = Graphics.FromImage(output))
+                            {
+                                g.DrawImage(input, new Rectangle(0, 0, size, size),
+                                      area,
+                                      GraphicsUnit.Pixel);
+                            };
+                            output.Save(outputAddress);
+                        }
+                        WithSystem.GarbageCollect();
+                    }
                 }
             }
             public ArkHelperMessage() { }
         }
         #endregion
 
+        public int AlreadyInitedCards = 0;
+        public List<DateTime> DTList = new List<DateTime>();
+        public List<ArkHelperMessage> Messages = new List<ArkHelperMessage>();
+
+        public Message()
+        {
+            InitializeComponent();
+            InitFromBlank();
+        }
+        private void InitFromBlank()
+        {
+            Task.Run(() =>
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    pgb.Visibility = Visibility.Visible;
+                    MessageListDock.Children.Clear();
+                    UserListXaml.Children.Clear();
+                });
+                while (!App.isMessageInited)
+                {
+                    Thread.Sleep(2000);
+                }
+                foreach (ArkHelperMessage akms in App.messages)
+                {
+                    Messages.Add(akms);
+                }
+                Messages.Sort();
+
+                Thread.Sleep(300);
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    pgb.IsIndeterminate = false;
+                    InitCard(3);
+                    pgb.Visibility = Visibility.Collapsed;
+                });
+            });
+        }
+        private void InitCard(int num = 3)
+        {
+            for (int i = 0; i < num; i++)
+            {
+                //pgb.Value = i / num;
+                if (AlreadyInitedCards >= Messages.Count) break;
+                ArkHelperMessage message = Messages[AlreadyInitedCards];
+                var messageCard = MakeMessageCard(message);
+
+                DockPanel.SetDock(messageCard, Dock.Top);
+                MessageListDock.Children.Add(messageCard);
+
+                bool _exist = false;
+                foreach (DateTime dt in DTList)
+                {
+                    if (dt.Day == message.CreateAt.Day && dt.Month == message.CreateAt.Month)
+                    {
+                        _exist = true;
+                        break;
+                    }
+                }
+
+                if (!_exist)
+                {
+                    DTList.Add(message.CreateAt);
+                    RadioButton radioButton = new RadioButton
+                    {
+                        Width = 220,
+                        Tag = messageCard,
+                        ContentStringFormat = message.CreateAt.Month + "月" + message.CreateAt.Day + "日",
+                        Style = (System.Windows.Style)FindResource("RadioButtonDock")
+                    };
+                    radioButton.Click += Btn_Click;
+                    if (AlreadyInitedCards == 0) { radioButton.IsChecked = true; };
+                    UserListXaml.Children.Add(radioButton);
+                }
+                AlreadyInitedCards++;
+            }
+        }
         /// <summary>
-        /// 构建message卡片
+        /// 构建卡片
         /// </summary>
         /// <param name="message"></param>
         Border MakeMessageCard(ArkHelperMessage message)
         {
             StackPanel CreateMessageWppel(ArkHelperMessage _message)
             {
+                //用户头像
+                var userAvatar = GetUserAvatar(_message.User);
+
+                //链接
+                var _linkListBox = new ListBox();
+                foreach (string link in _message.Links)
+                {
+                    var linkListBoxItem = new ListBoxItem()
+                    {
+                        Content = link,
+                        Tag = link
+                    };
+                    linkListBoxItem.MouseLeftButtonUp += LinkShow;
+                    _linkListBox.Items.Add(linkListBoxItem);
+                }
+                var linkBox = new MaterialDesignThemes.Wpf.PopupBox
+                {
+                    Width = 40,
+                    Height = 40,
+                    HorizontalAlignment = HorizontalAlignment.Right,
+                    StaysOpen = false,
+                    PopupContent = _linkListBox
+                };
+                if (_message.Links.Count == 0) linkBox.Visibility = Visibility.Collapsed;
+
+                //标头
+                var head = new Grid()
+                {
+                    Children =
+                    {
+                        linkBox,
+                        new WrapPanel()
+                        {
+                            Children =
+                            {
+                                //用户头像
+                                userAvatar,
+                                //标头文字
+                                new TextBlock()
+                                {
+                                    Margin = new Thickness(10,0,0,0),
+                                    VerticalAlignment = VerticalAlignment.Center,
+                                    Inlines =
+                                    {
+                                        new Run()
+                                        {
+                                            Text = _message.User.Name,
+                                            FontSize = 15,
+                                        },
+                                        new LineBreak(),
+                                        new Run()
+                                        {
+                                            FontSize = 12,
+                                            Foreground = new SolidColorBrush(Color.FromRgb(128,128,128)),
+                                            Text = _message.CreateAt.ToString("M")+_message.CreateAt.ToString("HH:mm")
+                                        }
+                                    }
+                                },
+                            }
+                        },
+                    }
+                };
+
                 //图片
-                var _pic = new WrapPanel()
+                var imageWrapPanel = new WrapPanel()
                 {
                     Margin = new Thickness(0, 5, 0, 0),
                     HorizontalAlignment = HorizontalAlignment.Left
                 };
                 foreach (var media in _message.Medias)
                 {
-                    System.Windows.Controls.Image imageControl = new System.Windows.Controls.Image()
+                    Image image = new Image()
                     {
                         Tag = media.Link,
                         Margin = new Thickness(0, 0, 5, 5),
                         Cursor = System.Windows.Input.Cursors.Hand,
                     };
 
-                    var bitimg = new BitmapImage(new Uri(media.Small, UriKind.Absolute));
-                    if (_message.Medias.Count == 1 && bitimg.Height > 200)
+                    var bitimg = GetBitmapImage(media.Small);
+                    if (_message.Medias.Count == 1 && media.Type != ArkHelperMessage.Media.MediaType.video)
                     {
-                        _pic.MaxWidth = 500;
+                        var _bitimg = GetBitmapImage(media.Link);
+                        if (_bitimg.Height <= _bitimg.Width)
+                        {
+                            bitimg = _bitimg;
+                            if (_bitimg.Height == _bitimg.Width)
+                            {
+                                image.MaxWidth = 300;
+                                imageWrapPanel.MaxWidth = 450;
+                            }
+                        }
+                        else
+                        {
+                            imageWrapPanel.MaxWidth = 315;
+                            image.Height = image.Width = 100;
+                        }
+                            
                     }
                     else
                     {
-                        imageControl.Height = imageControl.Width = 100;
-                        _pic.MaxWidth = 315;
+                        imageWrapPanel.MaxWidth = 315;
+                        image.Height = image.Width = 100;
                     }
-                    bitimg.Freeze();
-                    imageControl.Source = bitimg;
 
-                    imageControl.MouseLeftButtonUp += PictureShow;
-                    _pic.Children.Add(imageControl);
+                    image.Source = bitimg;
 
-                    GC.Collect();
-                    GC.WaitForPendingFinalizers();
-                    GC.Collect();
+                    image.MouseLeftButtonUp += PictureShow;
+                    imageWrapPanel.Children.Add(image);
+
+                    WithSystem.GarbageCollect();
                 }
-
-                //链接
-                var lstb = new ListBox();
-                foreach (string link in _message.Links)
-                {
-                    var _aa = new ListBoxItem()
-                    {
-                        Content = link,
-                        Tag = link
-                    };
-                    _aa.MouseLeftButtonUp += LinkShow;
-                    lstb.Items.Add(_aa);
-                }
-                var ppbox = new MaterialDesignThemes.Wpf.PopupBox
-                {
-                    Width = 40,
-                    Height = 40,
-                    HorizontalAlignment = HorizontalAlignment.Right,
-                    StaysOpen = false,
-                    PopupContent = lstb
-                };
-                if (_message.Links.Count == 0) ppbox.Visibility = Visibility.Collapsed;
 
                 //单消息卡片
-                Image _image = new Image()
-                {
-                    Height = 36,
-                    Width = 36,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    Clip = new RectangleGeometry()
-                    {
-                        RadiusY = 18,
-                        RadiusX = 18,
-                        Rect = new Rect(0, 0, 36, 36)
-                    }
-                };
-                if (_message.User.Avatar != null)
-                {
-                    _image.Source = new BitmapImage(new Uri(_message.User.Avatar));
-                }
-                else
-                {
-                    _image.Source = new BitmapImage(new Uri(Address.res + "\\normal_avatar.jpg"));
-                }
                 var _wr = new StackPanel()
                 {
                     Orientation = Orientation.Vertical,
                     Margin = new Thickness(20, 12, 20, 15),
                     Children =
                     {
-                        //标头区域
-                        new Grid()
-                        {
-                            Children =
-                            {
-                                ppbox,
-                                new WrapPanel()
-                                {
-                                    Children =
-                                    {
-                                        //用户头像
-                                        _image,
-                                        //标头文字
-                                        new TextBlock()
-                                        {
-                                            Margin = new Thickness(10,0,0,0),
-                                            VerticalAlignment = VerticalAlignment.Center,
-                                            Inlines =
-                                            {
-                                                new Run()
-                                                {
-                                                    Text = _message.User.Name,
-                                                    FontSize = 15,
-                                                },
-                                                new LineBreak(),
-                                                new Run()
-                                                {
-                                                    FontSize = 12,
-                                                    Foreground = new SolidColorBrush(Color.FromRgb(128,128,128)),
-                                                    Text = _message.CreateAt.ToString("M")+_message.CreateAt.ToString("HH:mm")
-                                                }
-                                            }
-                                        },
-                                    }
-                                },
-                            }
-                        },
+                        //标头
+                        head,
                         
                         //主体
                         new WrapPanel()
@@ -642,46 +626,106 @@ namespace ArkHelper.Pages
                                     Text = _message.Text,
                                     FontSize = 14
                                 },
-                                _pic
+                                imageWrapPanel
                             }
                         }
                     }
                 };
                 return _wr;
             }
-            StackPanel _wrmain = CreateMessageWppel(message);
+
+            StackPanel mainMessageWrapPanel = CreateMessageWppel(message);
 
             //转发生成卡片并加入
             if (message.Repost != null)
             {
-                StackPanel _wrpost = CreateMessageWppel(message.Repost);
-                DockPanel dockPanel = new DockPanel() { LastChildFill = true };
-                Border border = new Border()
+                StackPanel repostMessageWrapPanel = CreateMessageWppel(message.Repost);
+                DockPanel repostArea = new DockPanel() { LastChildFill = true };
+                Border repostLine = new Border()
                 {
                     Width = 2,
-                    Margin = new Thickness(0, 5, 0, 5),
+                    //Margin = new Thickness(0, 5, 0, 5),
                     Background = new SolidColorBrush(Color.FromRgb(211, 211, 211))
                 };
-                DockPanel.SetDock(border, Dock.Left);
-                dockPanel.Children.Add(border);
-                DockPanel.SetDock(_wrpost, Dock.Left);
-                dockPanel.Children.Add(_wrpost);
-                _wrmain.Children.Add(dockPanel);
+                DockPanel.SetDock(repostLine, Dock.Left);
+                repostArea.Children.Add(repostLine);
+                DockPanel.SetDock(repostMessageWrapPanel, Dock.Left);
+                repostArea.Children.Add(repostMessageWrapPanel);
+                mainMessageWrapPanel.Children.Add(repostArea);
             }
 
             //最后包装
-            var _bo = new Border
+            var endBorder = new Border
             {
                 Margin = new Thickness(0, 0, 0, 10),
                 Background = new SolidColorBrush(Color.FromRgb(240, 248, 255)),
-                Child = _wrmain,
+                Child = mainMessageWrapPanel,
                 Style = (System.Windows.Style)FindResource("card")
             };
 
-            return _bo;
+            return endBorder;
         }
 
+        #region 图片
+        private List<BitmapImage> UserAvatarList = new List<BitmapImage>();
+        Image GetUserAvatar(User user)
+        {
+            BitmapImage bitImage;
+            foreach (BitmapImage avatarInList in UserAvatarList)
+                if (avatarInList.UriSource.AbsoluteUri == user.Avatar)
+                {
+                    bitImage = avatarInList;
+                    goto bitmapImageInited;//如果列表已有则直接生成Image
+                }
+            //如果列表没有则主动生成
+            string bitImageUri = user.Avatar == null ? Address.res + "\\normal_avatar.jpg" : user.Avatar;
+            bitImage = new BitmapImage(new Uri(bitImageUri));
+            bitImage.Freeze();
+            UserAvatarList.Add(bitImage);
+
+        bitmapImageInited:;
+            Image avatar = new Image()
+            {
+                Height = 36,
+                Width = 36,
+                VerticalAlignment = VerticalAlignment.Center,
+                Tag = user,
+                Source = bitImage,
+                Clip = new RectangleGeometry()
+                {
+                    RadiusY = 18,
+                    RadiusX = 18,
+                    Rect = new Rect(0, 0, 36, 36)
+                }
+            };
+
+            return avatar;
+        }
+
+        private List<BitmapImage> BitmapImageList = new List<BitmapImage>();
+        BitmapImage GetBitmapImage(string absoluteUri)
+        {
+            foreach (BitmapImage bitImageInList in BitmapImageList)
+                if (bitImageInList.UriSource.AbsoluteUri == absoluteUri)
+                {
+                    return bitImageInList;
+                }
+
+            var bitImage = new BitmapImage(new Uri(absoluteUri));
+            bitImage.Freeze();
+            BitmapImageList.Add(bitImage);
+
+            return bitImage;
+        }
+
+
+        #endregion
         #region 页面响应
+        /// <summary>
+        /// 按时间导航
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Btn_Click(object sender, RoutedEventArgs e)
         {
             Border messageCard = (Border)((RadioButton)sender).Tag;
@@ -690,22 +734,31 @@ namespace ArkHelper.Pages
             var tarPos = messageCard.TransformToVisual(sc).Transform(point);
             sc.ScrollToVerticalOffset(tarPos.Y);
         }
-        private void Page_Unloaded(object sender, RoutedEventArgs e)
-        {
-            WithSystem.GarbageCollect();
-        }
+        /// <summary>
+        /// 点击图片展示大图/点击视频打开浏览器播放
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         void PictureShow(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             System.Windows.Controls.Image img = (System.Windows.Controls.Image)sender;
             Process.Start(img.Tag.ToString());
         }
+        /// <summary>
+        /// 点击链接打开浏览器
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         void LinkShow(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             ListBoxItem img = (ListBoxItem)sender;
             Process.Start(img.Tag.ToString());
         }
-        #endregion
-
+        /// <summary>
+        /// 滑动到底部更新卡片
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
             double dVer = sc.VerticalOffset;
@@ -729,11 +782,6 @@ namespace ArkHelper.Pages
             }
             if (isBottom) { InitCard(); }
         }
-
-        private void Border_MouseRightButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-            InitFromBlank();
-        }
+        #endregion
     }
-
 }

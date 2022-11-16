@@ -6,9 +6,9 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:thing="clr-namespace:ArkHelper.thing"
       Title="Message"
+      d:Background="White"
       d:DesignHeight="450"
       d:DesignWidth="652"
-      Unloaded="Page_Unloaded"
       mc:Ignorable="d">
     <Grid>
         <Grid.ColumnDefinitions>

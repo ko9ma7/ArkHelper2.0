@@ -9,6 +9,10 @@ using OpenCvSharp;
 using Point = OpenCvSharp.Point;
 using Rect = OpenCvSharp.Rect;
 using Size = OpenCvSharp.Size;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Diagnostics;
+using Windows.ApplicationModel.Appointments;
 
 namespace ArkHelper.Xaml
 {
@@ -67,8 +71,8 @@ namespace ArkHelper.Xaml
             };
             var json = new JsonElement();
             /*{
-                {"phone",user },
-                {"password",pswd }
+                { "phone",user },
+                { "password",pswd }
             };*/
             request.AddParameter("", json, ParameterType.RequestBody);
             var client = new RestClient("https://as.hypergryph.com/user/auth/v1/token_by_phone_password");
@@ -92,9 +96,6 @@ namespace ArkHelper.Xaml
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
-
-
-
             /*
             var ac = JsonSerializer.Serialize(App.Data);
             var jsonString = @"{""Simulator"":{}}";
@@ -105,20 +106,14 @@ namespace ArkHelper.Xaml
 
             /*ArkHelperDataStandard.Data cc =
                 JsonSerializer.Deserialize<ArkHelperDataStandard.Data>( new ArkHelper.ArkHelperDataStandard.AKHcpi());*/
-            var aaaa = new ArkHelperDataStandard.AKHcpi();
-            aaaa.adcmd.Add(new ArkHelperDataStandard.AKHcmd("shell input tap 66 66", "", 3, 3));
-            var ac = JsonSerializer.Serialize(aaaa);
-            string aba = "";
-        }
+            //var aaaa = new ArkHelperDataStandard.AKHcpi();
+            //aaaa.adcmd.Add(new ArkHelperDataStandard.AKHcmd("shell input tap 66 66", "", 3, 3));
+            //var ac = JsonSerializer.Serialize(aaaa);
+            /*string aba = "";*/
+            MessageBox.Show("");
 
-        private void Button_Click_3(object sender, RoutedEventArgs e)
-        {
-            //var aa = GetSmallPicLocationUsingOpenCV(@"C:\Users\SurFace\Desktop\屏幕截图 2022-11-12 174043.png", @"C:\Users\SurFace\Desktop\MuMu20220906000022255201.png");
-            /*foreach (var ab in aa)
-            {
-                MessageBox.Show(ab.ToString());
-            }*/
         }
+        
     }
 }
 

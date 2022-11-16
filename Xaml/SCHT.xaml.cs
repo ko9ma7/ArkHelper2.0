@@ -2,6 +2,7 @@
 using System.Windows.Controls;
 using System.Data;
 using System;
+using ArkHelper.Xaml;
 
 namespace ArkHelper.Pages.OtherList
 {
@@ -18,8 +19,22 @@ namespace ArkHelper.Pages.OtherList
             status_togglebutton.IsChecked = App.Data.scht.status;
             fcm_status_togglebutton.IsChecked = App.Data.scht.fcm.status;
             server_combobox.SelectedValue = App.Data.scht.server.id;
-            ((RadioButton)GetType().GetField(App.Data.scht.first.unit.Replace("PR-", "PR") + "First", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(this)).IsChecked = true;
-            ((RadioButton)GetType().GetField(App.Data.scht.second.unit + "Second", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(this)).IsChecked = true;
+            if (!App.Data.scht.first.unit.Contains("custom"))
+            {
+                ((RadioButton)GetType().GetField(App.Data.scht.first.unit.Replace("PR-", "PR") + "First", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(this)).IsChecked = true;
+            }
+            else
+            {
+                customFirst.IsChecked = true;
+            }
+            if (!App.Data.scht.second.unit.Contains("custom"))
+            {
+                ((RadioButton)GetType().GetField(App.Data.scht.second.unit + "Second", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(this)).IsChecked = true;
+            }
+            else
+            {
+                customSecond.IsChecked = true;
+            }
             ((RadioButton)GetType().GetField(App.Data.scht.ann.select, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(this)).IsChecked = true;
             ann_custom_time_status_checkbox.IsChecked = App.Data.scht.ann.customTime;
 
@@ -77,13 +92,13 @@ namespace ArkHelper.Pages.OtherList
         private void First_Unit_Selected(object sender, RoutedEventArgs e)
         {
             //检测是哪个button被激活
-            App.Data.scht.first.unit = (sender as RadioButton).Name.Replace("First", "").Replace("PR", "PR-"); //first.unit
+            var unit = (sender as RadioButton).Name.Replace("First", "").Replace("PR", "PR-"); //first.unit
 
             //备选状态切换
-            second_unit.Visibility = (App.Data.scht.first.unit == "LS" || App.Data.scht.first.unit == "custom") ? Visibility.Collapsed : Visibility.Visible;
+            second_unit.Visibility = (unit == "LS" || unit == "custom") ? Visibility.Collapsed : Visibility.Visible;
 
             //关卡
-            if (App.Data.scht.first.unit == "custom")
+            if (unit == "custom" && inited)
             {
                 //选取作战配置
                 string cpiAddress = OpenFileAsAkhcpi();
@@ -95,15 +110,19 @@ namespace ArkHelper.Pages.OtherList
                 }
                 else
                 {
-                    App.Data.scht.first.unit += ":" + cpiAddress;
+                    App.Data.scht.first.unit = unit + ":" + cpiAddress;
                 }
+            }
+            else
+            {
+                App.Data.scht.first.unit = unit;
             }
         }
         private void Second_Unit_Selected(object sender, RoutedEventArgs e)
         {
-            App.Data.scht.second.unit = (sender as RadioButton).Name.Replace("Second", "");
+            var unit = (sender as RadioButton).Name.Replace("Second", "");
 
-            if (App.Data.scht.second.unit == "custom")
+            if (unit == "custom" && inited)
             {
                 //选取配置
                 string cpiAddress = OpenFileAsAkhcpi();
@@ -115,8 +134,12 @@ namespace ArkHelper.Pages.OtherList
                 }
                 else
                 {
-                    App.Data.scht.second.unit += ":" + cpiAddress;
+                    App.Data.scht.second.unit = unit + ":" + cpiAddress;
                 }
+            }
+            else
+            {
+                App.Data.scht.second.unit = unit;
             }
         }
         private void ann_status_togglebutton_Click(object sender, RoutedEventArgs e)
@@ -146,6 +169,11 @@ namespace ArkHelper.Pages.OtherList
         private void ann_custom_time_status_checkbox_Click(object sender, RoutedEventArgs e)
         {
             App.Data.scht.ann.customTime = (bool)ann_custom_time_status_checkbox.IsChecked;
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            new akhcpiMaker().Show();
         }
     }
 }
