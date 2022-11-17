@@ -171,6 +171,7 @@ namespace ArkHelper
                         new User(ArkHelperDataStandard.MessageSource.weibo, "7461423907"),//HYP
                         new User(ArkHelperDataStandard.MessageSource.weibo, "6279793937"),//ARK
                         new User(ArkHelperDataStandard.MessageSource.weibo, "7753678921"),//GAW
+                        new User(ArkHelperDataStandard.MessageSource.weibo, "2954409082"),//PLG
                         new User(ArkHelperDataStandard.MessageSource.official_communication,""), //COM
                         //new Pages.Message.User(UniData.MessageSource.weibo, "7404330062") //test
                     };
