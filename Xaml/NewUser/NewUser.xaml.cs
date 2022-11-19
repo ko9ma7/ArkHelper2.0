@@ -1,11 +1,6 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
-using System.IO;
+﻿using System;
 using System.Windows;
 using System.Diagnostics;
-using System.Text;
-using System.Windows.Documents;
 using System.Collections.Generic;
 
 namespace ArkHelper
@@ -41,7 +36,7 @@ namespace ArkHelper
                 case @"\Xaml\NewUser\SCHT.xaml":
                     if (Pages.NewUserList.SCHT.enabled)
                     {
-                        Data.SCHT.status = true;
+                        App.Data.scht.status = true;
                     }
                     else
                     {
@@ -52,7 +47,7 @@ namespace ArkHelper
                     PagesNavigation.Margin = new Thickness(0);
                     break;
                 case @"\Xaml\NewUser\Guide.xaml":
-                    Data.Save();
+                    App.SaveData();
                     Close();
                     Process.Start(Address.akh + "\\ArkHelper.exe");
                     return;

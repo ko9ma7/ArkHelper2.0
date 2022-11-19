@@ -1,16 +1,18 @@
 ﻿using System.Windows;
 using RestSharp;
-using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.IO;
-using RoutedEventArgs = System.Windows.RoutedEventArgs;
-using Page = System.Windows.Controls.Page;
-using DataFormat = RestSharp.DataFormat;
-using System.Threading;
-using Microsoft.Win32;
+using System.Windows.Controls;
+using System.Text.Json;
 using System;
-using Windows.ApplicationModel.Background;
+using OpenCvSharp;
+using Point = OpenCvSharp.Point;
+using Rect = OpenCvSharp.Rect;
+using Size = OpenCvSharp.Size;
+using System.Windows.Input;
+using System.Windows.Media;
 using System.Diagnostics;
+using Windows.ApplicationModel.Appointments;
 
 namespace ArkHelper.Xaml
 {
@@ -65,13 +67,13 @@ namespace ArkHelper.Xaml
             var request = new RestRequest
             {
                 Method = Method.Post,
-                RequestFormat = DataFormat.Json
+                RequestFormat = RestSharp.DataFormat.Json
             };
-            var json = new JObject()
-            {
-                {"phone",user },
-                {"password",pswd }
-            };
+            var json = new JsonElement();
+            /*{
+                { "phone",user },
+                { "password",pswd }
+            };*/
             request.AddParameter("", json, ParameterType.RequestBody);
             var client = new RestClient("https://as.hypergryph.com/user/auth/v1/token_by_phone_password");
             var result = client.Post(request);
@@ -94,42 +96,59 @@ namespace ArkHelper.Xaml
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
-            
+            /*
+            var ac = JsonSerializer.Serialize(App.Data);
+            var jsonString = @"{""Simulator"":{}}";
+
+            ArkHelperDataStandard.Data bb =
+                JsonSerializer.Deserialize<ArkHelperDataStandard.Data>(ac);
+            bb.ToString();*/
+
+            /*ArkHelperDataStandard.Data cc =
+                JsonSerializer.Deserialize<ArkHelperDataStandard.Data>( new ArkHelper.ArkHelperDataStandard.AKHcpi());*/
+            //var aaaa = new ArkHelperDataStandard.AKHcpi();
+            //aaaa.adcmd.Add(new AKHcmd("shell input tap 66 66", "", 3, 3));
+            //var ac = JsonSerializer.Serialize(aaaa);
+            /*string aba = "";*/
+            MessageBox.Show("");
+
         }
 
-        private void Button_Click_3(object sender, RoutedEventArgs e)
+        private void Button_Drop(object sender, DragEventArgs e)
         {
-            
+            var fileName = ((System.Array)e.Data.GetData(DataFormats.FileDrop)).GetValue(0).ToString();
+            //
         }
-    }
 
-    public class UserModel
-    {
-        public bool IsEnabled { get; set; }
-        public string UserName { get; set; }
-        public UserModel() { }
-        public UserModel(string name)
+        private void Button_DragOver(object sender, DragEventArgs e)
         {
-            UserName = name;
+            //MessageBox.Show("");
+        }
+
+        private void Button_DragEnter(object sender, DragEventArgs e)
+        {
+            // MessageBox.Show("");
+        }
+
+        private void Grid_DragEnter(object sender, DragEventArgs e)
+        {
+
+        }
+
+        private void Grid_Drop(object sender, DragEventArgs e)
+        {
+
         }
     }
-    /*public class UserDBModel : INotifyPropertyChanged
+}
+
+public class UserModel
+{
+    public bool IsEnabled { get; set; }
+    public string UserName { get; set; }
+    public UserModel() { }
+    public UserModel(string name)
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-        public void OnPropertyChanged(PropertyChangedEventArgs e)
-        {
-            if (PropertyChanged != null)
-                PropertyChanged(this, e);
-        }
-        private ObservableCollection<UserModel> userdb = new ObservableCollection<UserModel>();
-        public ObservableCollection<UserModel> UserDB
-        {
-            get { return userdb; }
-            set
-            {
-                userdb = value;
-                OnPropertyChanged(new PropertyChangedEventArgs("UserDB"));
-            }
-        }
-    }*/
+        UserName = name;
+    }
 }

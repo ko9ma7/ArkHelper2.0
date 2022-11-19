@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media.Media3D;
 using System.Windows.Threading;
-using Windows.UI.Xaml.Controls;
 using Page = System.Windows.Controls.Page;
 
 namespace ArkHelper.Xaml
@@ -75,7 +72,7 @@ namespace ArkHelper.Xaml
         }
         private void UpdateTime()
         {
-            if (DateTime.Now.ToString("hh") == "03" || (DateTime.Now.ToString("HH") == "19" && Data.SCHT.fcm.status &&Convert.ToInt32(DateTime.Now.ToString("mm")) > 57))
+            if (DateTime.Now.ToString("hh") == "03" || (DateTime.Now.ToString("HH") == "19" && App.Data.scht.fcm.status &&Convert.ToInt32(DateTime.Now.ToString("mm")) > 57))
             {
                 time_notify.Text = DateTime.Now.ToString("tt h:mm:ss");
             }

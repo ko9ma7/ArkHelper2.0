@@ -18,7 +18,7 @@
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
 
-        <WrapPanel Name="battle_setting_wrappanel"
+        <StackPanel Name="battle_setting_wrappanel"
                    Margin="0,15,0,0"
                    Orientation="Vertical">
 
@@ -83,7 +83,7 @@
             </Border>
 
 
-        </WrapPanel>
+        </StackPanel>
 
         <Grid Grid.Column="1">
             <StackPanel Margin="15">

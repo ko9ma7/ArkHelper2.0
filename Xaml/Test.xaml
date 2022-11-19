@@ -22,17 +22,7 @@
                 <TextBlock>sssss</TextBlock>
             </Border>
 
-            <materialDesign:PopupBox Width="40"
-                                     Height="40"
-                                     Margin="100,10,10,10"
-                                     Background="Transparent"
-                                     StaysOpen="False">
 
-                <ListBox>
-                    <ListBoxItem>该消息内含的链接（单击打开）</ListBoxItem>
-                    <ListBoxItem MouseLeftButtonUp="ListBoxItem_MouseDoubleClick">www.baidu.com</ListBoxItem>
-                </ListBox>
-            </materialDesign:PopupBox>
             <DataGrid Name="datagrid"
                       Grid.Row="2"
                       Width="300"
@@ -55,14 +45,13 @@
                 </DataGrid.Columns>
             </DataGrid>
             <Button Click="Button_Click_1" Content="utftest" />
-            <ProgressBar x:Name="pgb"
-                         Margin="0,20,0,20"
-                         HorizontalAlignment="Center"
-                         DockPanel.Dock="Top"
-                         IsIndeterminate="True"
-                         Style="{DynamicResource MaterialDesignCircularProgressBar}" />
             <TextBlock Name="text" Text="null" />
-            <Button Click="Button_Click_3"/>
+            <Button Width="400"
+                    Height="400"
+                    AllowDrop="True"
+                    DragEnter="Button_DragEnter"
+                    Drop="Button_Drop" />
+            <!--<Grid Width="400" Height="400" Background="AliceBlue" DragEnter="Grid_DragEnter" Drop="Grid_Drop"></Grid>-->
         </WrapPanel>
     </Grid>
 </Page>

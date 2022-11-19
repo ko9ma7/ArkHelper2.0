@@ -1,8 +1,5 @@
 ﻿using System.Windows.Controls;
 using System.Windows;
-using Microsoft.Win32;
-using System.Diagnostics;
-using System.IO;
 
 namespace ArkHelper.Pages.NewUserList
 {
@@ -14,7 +11,7 @@ namespace ArkHelper.Pages.NewUserList
         public Guide()
         {
             InitializeComponent();
-            if (Data.SCHT.status) { guidea.Visibility = Visibility.Visible;  }
+            if (App.Data.scht.status) { guidea.Visibility = Visibility.Visible;  }
         }
 
     }

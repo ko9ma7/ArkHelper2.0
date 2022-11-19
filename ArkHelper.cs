@@ -1,8 +1,7 @@
 ﻿using MaterialDesignThemes.Wpf;
 using Microsoft.Toolkit.Uwp.Notifications;
 using Microsoft.Win32;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using OpenCvSharp;
 using RestSharp;
 using System;
 using System.Collections;
@@ -14,29 +13,23 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices.WindowsRuntime;
-using System.Runtime.Remoting.Channels;
-using System.Security.RightsManagement;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
-using System.IO.Compression;
-using System.Xml.Linq;
-using static ArkHelper.Data.SCHT;
+using System.Windows.Markup;
+using Windows.ApplicationModel.Appointments;
+using Windows.Storage.Streams;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 using Point = System.Drawing.Point;
-using System.Linq.Expressions;
 
 namespace ArkHelper
 {
     /// <summary>
     /// 版本信息
     /// </summary>
-    public class Version
+    public static class Version
     {
         /// <summary>
         /// 版本号
@@ -45,47 +38,94 @@ namespace ArkHelper
         /// <summary>
         /// 版本种类
         /// </summary>
-        public readonly static Kind kind = Kind.alpha;
+        public readonly static Kind kind = Kind.realese;
         /// <summary>
         /// ArkHelperConfig版本
         /// </summary>
         public readonly static double ArkHelperConfig = 1.0;
         public enum Kind
         {
-            alpha,
+            realese,
             beta,
-            release,
+        }
+        /// <summary>
+        /// 更新
+        /// </summary>
+        public static class Update
+        {
+            public static void Search()
+            {
+                //调用API 查找版本信息
+                var client = new RestClient("https://api.github.com/repos/ArkHelper/ArkHelper2.0/releases/latest");
+                var request = new RestRequest { Method = Method.Get };
+                var response = client.Execute(request);
+                var _result = JsonDocument.Parse(response.Content).RootElement;
+
+                //在json中取得最新版本号
+                string ver = _result.GetProperty("tag_name").GetString();
+                int tag = Convert.ToInt32(ver.Replace("v", "").Replace(".", ""));
+                var body = _result.GetProperty("body").GetString();
+                bool necessary = body.Contains("[NECESSARY]");
+
+                if (tag > Convert.ToInt32(Version.tag.Replace("v", "").Replace(".", "")))
+                {
+                    var assets = _result.GetProperty("assets").EnumerateArray();
+                    string url = "";
+                    foreach (var asset in assets)
+                    {
+                        if (asset.GetProperty("name").GetString() == "ArkHelper.zip")
+                        {
+                            url = asset.GetProperty("browser_download_url").GetString();
+                        }
+                    }
+                    /*
+                    if (body.Contains("[URL]"))
+                    {
+
+                    }*/
+                    new ToastContentBuilder()
+                        .AddArgument("kind", "Update")
+                        .AddArgument("UpdateIsNecessary", necessary.ToString())
+                        .AddArgument("url", url)
+                        .AddText("提示：ArkHelper有更新")
+                        .AddText("版本：" + ver)
+                        .AddText(necessary ? "正在更新中" : "点击本消息下载更新")
+                        .Show(); //通知
+                    if (necessary) Apply(url);
+                }
+            }
+
+            public static void Apply(string url)
+            {
+                string address = Address.akh + "\\ArkHelper.zip";
+                Net.DownloadFile(url, address);//下载更新包
+                new ToastContentBuilder()
+                        .AddArgument("kind", "UpdateMessage")
+                        .AddText("提示")
+                        .AddText("ArkHelper更新完成")
+                        .AddText("正在启动中")
+                        .Show(); //通知*/
+                App.ExitApp();
+            }
         }
     }
 
     /// <summary>
-    /// 数据传输
+    /// ArkHelper数据
     /// </summary>
-    public static class UniData
+    public static class ArkHelperDataStandard
     {
-        /// <summary>
-        /// 从文件中读取json
-        /// </summary>
-        /// <param name="address">文件地址</param>
-        /// <returns></returns>
-        public static JsonElement ReadJson(string address)
-        {
-            if (!File.Exists(address)) { return new JsonElement(); }
-            var _text = File.ReadAllText(address);
-            var _result = JsonSerializer.Deserialize<JsonElement>(_text);
-            return _result;
-        }
         /// <summary>
         /// 截图名称获取
         /// </summary>
         /// <returns>四位数年+两位数月+两位数日+两位数时分秒+三位毫秒+“.png”</returns>
-        public static string Screenshot => DateTime.Now.ToString("yyyyMMdd") + DateTime.Now.ToString("HHmmssfff") + @".png";
-
+        public static string Screenshot => DateTime.Now.ToString("yyyyMMddHHmmssfff") + @".png";
         /// <summary>
         /// log名称获取
         /// </summary>
         /// <returns></returns>
         public static string Log => Address.log + @"\" + DateTime.Now.ToString("yyyyMMdd") + @".log";
+
         /// <summary>
         /// 消息来源类型
         /// </summary>
@@ -100,14 +140,10 @@ namespace ArkHelper
             web,
             official_communication
         }
-        public enum ArgKind
-        {
-            Navigate,
-            ActiveFunc,
-            Shut,
-            none
-        }
 
+        /// <summary>
+        /// ArkHelperArg
+        /// </summary>
         public class ArkHelperArg
         {
             //public static string Creator { get; set; }
@@ -134,19 +170,144 @@ namespace ArkHelper
             {
                 return Arg + ":" + ArgContent + "(" + Discribe + ")," + Target;
             }
+            /// <summary>
+            /// ArkHelperArg类型
+            /// </summary>
+            public enum ArgKind
+            {
+                Navigate,
+                ActiveFunc,
+                Shut,
+                none
+            }
         }
+
+
+        #region 配置数据
+        public class Data
+        {
+            public Simulator simulator { get; set; } = new Simulator();
+            public class Simulator
+            {
+                public Custom custom { get; set; } = new Custom();
+                public class Custom
+                {
+                    public bool status { get; set; } = false;
+                    public int port { get; set; } = 0;
+                    public string im { get; set; } = "";
+                }
+            }
+
+            public SCHT scht { get; set; } = new SCHT();
+            public class SCHT
+            {
+                public bool status { get; set; } = false;
+
+                public CpRefer first { get; set; } = new CpRefer();
+                public CpRefer second { get; set; } = new CpRefer();
+                public class CpRefer
+                {
+                    public string unit { get; set; } = "LS";
+                }
+
+                public Ann ann { get; set; } = new Ann();
+                public class Ann
+                {
+                    public bool status { get; set; } = false;
+                    public string select { get; set; } = "TT";
+                    public bool customTime { get; set; } = false;
+                    public int[] time { get; set; } = new int[7] { 0, 0, 0, 0, 0, 0, 0 }; //周一为每周的第一天
+                }
+
+                public Server server { get; set; } = new Server();
+                public class Server
+                {
+                    public string id { get; set; } = "CO";
+                }
+
+                public Fcm fcm { get; set; } = new Fcm();
+                public class Fcm
+                {
+                    public bool status { get; set; } = false;
+                }
+            }
+
+            public Message message { get; set; } = new Message();
+            public class Message
+            {
+                public bool status { get; set; } = false;
+            }
+
+            public ArkHelper arkHelper { get; set; } = new ArkHelper();
+            public class ArkHelper
+            {
+                public bool pure { get; set; } = true;
+            }
+        }
+        #endregion
     }
 
     /// <summary>
-    /// 参数
+    /// Akhcmd
     /// </summary>
-    public static class Param
+    public class AKHcmd
     {
-        /// <summary>
-        /// 参数
-        /// </summary>
-        public readonly static string start_page = "Home";
-        public readonly static bool logAdvanceOutput = true;
+        public string ADBcmd { get; set; } = null;
+        private string Discribe { get; set; } = "";
+        public string OutputText { get; } = "";
+        public int WaitTime { get; set; } = 0;
+        public int ForTimes { get; set; } = 0;
+
+        public static Dictionary<string, AKHcmd> FormatAKHcmd = new Dictionary<string, AKHcmd>
+            {
+                {"zhongduan",new AKHcmd(1090,185,waitTime:2) },
+                {"zhongduan_menu_zhongduan",new AKHcmd(90,757,waitTime:1) },
+                {"ziyuanshouji",new AKHcmd(806,756,waitTime:1) },
+                {"menu",new AKHcmd(300,42,waitTime:1) },
+                {"menu_home",new AKHcmd(103,194,waitTime:2) }
+            };
+
+        public AKHcmd(string body, string outputText = "", int waitTime = 0, int forTimes = 1)
+        {
+            if (body != null)
+            {
+                //解析
+                if (body.Contains("####") && body.Contains("#;")) { waitTime = Convert.ToInt32(body.Substring(body.IndexOf("####") + 4, body.IndexOf("#;") - body.IndexOf("####") - 4)); }
+                if (body.Contains("$$$$") && body.Contains("$;")) { forTimes = Convert.ToInt32(body.Substring(body.IndexOf("$$$$") + 4, body.IndexOf("$;") - body.IndexOf("$$$$") - 4)); }
+                if (body.Contains("&&&&") && body.Contains("&;")) { outputText = body.Substring(body.IndexOf("&&&&") + 4, body.IndexOf("&;") - body.IndexOf("&&&&") - 4); }
+                ADBcmd = body.Replace("####" + waitTime + "#;", "").Replace("$$$$" + forTimes + "$;", "").Replace("&&&&" + outputText + "&;", "");
+            }
+            OutputText = outputText;
+            WaitTime = waitTime;
+            ForTimes = forTimes;
+        }
+        public AKHcmd(int x, int y, string outputText = "", int waitTime = 0, int forTimes = 1)
+        {
+            ADBcmd = "shell input tap " + x + " " + y;
+
+            OutputText = outputText;
+            WaitTime = waitTime;
+            ForTimes = forTimes;
+        }
+
+        public void RunCmd()
+        {
+            for (int i = 1; i <= ForTimes; i++)
+            {
+                if (ADBcmd != null) ADB.CMD(ADBcmd);
+                Thread.Sleep(WaitTime * 1000);
+            }
+        }
+
+        public override string ToString()
+        {
+            string _ret = ADBcmd;
+            if (WaitTime != 0) _ret = _ret + "####" + WaitTime + "#;";
+            if (ForTimes > 0) _ret = _ret + "$$$$" + ForTimes + "$;";
+            if (OutputText != "") _ret = _ret + "&&&&" + OutputText + "&;";
+            return _ret;
+        }
+
     }
 
     /// <summary>
@@ -178,28 +339,32 @@ namespace ArkHelper
         /// <returns>adb的返回结果</returns>
         public static string CMD(string cmd)
         {
+            //未连接报错
             while (!cmd.Contains("connect") && ConnectedInfo == null)
             {
-                Application.Current.Dispatcher.Invoke(() =>
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
                 {
                     WithSystem.Message("模拟器连接断开", "请启动或重启模拟器");
                 });
                 Thread.Sleep(2000);
             }
 
+            //cmd
             process.StartInfo.Arguments = cmd;
+            if (true) Output.Log(cmd, "ADB");
 
-            if (Param.logAdvanceOutput) Output.Log(cmd, "ADB");
-
+            //启动命令并读取结果
             process.Start();
             var end = process.StandardOutput.ReadToEnd();
 
-            if (Param.logAdvanceOutput) Output.Log("=>" + end.Replace("\n", "[linebreak]").Replace("\r", ""), "ADB");
-
+            //log结果
+            if (true) Output.Log("=>" + end.Replace("\n", "[linebreak]").Replace("\r", ""), "ADB");
+            //等待退出
             process.WaitForExit();
+            //log退出
+            if (true) Output.Log("=>" + "Exited", "ADB");
 
-            if (Param.logAdvanceOutput) Output.Log("=>" + "Exited", "ADB");
-
+            //返回结果
             return end;
         }
 
@@ -222,10 +387,10 @@ namespace ArkHelper
 
             //尝试遍历寻找在线的模拟器
             PinnedData.Simulator.SimuInfo ConnectThis = new PinnedData.Simulator.SimuInfo();
-            if (Data.simulator.custom.status)
+            if (App.Data.simulator.custom.status)
             {
-                if (Process.GetProcessesByName(Data.simulator.custom.im).Length != 0)
-                    ConnectThis = new PinnedData.Simulator.SimuInfo("custom", "自定义", Data.simulator.custom.port, Data.simulator.custom.im);
+                if (Process.GetProcessesByName(App.Data.simulator.custom.im).Length != 0)
+                    ConnectThis = new PinnedData.Simulator.SimuInfo("custom", "自定义", App.Data.simulator.custom.port, App.Data.simulator.custom.im);
                 else return;
             }
             else
@@ -290,7 +455,7 @@ namespace ArkHelper
         #endregion
 
         /// <summary>
-        /// 截图
+        /// 简单截图
         /// </summary>
         /// <param name="address">截图输出地址</param>
         /// <param name="name">截图名称</param>
@@ -310,7 +475,7 @@ namespace ArkHelper
             private Bitmap ImgBitmap { get; set; }
             public Screenshot()
             {
-                string name = UniData.Screenshot;
+                string name = ArkHelperDataStandard.Screenshot;
                 string address = Address.Cache.main;
                 CMD(@"shell screencap -p /sdcard/DCIM/" + name); //截图
                 CMD(@"pull /sdcard/DCIM/" + name + " " + address); //pull
@@ -346,15 +511,15 @@ namespace ArkHelper
             }
             #endregion
 
-            public Point[] PicToPoint(string smallimg, double errorCon = 0.7, int errorRange = 16, int num = 50)
+            public List<Point> PicToPoint(string smallimg, double errorCon = 0.7, int errorRange = 16, int num = 50)
             {
-                if (!File.Exists(smallimg)) { return new Point[0]; }
+                if (!File.Exists(smallimg)) { return new List<Point>(); }
 
-                //初始化图像类
+                /*//初始化图像类
                 InitBitmap();
                 var smallBM = new Bitmap(smallimg);
-
-                return PictureProcess.PicToPoint.GetPoint(this.ImgBitmap, smallBM, errorCon, errorRange, num);
+                return PictureProcess.PicToPoint.GetPointUsingNative(this.ImgBitmap, smallBM, errorCon, errorRange, num);*/
+                return PictureProcess.PicToPoint.GetPointUsingOpenCV(this.Location, smallimg);
             }
             private void InitBitmap()
             {
@@ -385,7 +550,9 @@ namespace ArkHelper
                 //必须为false
                 Dispose(false);
             }
-            /// <summary>执行与释放或重置非托管资源关联的应用程序定义的任务。</summary>
+            /// <summary>
+            /// 执行与释放或重置非托管资源关联的应用程序定义的任务。
+            /// </summary>
             public void Dispose()
             {
                 //必须为true
@@ -412,8 +579,6 @@ namespace ArkHelper
                         File.Delete(Location);
                     }
                     catch { }
-
-
                 }
                 //清理非托管资源
 
@@ -469,7 +634,7 @@ namespace ArkHelper
         /// <returns>如果两点都符合对应的期望颜色值，返回<see langword="true"/>，否则返回<see langword="false"/>。</returns>
         public static bool ColorCheck(int x1, int y1, string c1, int x2, int y2, string c2)
         {
-            string _name = ADB.GetScreenshot(Address.Cache.main, UniData.Screenshot);
+            string _name = ADB.GetScreenshot(Address.Cache.main, ArkHelperDataStandard.Screenshot);
             string[] color = ColorPick(
                 _name, x1, y1, x2, y2);
             File.Delete(_name);
@@ -490,8 +655,8 @@ namespace ArkHelper
             /// <param name="errorCon">点容差（0~1），越大越难以匹配</param>
             /// <param name="errorRange">色容差（0~255），越大越容易匹配</param>
             /// <param name="num">精确度，越大越准确</param>
-            /// <returns>点数组</returns>
-            public static Point[] GetPoint(Bitmap bigBM, Bitmap smallBM, double errorCon = 0.6, int errorRange = 15, int num = 100)
+            /// <returns>所有匹配矩形的中心点在大图中的坐标</returns>
+            public static List<Point> GetPointUsingNative(Bitmap bigBM, Bitmap smallBM, double errorCon = 0.6, int errorRange = 15, int num = 100)
             {
                 //声明数组，写入随机坐标
                 Point[] pointSmall = new Point[num];
@@ -596,10 +761,10 @@ namespace ArkHelper
                         }
                     }
                     //存储
-                    Point[] _points = new Point[FinallyPoints.Count];
-                    for (int i = 0; i < FinallyPoints.Count; i++)
+                    List<Point> _points = new List<Point>();
+                    foreach (Point _point in FinallyPoints)
                     {
-                        _points[i] = (Point)FinallyPoints[i];
+                        _points.Add(_point);
                     }
                     bigBM.Dispose(); smallBM.Dispose();
                     return _points;
@@ -607,7 +772,7 @@ namespace ArkHelper
                 else
                 {
                     bigBM.Dispose(); smallBM.Dispose();
-                    return new Point[0];
+                    return new List<Point>();
                 }
 
                 //坐标相减
@@ -634,16 +799,59 @@ namespace ArkHelper
             /// <param name="errorRange">色容差（0~255），越大越容易匹配</param>
             /// <param name="num">精确度，越大越准确</param>
             /// <returns>点数组</returns>
-            public static Point[] GetPoint(string bigpic, string smallpic, double errorCon = 0.6, int errorRange = 15, int num = 100)
+            public static List<Point> GetPointUsingNative(string bigpic, string smallpic, double errorCon = 0.6, int errorRange = 15, int num = 100)
             {
-                if (!File.Exists(bigpic)) { return new Point[0]; }
-                if (!File.Exists(smallpic)) { return new Point[0]; }
+                if (!File.Exists(bigpic)) { return new List<Point>(); }
+                if (!File.Exists(smallpic)) { return new List<Point>(); }
 
                 //初始化图像类
                 var bigBM = new Bitmap(bigpic);
                 var smallBM = new Bitmap(smallpic);
 
-                return GetPoint(bigBM, smallBM, errorCon, errorRange, num);
+                return GetPointUsingNative(bigBM, smallBM, errorCon, errorRange, num);
+            }
+
+            /// <summary>
+            /// 获取
+            /// </summary>
+            /// <param name="bigPicLocation">大图地址</param>
+            /// <param name="smallPicLocation">小图地址</param>
+            /// <returns></returns>
+            public static List<Point> GetPointUsingOpenCV(string bigPicLocation, string smallPicLocation)
+            {
+                List<Point> @return = new List<Point>();
+
+                using (Mat bigPic = new Mat(bigPicLocation))//大图
+                using (Mat smallPic = new Mat(smallPicLocation))//小图
+                using (Mat res = new Mat(bigPic.Rows - smallPic.Rows + 1, bigPic.Cols - smallPic.Cols + 1, MatType.CV_32FC1))
+                {
+                    //灰度化
+                    Mat gref = bigPic.CvtColor(ColorConversionCodes.BGR2GRAY);
+                    Mat gtpl = smallPic.CvtColor(ColorConversionCodes.BGR2GRAY);
+
+                    Cv2.MatchTemplate(gref, gtpl, res, TemplateMatchModes.CCoeffNormed);
+                    Cv2.Threshold(res, res, 0.8, 1.0, ThresholdTypes.Tozero);
+
+                    while (true)
+                    {
+                        double minval, maxval, threshold = 0.8;
+                        OpenCvSharp.Point minloc, maxloc;
+                        Cv2.MinMaxLoc(res, out minval, out maxval, out minloc, out maxloc);
+
+                        if (maxval >= threshold)
+                        {
+                            Point newPoint = new Point(maxloc.X + smallPic.Width / 2, maxloc.Y + smallPic.Height / 2);
+                            @return.Add(newPoint);
+
+                            //去重
+                            OpenCvSharp.Rect outRect;
+                            Cv2.FloodFill(res, maxloc, new Scalar(0), out outRect, new Scalar(0.1), new Scalar(1.0));
+                        }
+                        else
+                            break;
+                    }
+                }
+                return @return;
             }
         }
     }
@@ -752,224 +960,6 @@ namespace ArkHelper
     }
 
     /// <summary>
-    /// 运行数据
-    /// </summary>
-    public static class Data
-    {
-        public static class simulator
-        {
-            public static class custom
-            {
-                public static bool status = false;
-                public static int port = 0;
-                public static string im = "";
-            }
-        }
-        public static class SCHT
-        {
-            public static bool status = false;
-            public static class first
-            {
-                public static string unit = "LS";
-                public static string cp = "1";
-            }
-            public static class second
-            {
-                public static string unit = "LS";
-                public static string cp = "1";
-            }
-            public static class ann
-            {
-                public static bool status = false;
-                public static string select = "TT";
-                public static class time
-                {
-                    public static bool custom = true;
-                    public static int Mon = 0;
-                    public static int Tue = 0;
-                    public static int Wed = 0;
-                    public static int Thu = 0;
-                    public static int Fri = 0;
-                    public static int Sat = 0;
-                    public static int Sun = 0;
-                }
-            }
-            public static class server
-            {
-                public static string id = "CO";
-            }
-            public static class fcm
-            {
-                public static bool status = true;
-            }
-        }
-        public static class ArkHelper
-        {
-            public static bool pure = false;
-        }
-        public static class UserData
-        {
-            public static string User = "";
-            public static string Password = "";
-        }
-        /// <summary>
-        /// 更新数据
-        /// </summary>
-        public static void Load()
-        {
-            if (File.Exists(Address.config))
-            {
-                //读取配置
-                JObject config = (JObject)JToken.ReadFrom(
-                    new JsonTextReader(
-                        File.OpenText(Address.config)
-                        )
-                    );
-
-                //模拟器
-                JObject _simulator = (JObject)config["simulator"]["custom"];
-                simulator.custom.status = (bool)_simulator["status"];
-                if (simulator.custom.status)
-                {
-                    simulator.custom.port = Convert.ToInt32(_simulator["port"]);
-                    simulator.custom.im = _simulator["im"].ToString();
-                }
-                //akh
-                JObject _akh = (JObject)config["ArkHelper"];
-                ArkHelper.pure = (bool)_akh["pure"];
-                //SCHT
-                JObject _SCHT = (JObject)config["SCHT"];
-                status = (bool)_SCHT["status"];
-                if (status)
-                {
-                    first.unit = _SCHT["first"]["unit"].ToString();
-                    first.cp = _SCHT["first"]["cp"].ToString();
-
-                    if (first.unit != "LS" && first.unit != "custom")
-                    {
-                        second.unit = _SCHT["second"]["unit"].ToString();
-                        second.cp = _SCHT["second"]["cp"].ToString();
-                    }
-
-                    ann.status = (bool)_SCHT["ann"]["status"];
-                    if (ann.status)
-                    {
-                        ann.select = _SCHT["ann"]["select"].ToString();
-                        JObject _time = (JObject)_SCHT["ann"]["time"];
-                        ann.time.custom = (bool)_time["custom"];
-                        if (ann.time.custom)
-                        {
-                            ann.time.Mon = Convert.ToInt32(_time["Mon"].ToString());
-                            ann.time.Tue = Convert.ToInt32(_time["Tue"].ToString());
-                            ann.time.Wed = Convert.ToInt32(_time["Wed"].ToString());
-                            ann.time.Thu = Convert.ToInt32(_time["Thu"].ToString());
-                            ann.time.Fri = Convert.ToInt32(_time["Fri"].ToString());
-                            ann.time.Sat = Convert.ToInt32(_time["Sat"].ToString());
-                            ann.time.Sun = Convert.ToInt32(_time["Sun"].ToString());
-                        }
-                    }
-                    server.id = _SCHT["server"]["id"].ToString();
-                    fcm.status = (bool)_SCHT["fcm"]["status"];
-                }
-            }
-        }
-
-        /// <summary>
-        /// 保存数据
-        /// </summary>
-        public static void Save()
-        {
-            if (!File.Exists(Address.config))
-            {
-                File.Create(Address.config).Close();
-            }
-
-            JObject config = new JObject();
-            JObject akh = new JObject()
-            {
-                {"pure",ArkHelper.pure }
-            };
-            config.Add("ArkHelper", akh);
-
-            JObject simu = new JObject();
-            JObject custom = new JObject();
-            custom.Add("status", simulator.custom.status);
-            if (simulator.custom.status)
-            {
-                custom.Add("im", simulator.custom.im);
-                custom.Add("port", simulator.custom.port);
-            }
-            simu.Add("custom", custom);
-            config.Add("simulator", simu);
-
-            JObject SCHT = new JObject();
-            SCHT.Add("status", status);
-            if (status)
-            {
-                JObject _first = new JObject()
-                {
-                    {"unit",first.unit },
-                    {"cp",first.cp }
-                };
-                SCHT.Add("first", _first);
-
-                if (first.unit != "custom" && first.unit != "LS")
-                {
-                    JObject _second = new JObject()
-                    {
-                        {"unit",second.unit },
-                        {"cp",second.cp }
-                    };
-                    SCHT.Add("second", _second);
-                }
-
-                //剿灭
-                JObject _ann = new JObject()
-                {
-                    {"status",ann.status }
-                };
-                if (ann.status)
-                {
-                    _ann.Add("select", ann.select);
-                    JObject _time = new JObject()
-                    {
-                        {"custom",ann.time.custom }
-                    };
-                    if (ann.time.custom)
-                    {
-                        _time.Add("Mon", ann.time.Mon);
-                        _time.Add("Tue", ann.time.Tue);
-                        _time.Add("Wed", ann.time.Wed);
-                        _time.Add("Thu", ann.time.Thu);
-                        _time.Add("Fri", ann.time.Fri);
-                        _time.Add("Sat", ann.time.Sat);
-                        _time.Add("Sun", ann.time.Sun);
-                    }
-                    _ann.Add("time", _time);
-                }
-                SCHT.Add("ann", _ann);
-
-                //服务器
-                JObject _server = new JObject()
-                {
-                    {"id",server.id }
-                };
-                SCHT.Add("server", _server);
-
-                //防沉迷
-                JObject _fcm = new JObject()
-                {
-                    {"status",fcm.status }
-                };
-                SCHT.Add("fcm", _fcm);
-            }
-            config.Add("SCHT", SCHT);
-            //保存
-            File.WriteAllText(Address.config, JsonConvert.SerializeObject(config, Formatting.Indented));
-        }
-    }
-
-    /// <summary>
     /// 输出
     /// </summary>
     public static class Output
@@ -986,12 +976,7 @@ namespace ArkHelper
             Emergency
         }
 
-        /// <summary>
-        /// 文字输出到文件
-        /// </summary>
-        /// <param name="content">内容</param>
-        /// <param name="file">文件路径</param>
-        public static void Text(string content, string file)
+        private static void Text(string content, string file)
         {
             if (File.Exists(file)) { } else { File.Create(file).Close(); } //检查有无该文件，无就创建
             StreamWriter output_stream = new StreamWriter(file, true) { AutoFlush = true }; //启动写入流
@@ -1010,7 +995,7 @@ namespace ArkHelper
                 + "[" + infokind.ToString() + "]"
                 + " "
                 + content
-                , UniData.Log
+                , ArkHelperDataStandard.Log
                 );
         }
     }
@@ -1193,7 +1178,7 @@ namespace ArkHelper
     /// <summary>
     /// 网络交互
     /// </summary>
-    public static class WithNet
+    public static class Net
     {
         /// <summary>
         /// 下载文件
@@ -1205,8 +1190,10 @@ namespace ArkHelper
             string cache = address + @".cache";
             if (!File.Exists(address))
             {
-                var web = new WebClient();
-                web.DownloadFile(url, cache);
+                using (var web = new WebClient())
+                {
+                    web.DownloadFile(url, cache);
+                }
                 Directory.Move(cache, address);
 
                 if (File.Exists(cache)) { File.Delete(cache); }
@@ -1235,67 +1222,6 @@ namespace ArkHelper
             {
                 goto start;
             }
-        }
-    }
-
-    /// <summary>
-    /// ArkHelper更新
-    /// </summary>
-    public static class Update
-    {
-        public static void Search()
-        {
-            //调用API 查找版本信息
-            var client = new RestClient("https://api.github.com/repos/ArkHelper/ArkHelper2.0/releases/latest");
-            var request = new RestRequest { Method = Method.Get };
-            var response = client.Execute(request);
-            var _result = JsonDocument.Parse(response.Content).RootElement;
-
-            //在json中取得最新版本号
-            string ver = _result.GetProperty("tag_name").GetString();
-            int tag = Convert.ToInt32(ver.Replace("v", "").Replace(".", ""));
-            var body = _result.GetProperty("body").GetString();
-            bool necessary = body.Contains("[NECESSARY]");
-
-            if (tag > Convert.ToInt32(Version.tag.Replace("v", "").Replace(".", "")))
-            {
-                var assets = _result.GetProperty("assets").EnumerateArray();
-                string url = "";
-                foreach (var asset in assets)
-                {
-                    if (asset.GetProperty("name").GetString() == "ArkHelper.zip")
-                    {
-                        url = asset.GetProperty("browser_download_url").GetString();
-                    }
-                }
-                /*
-                if (body.Contains("[URL]"))
-                {
-                    
-                }*/
-                new ToastContentBuilder()
-                    .AddArgument("kind", "Update")
-                    .AddArgument("UpdateIsNecessary", necessary.ToString())
-                    .AddArgument("url", url)
-                    .AddText("提示：ArkHelper有更新")
-                    .AddText("版本：" + ver)
-                    .AddText(necessary ? "正在更新中" : "点击本消息下载更新")
-                    .Show(); //通知
-                if (necessary) Apply(url);
-            }
-        }
-
-        public static void Apply(string url)
-        {
-            string address = Address.akh + "\\ArkHelper.zip";
-            WithNet.DownloadFile(url, address);//下载更新包
-            new ToastContentBuilder()
-                    .AddArgument("kind", "UpdateMessage")
-                    .AddText("提示")
-                    .AddText("ArkHelper更新完成")
-                    .AddText("正在启动中")
-                    .Show(); //通知*/
-            App.ExitApp();
         }
     }
 

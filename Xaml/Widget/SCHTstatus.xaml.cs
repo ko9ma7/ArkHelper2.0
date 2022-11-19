@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Windows.Controls;
-using static ArkHelper.Data.SCHT;
 
 namespace ArkHelper.Xaml.Widget
 {
@@ -9,10 +8,10 @@ namespace ArkHelper.Xaml.Widget
         public SCHTstatus()
         {
             InitializeComponent();
-            if (status)
+            if (App.Data.scht.status)
             {
                 SCHT_status.Text = "正常运行中";
-                if (fcm.status)
+                if (App.Data.scht.fcm.status)
                 {
                     //防沉迷
                     DateTime dateTime = DateTime.Now;
