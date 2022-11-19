@@ -46,7 +46,12 @@
             </DataGrid>
             <Button Click="Button_Click_1" Content="utftest" />
             <TextBlock Name="text" Text="null" />
-            
+            <Button Width="400"
+                    Height="400"
+                    AllowDrop="True"
+                    DragEnter="Button_DragEnter"
+                    Drop="Button_Drop" />
+            <!--<Grid Width="400" Height="400" Background="AliceBlue" DragEnter="Grid_DragEnter" Drop="Grid_Drop"></Grid>-->
         </WrapPanel>
     </Grid>
 </Page>

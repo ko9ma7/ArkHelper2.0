@@ -18,6 +18,7 @@ using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Markup;
 using Windows.ApplicationModel.Appointments;
 using Windows.Storage.Streams;
 using JsonSerializer = System.Text.Json.JsonSerializer;
@@ -47,12 +48,72 @@ namespace ArkHelper
             realese,
             beta,
         }
+        /// <summary>
+        /// 更新
+        /// </summary>
+        public static class Update
+        {
+            public static void Search()
+            {
+                //调用API 查找版本信息
+                var client = new RestClient("https://api.github.com/repos/ArkHelper/ArkHelper2.0/releases/latest");
+                var request = new RestRequest { Method = Method.Get };
+                var response = client.Execute(request);
+                var _result = JsonDocument.Parse(response.Content).RootElement;
+
+                //在json中取得最新版本号
+                string ver = _result.GetProperty("tag_name").GetString();
+                int tag = Convert.ToInt32(ver.Replace("v", "").Replace(".", ""));
+                var body = _result.GetProperty("body").GetString();
+                bool necessary = body.Contains("[NECESSARY]");
+
+                if (tag > Convert.ToInt32(Version.tag.Replace("v", "").Replace(".", "")))
+                {
+                    var assets = _result.GetProperty("assets").EnumerateArray();
+                    string url = "";
+                    foreach (var asset in assets)
+                    {
+                        if (asset.GetProperty("name").GetString() == "ArkHelper.zip")
+                        {
+                            url = asset.GetProperty("browser_download_url").GetString();
+                        }
+                    }
+                    /*
+                    if (body.Contains("[URL]"))
+                    {
+
+                    }*/
+                    new ToastContentBuilder()
+                        .AddArgument("kind", "Update")
+                        .AddArgument("UpdateIsNecessary", necessary.ToString())
+                        .AddArgument("url", url)
+                        .AddText("提示：ArkHelper有更新")
+                        .AddText("版本：" + ver)
+                        .AddText(necessary ? "正在更新中" : "点击本消息下载更新")
+                        .Show(); //通知
+                    if (necessary) Apply(url);
+                }
+            }
+
+            public static void Apply(string url)
+            {
+                string address = Address.akh + "\\ArkHelper.zip";
+                Net.DownloadFile(url, address);//下载更新包
+                new ToastContentBuilder()
+                        .AddArgument("kind", "UpdateMessage")
+                        .AddText("提示")
+                        .AddText("ArkHelper更新完成")
+                        .AddText("正在启动中")
+                        .Show(); //通知*/
+                App.ExitApp();
+            }
+        }
     }
 
     /// <summary>
     /// ArkHelper数据
     /// </summary>
-    public class ArkHelperDataStandard
+    public static class ArkHelperDataStandard
     {
         /// <summary>
         /// 截图名称获取
@@ -120,48 +181,7 @@ namespace ArkHelper
                 none
             }
         }
-        /// <summary>
-        /// Akhcmd
-        /// </summary>
-        public class AKHcmd
-        {
-            public string ADBcmd { get; set; } = null;
-            private string Discribe { get; set; } = "";
-            public string OutputText { get; } = "";
-            public int WaitTime { get; set; } = 0;
-            public int ForTimes { get; set; } = 0;
 
-            public AKHcmd(string body, string outputText = "", int waitTime = 0, int forTimes = 1)
-            {
-                if (body == "zhongduan") body = "shell input tap 1090 185 ####2#;";
-                if (body == "zhongduan_menu_zhongduan") body = "shell input tap 90 757 ####1#;";
-                if (body == "ziyuanshouji") body = "shell input tap 806 756####1#;";
-                if (body == "menu") body = "shell input tap 300 42####1#;";
-                if (body == "menu_home") body = "shell input tap 103 194####2#;";
-
-                if (body != null)
-                {
-                    //解析
-                    if (body.Contains("####") && body.Contains("#;")) { waitTime = Convert.ToInt32(body.Substring(body.IndexOf("####") + 4, body.IndexOf("#;") - body.IndexOf("####") - 4)); }
-                    if (body.Contains("$$$$") && body.Contains("$;")) { forTimes = Convert.ToInt32(body.Substring(body.IndexOf("$$$$") + 4, body.IndexOf("$;") - body.IndexOf("$$$$") - 4)); }
-                    if (body.Contains("&&&&") && body.Contains("&;")) { outputText = body.Substring(body.IndexOf("&&&&") + 4, body.IndexOf("&;") - body.IndexOf("&&&&") - 4); }
-                    ADBcmd = body.Replace("####" + waitTime + "#;", "").Replace("$$$$" + forTimes + "$;", "").Replace("&&&&" + outputText + "&;", "");
-                }
-                OutputText = outputText;
-                WaitTime = waitTime;
-                ForTimes = forTimes;
-            }
-
-            public void RunCmd()
-            {
-                for (int i = 1; i <= ForTimes; i++)
-                {
-                    if(ADBcmd != null) ADB.CMD(ADBcmd);
-                    Thread.Sleep(WaitTime * 1000);
-                }
-            }
-
-        }
 
         #region 配置数据
         public class Data
@@ -212,6 +232,12 @@ namespace ArkHelper
                 }
             }
 
+            public Message message { get; set; } = new Message();
+            public class Message
+            {
+                public bool status { get; set; } = false;
+            }
+
             public ArkHelper arkHelper { get; set; } = new ArkHelper();
             public class ArkHelper
             {
@@ -219,6 +245,69 @@ namespace ArkHelper
             }
         }
         #endregion
+    }
+
+    /// <summary>
+    /// Akhcmd
+    /// </summary>
+    public class AKHcmd
+    {
+        public string ADBcmd { get; set; } = null;
+        private string Discribe { get; set; } = "";
+        public string OutputText { get; } = "";
+        public int WaitTime { get; set; } = 0;
+        public int ForTimes { get; set; } = 0;
+
+        public static Dictionary<string, AKHcmd> FormatAKHcmd = new Dictionary<string, AKHcmd>
+            {
+                {"zhongduan",new AKHcmd(1090,185,waitTime:2) },
+                {"zhongduan_menu_zhongduan",new AKHcmd(90,757,waitTime:1) },
+                {"ziyuanshouji",new AKHcmd(806,756,waitTime:1) },
+                {"menu",new AKHcmd(300,42,waitTime:1) },
+                {"menu_home",new AKHcmd(103,194,waitTime:2) }
+            };
+
+        public AKHcmd(string body, string outputText = "", int waitTime = 0, int forTimes = 1)
+        {
+            if (body != null)
+            {
+                //解析
+                if (body.Contains("####") && body.Contains("#;")) { waitTime = Convert.ToInt32(body.Substring(body.IndexOf("####") + 4, body.IndexOf("#;") - body.IndexOf("####") - 4)); }
+                if (body.Contains("$$$$") && body.Contains("$;")) { forTimes = Convert.ToInt32(body.Substring(body.IndexOf("$$$$") + 4, body.IndexOf("$;") - body.IndexOf("$$$$") - 4)); }
+                if (body.Contains("&&&&") && body.Contains("&;")) { outputText = body.Substring(body.IndexOf("&&&&") + 4, body.IndexOf("&;") - body.IndexOf("&&&&") - 4); }
+                ADBcmd = body.Replace("####" + waitTime + "#;", "").Replace("$$$$" + forTimes + "$;", "").Replace("&&&&" + outputText + "&;", "");
+            }
+            OutputText = outputText;
+            WaitTime = waitTime;
+            ForTimes = forTimes;
+        }
+        public AKHcmd(int x, int y, string outputText = "", int waitTime = 0, int forTimes = 1)
+        {
+            ADBcmd = "shell input tap " + x + " " + y;
+
+            OutputText = outputText;
+            WaitTime = waitTime;
+            ForTimes = forTimes;
+        }
+
+        public void RunCmd()
+        {
+            for (int i = 1; i <= ForTimes; i++)
+            {
+                if (ADBcmd != null) ADB.CMD(ADBcmd);
+                Thread.Sleep(WaitTime * 1000);
+            }
+        }
+
+        public override string ToString()
+        {
+            string _ret = ADBcmd;
+            if (WaitTime != 0) _ret = _ret + "####" + WaitTime + "#;";
+            if (ForTimes > 0) _ret = _ret + "$$$$" + ForTimes + "$;";
+            if (OutputText != "") _ret = _ret + "&&&&" + OutputText + "&;";
+            return _ret;
+        }
+
     }
 
     /// <summary>
@@ -461,7 +550,9 @@ namespace ArkHelper
                 //必须为false
                 Dispose(false);
             }
-            /// <summary>执行与释放或重置非托管资源关联的应用程序定义的任务。</summary>
+            /// <summary>
+            /// 执行与释放或重置非托管资源关联的应用程序定义的任务。
+            /// </summary>
             public void Dispose()
             {
                 //必须为true
@@ -488,8 +579,6 @@ namespace ArkHelper
                         File.Delete(Location);
                     }
                     catch { }
-
-
                 }
                 //清理非托管资源
 
@@ -673,7 +762,7 @@ namespace ArkHelper
                     }
                     //存储
                     List<Point> _points = new List<Point>();
-                    foreach(Point _point in FinallyPoints)
+                    foreach (Point _point in FinallyPoints)
                     {
                         _points.Add(_point);
                     }
@@ -887,12 +976,7 @@ namespace ArkHelper
             Emergency
         }
 
-        /// <summary>
-        /// 文字输出到文件
-        /// </summary>
-        /// <param name="content">内容</param>
-        /// <param name="file">文件路径</param>
-        public static void Text(string content, string file)
+        private static void Text(string content, string file)
         {
             if (File.Exists(file)) { } else { File.Create(file).Close(); } //检查有无该文件，无就创建
             StreamWriter output_stream = new StreamWriter(file, true) { AutoFlush = true }; //启动写入流
@@ -1094,7 +1178,7 @@ namespace ArkHelper
     /// <summary>
     /// 网络交互
     /// </summary>
-    public static class WithNet
+    public static class Net
     {
         /// <summary>
         /// 下载文件
@@ -1106,8 +1190,10 @@ namespace ArkHelper
             string cache = address + @".cache";
             if (!File.Exists(address))
             {
-                var web = new WebClient();
-                web.DownloadFile(url, cache);
+                using (var web = new WebClient())
+                {
+                    web.DownloadFile(url, cache);
+                }
                 Directory.Move(cache, address);
 
                 if (File.Exists(cache)) { File.Delete(cache); }
@@ -1136,67 +1222,6 @@ namespace ArkHelper
             {
                 goto start;
             }
-        }
-    }
-
-    /// <summary>
-    /// ArkHelper更新
-    /// </summary>
-    public static class Update
-    {
-        public static void Search()
-        {
-            //调用API 查找版本信息
-            var client = new RestClient("https://api.github.com/repos/ArkHelper/ArkHelper2.0/releases/latest");
-            var request = new RestRequest { Method = Method.Get };
-            var response = client.Execute(request);
-            var _result = JsonDocument.Parse(response.Content).RootElement;
-
-            //在json中取得最新版本号
-            string ver = _result.GetProperty("tag_name").GetString();
-            int tag = Convert.ToInt32(ver.Replace("v", "").Replace(".", ""));
-            var body = _result.GetProperty("body").GetString();
-            bool necessary = body.Contains("[NECESSARY]");
-
-            if (tag > Convert.ToInt32(Version.tag.Replace("v", "").Replace(".", "")))
-            {
-                var assets = _result.GetProperty("assets").EnumerateArray();
-                string url = "";
-                foreach (var asset in assets)
-                {
-                    if (asset.GetProperty("name").GetString() == "ArkHelper.zip")
-                    {
-                        url = asset.GetProperty("browser_download_url").GetString();
-                    }
-                }
-                /*
-                if (body.Contains("[URL]"))
-                {
-                    
-                }*/
-                new ToastContentBuilder()
-                    .AddArgument("kind", "Update")
-                    .AddArgument("UpdateIsNecessary", necessary.ToString())
-                    .AddArgument("url", url)
-                    .AddText("提示：ArkHelper有更新")
-                    .AddText("版本：" + ver)
-                    .AddText(necessary ? "正在更新中" : "点击本消息下载更新")
-                    .Show(); //通知
-                if (necessary) Apply(url);
-            }
-        }
-
-        public static void Apply(string url)
-        {
-            string address = Address.akh + "\\ArkHelper.zip";
-            WithNet.DownloadFile(url, address);//下载更新包
-            new ToastContentBuilder()
-                    .AddArgument("kind", "UpdateMessage")
-                    .AddText("提示")
-                    .AddText("ArkHelper更新完成")
-                    .AddText("正在启动中")
-                    .Show(); //通知*/
-            App.ExitApp();
         }
     }
 

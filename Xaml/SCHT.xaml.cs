@@ -160,9 +160,9 @@ namespace ArkHelper.Pages.OtherList
             App.Data.scht.server.id = server_combobox.SelectedValue.ToString();
         }
 
-        private string OpenFileAsAkhcpi()
+        public static string OpenFileAsAkhcpi()
         {
-            string aa = WithSystem.OpenFile("选择关卡配置", "ArkHelper关卡配置文件(*.akhcpi)|*.akhcpi");
+            string aa = WithSystem.OpenFile("选择关卡方案", "ArkHelper关卡方案文件(*.akhcpi)|*.akhcpi");
             return aa;
         }
 

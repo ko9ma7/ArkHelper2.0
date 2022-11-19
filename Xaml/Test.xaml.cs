@@ -107,13 +107,38 @@ namespace ArkHelper.Xaml
             /*ArkHelperDataStandard.Data cc =
                 JsonSerializer.Deserialize<ArkHelperDataStandard.Data>( new ArkHelper.ArkHelperDataStandard.AKHcpi());*/
             //var aaaa = new ArkHelperDataStandard.AKHcpi();
-            //aaaa.adcmd.Add(new ArkHelperDataStandard.AKHcmd("shell input tap 66 66", "", 3, 3));
+            //aaaa.adcmd.Add(new AKHcmd("shell input tap 66 66", "", 3, 3));
             //var ac = JsonSerializer.Serialize(aaaa);
             /*string aba = "";*/
             MessageBox.Show("");
 
         }
-        
+
+        private void Button_Drop(object sender, DragEventArgs e)
+        {
+            var fileName = ((System.Array)e.Data.GetData(DataFormats.FileDrop)).GetValue(0).ToString();
+            //
+        }
+
+        private void Button_DragOver(object sender, DragEventArgs e)
+        {
+            //MessageBox.Show("");
+        }
+
+        private void Button_DragEnter(object sender, DragEventArgs e)
+        {
+            // MessageBox.Show("");
+        }
+
+        private void Grid_DragEnter(object sender, DragEventArgs e)
+        {
+
+        }
+
+        private void Grid_Drop(object sender, DragEventArgs e)
+        {
+
+        }
     }
 }
 

@@ -12,6 +12,7 @@ using Windows.Data.Json;
 using System.Text.Json;
 using System.Collections.Generic;
 using Windows.ApplicationModel.VoiceCommands;
+using ArkHelper.Xaml;
 
 namespace ArkHelper.Pages.OtherList
 {
@@ -26,14 +27,14 @@ namespace ArkHelper.Pages.OtherList
         }
 
         #region standard
-        void Akhcmd(ArkHelperDataStandard.AKHcmd akhcmd)
+        void Akhcmd(AKHcmd akhcmd)
         {
             Info(akhcmd.OutputText);
             akhcmd.RunCmd();
         }
         void Akhcmd(string body, string show = "null", int wait = 0, int repeat = 1)
         {
-            var akhcmd = new ArkHelperDataStandard.AKHcmd(body, show, wait, repeat);
+            var akhcmd = new AKHcmd(body, show, wait, repeat);
             Akhcmd(akhcmd);
         }
 
@@ -323,18 +324,16 @@ namespace ArkHelper.Pages.OtherList
                 void GetCustomCp(string _unit)
                 {
                     var akhcpiaddress = _unit.Replace("custom:", "");
-                    var json = JsonSerializer.Deserialize<JsonElement>(File.ReadAllText(akhcpiaddress));
-                    var akhcmds = json.GetProperty("akhcmd").EnumerateArray();
-                    foreach (var akhcmd in akhcmds)
+                    foreach (var akhcmd in akhcpiMaker.ReadFromAKHcpi(akhcpiaddress))
                     {
-                        Akhcmd(akhcmd.GetString());
+                        Akhcmd(akhcmd);
                     }
                 }
                 //first
                 if (App.Data.scht.first.unit != "custom")
                 {
-                    new ArkHelperDataStandard.AKHcmd("zhongduan").RunCmd();
-                    new ArkHelperDataStandard.AKHcmd("ziyuanshouji").RunCmd();
+                    AKHcmd.FormatAKHcmd["zhongduan"].RunCmd();
+                    AKHcmd.FormatAKHcmd["ziyuanshouji"].RunCmd();
 
                     if (App.Data.scht.first.unit == "LS")
                     {
@@ -388,8 +387,8 @@ namespace ArkHelper.Pages.OtherList
                 //second
                 if (App.Data.scht.second.unit != "custom")
                 {
-                    new ArkHelperDataStandard.AKHcmd("zhongduan_menu_zhongduan").RunCmd();
-                    new ArkHelperDataStandard.AKHcmd("ziyuanshouji").RunCmd();
+                    AKHcmd.FormatAKHcmd["zhongduan_menu_zhongduan"].RunCmd();
+                    AKHcmd.FormatAKHcmd["ziyuanshouji"].RunCmd();
                     if (App.Data.scht.second.unit == "LS")
                     {
                         ADB.Tap(717, 374);
@@ -398,8 +397,8 @@ namespace ArkHelper.Pages.OtherList
                 }
                 else
                 {
-                    new ArkHelperDataStandard.AKHcmd("menu").RunCmd();
-                    new ArkHelperDataStandard.AKHcmd("menu_home").RunCmd();
+                    AKHcmd.FormatAKHcmd["menu"].RunCmd();
+                    AKHcmd.FormatAKHcmd["menu_home"].RunCmd();
                     GetCustomCp(App.Data.scht.second.unit);
                     goto UnitInited;
                 }

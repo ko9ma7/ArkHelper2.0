@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -44,7 +45,7 @@ namespace ArkHelper.Pages
                 {
                     // 微博
                     case ArkHelperDataStandard.MessageSource.weibo:
-                        JsonElement _userinfo = WithNet.GetFromApi("https://m.weibo.cn/api/container/getIndex?type=uid&value=" + UID).GetProperty("data").GetProperty("userInfo");
+                        JsonElement _userinfo = Net.GetFromApi("https://m.weibo.cn/api/container/getIndex?type=uid&value=" + UID).GetProperty("data").GetProperty("userInfo");
                         Avatar = _userinfo.GetProperty("profile_image_url").GetString();
                         Name = _userinfo.GetProperty("screen_name").GetString();
                         break;
@@ -59,7 +60,7 @@ namespace ArkHelper.Pages
                     string[] _ava = Directory.GetFiles(Address.Cache.message, ID + "_avatar.*");
                     if (_ava.Length == 0)
                     {
-                        WithNet.DownloadFile(Avatar, Address.Cache.message + "\\" + ID + "_avatar.jpg");
+                        Net.DownloadFile(Avatar, Address.Cache.message + "\\" + ID + "_avatar.jpg");
                     }
                     Avatar = Address.Cache.message + "\\" + ID + "_avatar.jpg";
                 }
@@ -77,7 +78,7 @@ namespace ArkHelper.Pages
                     case ArkHelperDataStandard.MessageSource.weibo:
                         for (int page = 1; ; page++)
                         {
-                            var _getresult = WithNet.GetFromApi("https://m.weibo.cn/api/container/getIndex?type=uid&value=" + UID + @"&containerid=107603" + UID + "&page=" + page);
+                            var _getresult = Net.GetFromApi("https://m.weibo.cn/api/container/getIndex?type=uid&value=" + UID + @"&containerid=107603" + UID + "&page=" + page);
 
                             if (_getresult.GetProperty("ok").GetInt16() == 0) break; //返回错误就停
                             var cards = _getresult.GetProperty("data").GetProperty("cards"); //提取卡片
@@ -354,7 +355,7 @@ namespace ArkHelper.Pages
                         string smallfile = Address.Cache.message + "\\" + "small_" + filename;
                         if (!File.Exists(smallfile))
                         {
-                            WithNet.DownloadFile(media.Small, smallfile);
+                            Net.DownloadFile(media.Small, smallfile);
                         }
                         media.Small = smallfile;
                     }
@@ -367,7 +368,7 @@ namespace ArkHelper.Pages
                         string file = Address.Cache.message + "\\" + filename;
                         if (!File.Exists(file))
                         {
-                            WithNet.DownloadFile(media.Link, file);
+                            Net.DownloadFile(media.Link, file);
                         }
                         media.Link = file;
 
@@ -419,21 +420,36 @@ namespace ArkHelper.Pages
         {
             Task.Run(() =>
             {
-                Application.Current.Dispatcher.Invoke(() =>
+                if (App.Data.message.status)
                 {
-                    pgb.Visibility = Visibility.Visible;
-                    MessageListDock.Children.Clear();
-                    UserListXaml.Children.Clear();
-                });
-                while (!App.isMessageInited)
-                {
-                    Thread.Sleep(2000);
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        pgb.Visibility = Visibility.Visible;
+                        //MessageListDock.Children.Clear();
+                        off.Visibility = Visibility.Collapsed;
+                        cancel.Visibility = Visibility.Visible;
+                        //UserListXaml.Children.Clear();
+                    });
+                    while (!App.isMessageInited)
+                    {
+                        Thread.Sleep(2000);
+                    }
+                    foreach (ArkHelperMessage akms in App.messages)
+                    {
+                        Messages.Add(akms);
+                    }
+                    Messages.Sort();
                 }
-                foreach (ArkHelperMessage akms in App.messages)
+                else
                 {
-                    Messages.Add(akms);
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        pgb.Visibility = Visibility.Collapsed;
+                        off.Visibility = Visibility.Visible;
+                        cancel.Visibility = Visibility.Collapsed;
+                    });
+                    return;
                 }
-                Messages.Sort();
 
                 Thread.Sleep(300);
                 Application.Current.Dispatcher.Invoke(() =>
@@ -473,7 +489,7 @@ namespace ArkHelper.Pages
                     {
                         Width = 220,
                         Tag = messageCard,
-                        ContentStringFormat = message.CreateAt.Month + "月" + message.CreateAt.Day + "日",
+                        ContentStringFormat = ((message.CreateAt.Year != DateTime.Now.Year) ? (message.CreateAt.Year + "年") : "") + message.CreateAt.Month + "月" + message.CreateAt.Day + "日",
                         Style = (System.Windows.Style)FindResource("RadioButtonDock")
                     };
                     radioButton.Click += Btn_Click;
@@ -561,7 +577,7 @@ namespace ArkHelper.Pages
                     HorizontalAlignment = HorizontalAlignment.Left
                 };
 
-                if(_message.Medias.Count > 3)
+                if (_message.Medias.Count > 3)
                 {
                     imageWrapPanel.MaxWidth = 315;
                 }
@@ -796,5 +812,22 @@ namespace ArkHelper.Pages
             if (isBottom) { InitCard(); }
         }
         #endregion
+
+        private void Hyperlink_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                App.MessageInit.Start();
+            }
+            catch { }
+            App.Data.message.status = true;
+            InitFromBlank();
+        }
+
+        private void cancel_Click(object sender, RoutedEventArgs e)
+        {
+            App.Data.message.status = false;
+            WithSystem.Message("功能已禁用                       ", "ArkHelper下次启动时生效");
+        }
     }
 }

@@ -5,7 +5,9 @@ using System.Diagnostics;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 using System.Windows;
+using static System.Windows.Forms.LinkLabel;
 using Page = System.Windows.Controls.Page;
 
 namespace ArkHelper.Xaml
@@ -49,8 +51,11 @@ namespace ArkHelper.Xaml
             {
                 string ret = "";
                 ret += IsNew ? "[新]" : "";
-                for (int i = 0; i > Rare; ret += "⭐") ;
                 ret += Name;
+                for (int i = 0; i <= Rare;i++ )
+                {
+                    ret += "★";
+                };
                 return ret;
             }
         }
@@ -83,7 +88,8 @@ namespace ArkHelper.Xaml
         private void GetResult()
         {
             Lists.Clear();
-            int totalPage = get(1).GetProperty("data").GetProperty("pagination").GetProperty("total").GetInt32();
+            var res = get(1);
+            int totalPage = res.GetProperty("data").GetProperty("pagination").GetProperty("total").GetInt32();
             if (totalPage == 0) return;
             else
             {
@@ -105,7 +111,7 @@ namespace ArkHelper.Xaml
         /// <returns>错误类型</returns>
         public bool IsTokenUseful()
         {
-            var userdata = WithNet.GetFromApi("https://as.hypergryph.com/user/info/v1/basic?token=" + Token);
+            var userdata = Net.GetFromApi("https://as.hypergryph.com/user/info/v1/basic?token=" + Token);
             if (userdata.TryGetProperty("error", out var error)) return false; //Token无效返回
             return true;
         }
@@ -167,7 +173,7 @@ namespace ArkHelper.Xaml
             try
             {
                 var aa = JsonSerializer.Deserialize<JsonElement>(TokenJsonTextBox.Text);
-                Token = aa.GetProperty("data").GetProperty("content").GetString();
+                Token = HttpUtility.UrlEncode(aa.GetProperty("data").GetProperty("content").GetString());
             }
             catch
             {
@@ -215,7 +221,7 @@ namespace ArkHelper.Xaml
         private void ListBox_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             var result = (System.Windows.Controls.ListBox)e.Source;
-            var b = result.SelectedValue;
+            string b = result.SelectedValue.ToString().Replace("[新]","").Replace("★","");
             Process.Start("https://prts.wiki/w/" + b);
         }
     }
