@@ -188,7 +188,7 @@ namespace ArkHelper.Pages.OtherList
                 Akhcmd("shell input tap 962 555", "/// 指令：确认", 5);
                 if (AMmode == true)
                 {
-                    void _Buy(int x, int y)
+                    void Buy(int x, int y)
                     {
                         Akhcmd("shell input tap " + x + " " + y, "/// 指令：商品", 2);
                         Akhcmd("shell input tap 1042 655", "/// 指令：购买物品", 3);
@@ -209,17 +209,17 @@ namespace ArkHelper.Pages.OtherList
                     Akhcmd("shell input tap 722 719", "/// 指令：收取", 2);
                     Akhcmd("shell input tap 746 51", "/// 指令：", 2);
 
-                    _Buy(146, 309);
-                    _Buy(426, 290);
-                    _Buy(716, 298);
-                    _Buy(1010, 300);
-                    _Buy(1290, 305);
+                    Buy(146, 309);
+                    Buy(426, 290);
+                    Buy(716, 298);
+                    Buy(1010, 300);
+                    Buy(1290, 305);
 
-                    _Buy(160, 592);
-                    _Buy(443, 578);
-                    _Buy(733, 608);
-                    _Buy(997, 592);
-                    _Buy(1290, 583);
+                    Buy(160, 592);
+                    Buy(443, 578);
+                    Buy(733, 608);
+                    Buy(997, 592);
+                    Buy(1290, 583);
 
                     Akhcmd("shell input tap 299 46", "/// 指令：菜单", 1);
                     Akhcmd("shell input tap 103 305", "/// 指令：首页", 3);
@@ -330,7 +330,7 @@ namespace ArkHelper.Pages.OtherList
                     }
                 }
                 //first
-                if (App.Data.scht.first.unit != "custom")
+                if (!App.Data.scht.first.unit.Contains("custom"))
                 {
                     AKHcmd.FormatAKHcmd["zhongduan"].RunCmd();
                     AKHcmd.FormatAKHcmd["ziyuanshouji"].RunCmd();
@@ -385,7 +385,7 @@ namespace ArkHelper.Pages.OtherList
                     goto UnitInited;
                 }
                 //second
-                if (App.Data.scht.second.unit != "custom")
+                if (!App.Data.scht.second.unit.Contains("custom"))
                 {
                     AKHcmd.FormatAKHcmd["zhongduan_menu_zhongduan"].RunCmd();
                     AKHcmd.FormatAKHcmd["ziyuanshouji"].RunCmd();
