@@ -214,7 +214,7 @@ namespace ArkHelper
                 App.LoadData();
                 if (
                    e.Args.Contains("SCHT")
-                ||true
+                //||true
                 )
                 {
                     if (!Data.scht.status)
