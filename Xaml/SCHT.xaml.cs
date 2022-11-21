@@ -3,6 +3,8 @@ using System.Windows.Controls;
 using System.Data;
 using System;
 using ArkHelper.Xaml;
+using ArkHelper.Xaml.NewUser;
+using System.IO;
 
 namespace ArkHelper.Pages.OtherList
 {
@@ -12,6 +14,16 @@ namespace ArkHelper.Pages.OtherList
         public SCHT()
         {
             InitializeComponent();
+
+            nextRunTime.Text = ArkHelper.Xaml.Widget.SCHTstatus.GetTime();
+            foreach(ArkHelper.PinnedData.Simulator.SimuInfo simulator in ArkHelper.PinnedData.Simulator.Support)
+            {
+                SimuSupport.Text+=simulator.Name + " ";
+            }
+            if (File.Exists(Address.dataExternal + "\\simulator.lnk"))
+            {
+                SimuSel.Visibility = Visibility.Collapsed;
+            }
 
             //UI
             server_combobox.ItemsSource = PinnedData.Server.dataSheet.DefaultView;
@@ -110,7 +122,7 @@ namespace ArkHelper.Pages.OtherList
                 }
                 else
                 {
-                    App.Data.scht.first.unit = unit + ":" + cpiAddress;
+                    App.Data.scht.first.unit = unit + ":##" + cpiAddress + "##";
                 }
             }
             else
@@ -134,7 +146,7 @@ namespace ArkHelper.Pages.OtherList
                 }
                 else
                 {
-                    App.Data.scht.second.unit = unit + ":" + cpiAddress;
+                    App.Data.scht.second.unit = unit + ":##" + cpiAddress + "##";
                 }
             }
             else
@@ -174,6 +186,14 @@ namespace ArkHelper.Pages.OtherList
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             new akhcpiMaker().Show();
+        }
+
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            if(Setting.SelectSimu() != "")
+            {
+                SimuSel.Visibility = Visibility.Collapsed;
+            };
         }
     }
 }

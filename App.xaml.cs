@@ -3,6 +3,7 @@ using Microsoft.Toolkit.Uwp.Notifications;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -25,6 +26,10 @@ namespace ArkHelper
         }
         public static void SaveData()
         {
+            if (!File.Exists(Address.config))
+            {
+                File.Create(Address.config).Dispose();
+            }
             File.WriteAllText(Address.config, JsonSerializer.Serialize(App.Data));
         }
         #endregion
@@ -37,47 +42,53 @@ namespace ArkHelper
             Icon = new System.Drawing.Icon(Address.res + "\\ArkHelper.ico")
         };
         static ContextMenu NotifyIconMenu;
-        public static bool IsMainWindowInShow = false;
-        public static bool isexit = false; //确定退出
+        public static bool OKtoOpenSCHT = true;
         public void NotifyClick(object sender, System.Windows.Forms.MouseEventArgs e)
         {
             if (e.Button == System.Windows.Forms.MouseButtons.Left)//左键被按下
             {
-                notifyIcon.Visible = false;
                 OpenMainWindow();
             }
             else //右键按下
             {
                 NotifyIconMenu.IsOpen = true;
-                NotifyIconMenu.Visibility = Visibility.Visible;
             }
         }
         private void MenuOpen_Click(object sender, RoutedEventArgs e)
         {
             MenuItem menuItemClicked = sender as MenuItem;
-            notifyIcon.Visible = false;
             if (menuItemClicked.Name == "MenuOpen")
             {
                 OpenMainWindow();
             }
             if (menuItemClicked.Name == "MenuExit")
             {
-                OpenMainWindow();
                 ExitApp();
             }
         }
-        private void OpenMainWindow()
+
+        public void OpenMainWindow()
         {
-            if (!IsMainWindowInShow)
+            bool windowIsOpen = false;
+            Application.Current.Dispatcher.Invoke(delegate
             {
-                new MainWindow().Show();
-                IsMainWindowInShow = true;
-            }
+                foreach (Window window in Application.Current.Windows)
+                {
+                    if (window.GetType() == typeof(MainWindow))
+                    {
+                        windowIsOpen = true;
+                    }
+                }
+            });
+            if (!windowIsOpen) new MainWindow().Show();
         }
+
         public static void ExitApp()
         {
-            isexit = true;
-            Application.Current.Dispatcher.Invoke(() => Current.Shutdown());
+            notifyIcon.Visible = false;
+            App.SaveData();
+            Process.GetCurrentProcess().Kill();
+            Current.Shutdown();
         }
         #endregion
 
@@ -161,12 +172,20 @@ namespace ArkHelper
         });
         #endregion
 
-        #region 主页
-        public static bool IsMissionRunning = false;
-        #endregion
-
         private void Application_Startup(object sender, StartupEventArgs e)
         {
+            #region shutdown
+            this.ShutdownMode = ShutdownMode.OnExplicitShutdown;
+            #endregion
+
+            #region 检测启动
+            if (Process.GetProcessesByName("ArkHelper").Count() > 1)
+            {
+                MessageBox.Show("ArkHelper已经在运行。", "ArkHelper");
+                ExitApp();
+            }
+            #endregion
+
             #region 监听toast
             ToastNotificationManagerCompat.OnActivated += toastArgs =>
             {
@@ -180,18 +199,10 @@ namespace ArkHelper
                         OpenMainWindow();
                     });
                 }
-                /*if (args["kind"].ToString() == "Update")
-                {
-                    if (args["UpdateIsNecessary"] == "false")
-                    {
-                        Update.Apply(args["url"].ToString());
-                    }
-                }*/
             };
             #endregion
 
             #region 托盘和后台
-            ShutdownMode = ShutdownMode.OnExplicitShutdown;
             NotifyIconMenu = (ContextMenu)FindResource("NotifyIconMenu"); //右键菜单
             App.notifyIcon.MouseClick += NotifyClick; //绑定事件
             #endregion
@@ -199,47 +210,72 @@ namespace ArkHelper
             #region 更新
             Task update = Task.Run(() =>
             {
-                //Update.Search();
+                Version.Update.Search();
             });
             #endregion
 
-            PinnedData.Server.Load();
+            PinnedData.Server.Load();//fu
+
             if (!File.Exists(Address.config)) //配置文件缺失
             {
-                if (Directory.Exists(Address.programData)) { Directory.Delete(Address.programData, true); } //删除残缺的数据文件
-                new NewUser().ShowDialog(); //导航到新用户窗口
+                //if (Directory.Exists(Address.programData)) { Directory.Delete(Address.programData, true); } //删除残缺的数据文件
+                //new NewUser().ShowDialog(); //导航到新用户窗口
+                var win = new NewUserPolicyWindow();
+                win.ShowDialog();
             }
-            else //main
+            try
             {
                 App.LoadData();
-                if (
-                   e.Args.Contains("SCHT")
-                //||true
-                )
-                {
-                    if (!Data.scht.status)
-                    {
-                        ExitApp();
-                    }
-                    mainArg = new ArkHelperArg(ArkHelperDataStandard.ArkHelperArg.ArgKind.Navigate, "SCHTRunning", "MainWindow");
-                }
-                if (e.Args.Contains("test"))
-                {
-                    MessageBox.Show("test");
-                }
                 OpenMainWindow();
-                #region 启动message装载
-                
-                if (Data.message.status)
-                    MessageInit.Start();
-                #endregion
-                #region 启动ADB连接
-                Task adbConnect = Task.Run(() =>
-                {
-                    for (; ; Thread.Sleep(3000)) ADB.Connect();
-                });
-                #endregion
+                notifyIcon.Visible = true;
             }
+            catch
+            {
+                Current.Shutdown();
+            }
+
+            #region 启动message装载
+
+            if (Data.message.status)
+                MessageInit.Start();
+            #endregion
+            #region 启动ADB连接
+            Task adbConnect = Task.Run(() =>
+            {
+                for (; ; Thread.Sleep(3000)) ADB.Connect();
+            });
+            #endregion
+            #region SCHT等待
+            Task SCHT = Task.Run(() =>
+            {
+                for (; ; Thread.Sleep(1000))
+                {
+                    //
+                    if ((DateTime.Now.Hour == 7 || DateTime.Now.Hour == 19) && DateTime.Now.Minute == 58 && OKtoOpenSCHT && Data.scht.status)
+                    {
+                        if (Data.scht.fcm.status)
+                        {
+                            if (DateTime.Now.Hour == 7 || !(DateTime.Now.DayOfWeek == DayOfWeek.Friday || DateTime.Now.DayOfWeek == DayOfWeek.Saturday || DateTime.Now.DayOfWeek == DayOfWeek.Sunday))
+                                goto end;
+                        }
+                        OKtoOpenSCHT = false;
+                        Application.Current.Dispatcher.Invoke(delegate
+                        {
+                            foreach (Window window in Application.Current.Windows)
+                            {
+                                if (window.GetType() == typeof(MainWindow))
+                                {
+                                    window.Close();
+                                    mainArg = new ArkHelperArg(ArkHelperDataStandard.ArkHelperArg.ArgKind.Navigate, "SCHTRunning", "MainWindow");
+                                    OpenMainWindow();
+                                }
+                            }
+                        });
+                    }
+                end:;
+                }
+            });
+            #endregion
         }
     }
 }

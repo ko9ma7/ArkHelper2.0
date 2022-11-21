@@ -323,7 +323,7 @@ namespace ArkHelper.Pages.OtherList
                 }
                 void GetCustomCp(string _unit)
                 {
-                    var akhcpiaddress = _unit.Replace("custom:", "");
+                    var akhcpiaddress = _unit.Replace("custom:##", "").Replace("##","");
                     foreach (var akhcmd in akhcpiMaker.ReadFromAKHcpi(akhcpiaddress))
                     {
                         Akhcmd(akhcmd);
@@ -403,6 +403,7 @@ namespace ArkHelper.Pages.OtherList
                     goto UnitInited;
                 }
             NativeUnitInited:;
+                Thread.Sleep(2000);
                 TouchCp();
             UnitInited:;
 
@@ -449,7 +450,7 @@ namespace ArkHelper.Pages.OtherList
                 Akhcmd("shell input tap 908 676", "/// 指令：任务", 2);
                 Akhcmd("shell input tap 767 41", "/// 指令：日常任务", 3);
                 Akhcmd("shell input tap 1246 168", "/// 指令：收集", 2, 3);
-                if (week == DayOfWeek.Sunday)
+                if (week == DayOfWeek.Sunday||App.Data.scht.fcm.status)
                 {
                     Akhcmd("shell input tap 1051 51", "/// 指令：周常任务", 3);
                     Akhcmd("shell input tap 1246 168", "/// 指令：收集", 2, 3);
@@ -458,10 +459,12 @@ namespace ArkHelper.Pages.OtherList
                 GetScreenshot(Address.Screenshot.SCHT, ArkHelperDataStandard.Screenshot);
                 WithSystem.KillSimulator();
                 Info("/// 正在关闭模拟器...");
-                Info("/// 系统任务运行完毕。正在终止...");
-                new ToastContentBuilder().AddArgument("kind", "SCHT").AddText("提示：定时事项处理指挥器任务已结束").AddText("开始时间：" + starttime + "\n" + "结束时间：" + DateTime.Now.ToString("g") + "\n" + "即将关闭运行终端...").Show(); //结束通知
+                Info("/// 系统任务运行完毕。");
+                new ToastContentBuilder().AddArgument("kind", "SCHT").AddText("提示：定时事项处理指挥器任务已结束").AddText("开始时间：" + starttime + "\n" + "结束时间：" + DateTime.Now.ToString("g")).Show(); //结束通知
                 Thread.Sleep(2000);
-                Application.Current.Dispatcher.Invoke(() => App.ExitApp());
+
+                App.OKtoOpenSCHT = true;
+                Application.Current.Dispatcher.Invoke(() => (Window.GetWindow(this)).Close());
             });
         }
     }

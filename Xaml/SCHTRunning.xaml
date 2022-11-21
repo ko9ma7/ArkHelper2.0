@@ -16,12 +16,12 @@
         <ScrollViewer VerticalScrollBarVisibility="Visible">
 
 
-            <StackPanel Orientation="Vertical">
+            <WrapPanel Orientation="Vertical">
                 <!--  标题  -->
                 <akhc:Title Icon="ThermostatAuto" Text="RHODES ISLAND™ 定时事项处理指挥器运行中" />
                 <!--  运行列表  -->
                 <ListBox x:Name="loglist" />
-            </StackPanel>
+            </WrapPanel>
         </ScrollViewer>
         <ProgressBar Margin="0,0,50,50"
                      HorizontalAlignment="Right"

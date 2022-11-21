@@ -5,12 +5,11 @@ namespace ArkHelper.Xaml.Widget
 {
     public partial class SCHTstatus : Page
     {
-        public SCHTstatus()
+        public static string GetTime()
         {
-            InitializeComponent();
+            string res = "";
             if (App.Data.scht.status)
             {
-                SCHT_status.Text = "正常运行中";
                 if (App.Data.scht.fcm.status)
                 {
                     //防沉迷
@@ -22,17 +21,17 @@ namespace ArkHelper.Xaml.Widget
                         case DayOfWeek.Saturday:
                             if (dateTime.Hour < 20)
                             {
-                                time_NextSCHT.Text = dateTime.ToString("M") + " 下午 7:58";
+                                res = dateTime.ToString("M") + " 下午 7:58";
                             }
                             else
                             {
-                                time_NextSCHT.Text = dateTime.AddDays(1).ToString("M") + " 下午 7:58";
+                                res= dateTime.AddDays(1).ToString("M") + " 下午 7:58";
                             }
                             break;
                         default:
                             if (dateTime.DayOfWeek == DayOfWeek.Sunday && dateTime.Hour < 20)
                             {
-                                time_NextSCHT.Text = time_NextSCHT.Text = dateTime.ToString("M") + " 下午 7:58";
+                                res= dateTime.ToString("M") + " 下午 7:58";
                             }
                             else
                             {
@@ -40,7 +39,7 @@ namespace ArkHelper.Xaml.Widget
                                     dateTime.AddDays(a).DayOfWeek <= DayOfWeek.Friday;
                                     a += 1)
                                 {
-                                    time_NextSCHT.Text = dateTime.AddDays(a).ToString("M") + " 下午 7:58";
+                                    res= dateTime.AddDays(a).ToString("M") + " 下午 7:58";
                                 }
                             }
                             break;
@@ -50,15 +49,29 @@ namespace ArkHelper.Xaml.Widget
                 {
                     //非防沉迷
                     int a = Convert.ToInt32(DateTime.Now.ToString("HH"));
-                    if (a < 8) { time_NextSCHT.Text = DateTime.Now.ToString("M") + " 上午 7:58"; }
-                    else { time_NextSCHT.Text = DateTime.Now.ToString("M") + " 下午 7:58"; }
+                    if (a < 8) { res= DateTime.Now.ToString("M") + " 上午 7:58"; }
+                    else { res= DateTime.Now.ToString("M") + " 下午 7:58"; }
                 }
             }
             else
             {
-                SCHT_status.Text = "已禁用";
-                time_NextSCHT.Text = "不会运行";
+                res= "不会运行";
             }
+            return res;
+        }
+        public SCHTstatus()
+        {
+            InitializeComponent();
+            if (App.Data.scht.status)
+            {
+                SCHT_status.Text = "正常运行中";
+            }
+            else
+            {
+                SCHT_status.Text = "已禁用";
+            }
+
+            time_NextSCHT.Text = GetTime();
         }
     }
 }

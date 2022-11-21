@@ -153,10 +153,5 @@ namespace ArkHelper.Style.Control
         {
             moveEvent(Num, false);
         }
-
-        private void Button_Click_3(object sender, RoutedEventArgs e)
-        {
-            Num = 777;
-        }
     }
 }
