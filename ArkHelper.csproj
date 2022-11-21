@@ -391,4 +391,9 @@
     <Resource Include="Asset\ArkHelper.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>rmdir /s /q $(TargetDir)\external
+md $(TargetDir)\external
+xcopy $(ProjectDir)\external $(TargetDir)\external /s /e</PostBuildEvent>
+  </PropertyGroup>
 </Project>

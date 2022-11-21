@@ -26,12 +26,17 @@
                            Foreground="Gray"
                            ToolTip="您只有已阅读并接受《ArkHelper最终用户许可协议》和《ArkHelper隐私政策》，才有权使用本软件。">
                     <Run Text="我已同意" />
-                    <Run Text=" " /><Hyperlink Click="Hyperlink_Click" Foreground="Gray">
+                    <Run Text=" " />
+                    <Hyperlink Click="Hyperlink_Click" Foreground="Gray">
                         <Run Text="《ArkHelper最终用户许可协议》" />
-                    </Hyperlink><Run Text=" " /><Run Text="和" /><Run Text=" " /><Hyperlink Click="Hyperlink_Click1" Foreground="Gray">
+                    </Hyperlink>
+                    <Run Text=" " />
+                    <Run Text="和" />
+                    <Run Text=" " />
+                    <Hyperlink Click="Hyperlink_Click1" Foreground="Gray">
                         <Run Text="《ArkHelper隐私政策》" />
                     </Hyperlink></TextBlock>
-
+                <!--    -->
             </WrapPanel>
             <Button x:Name="next"
                     Margin="0,15,0,0"
