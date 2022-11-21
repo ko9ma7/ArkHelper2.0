@@ -41,12 +41,12 @@ namespace ArkHelper.Xaml
                 new Menu("寻访记录查询","UserData_Gacha",PackIconKind.AccountCheck),
                 new Menu("SCHT控制台","SCHT",PackIconKind.ThermostatAuto,false),
                 //new Menu("材料计算器","MaterialCalc",PackIconKind.Material),
-                new Menu("SCHT","SCHTRunning",PackIconKind.ThermostatAuto,true),
+                new Menu("SCHT","SCHTRunning",PackIconKind.ThermostatAuto,false),
             },
             new List<Menu>()
             {
                 new Menu("设置","Setting",PackIconKind.Settings),
-                new Menu("Test","Test",PackIconKind.TestTube),
+                //new Menu("Test","Test",PackIconKind.TestTube),
             },
         };
         #endregion
@@ -56,10 +56,10 @@ namespace ArkHelper.Xaml
         #region 动画
         ThicknessAnimation FrameThicknessAnimation = new ThicknessAnimation()
         {
-            From = new Thickness(-20,0,20,0),
+            From = new Thickness(-20, 0, 20, 0),
             DecelerationRatio = 0.7,
-            To = new Thickness(0,0,0,0),
-            Duration = new TimeSpan(0,0,0,0,300)
+            To = new Thickness(0, 0, 0, 0),
+            Duration = new TimeSpan(0, 0, 0, 0, 300)
         };
         DoubleAnimation FrameOpacityAnimation = new DoubleAnimation()
         {
@@ -138,7 +138,7 @@ namespace ArkHelper.Xaml
             }
         end:;
 
-            
+
             if (ThisFrame != null)
             {
                 if (ThisFrame.Tag.ToString() == page)
@@ -236,27 +236,14 @@ namespace ArkHelper.Xaml
 
         private void Window_Closing(object sender, CancelEventArgs e)
         {
-            if (App.IsMissionRunning)
-            {
-                e.Cancel = true;
-                WithSystem.Message("任务正在运行，暂时无法关闭ArkHelper");
-                return;
-            }
             App.SaveData();
             if (App.Data.arkHelper.pure && !App.Data.scht.status)
             {
-                Application.Current.Shutdown();
+                App.ExitApp();
             }
             else
             {
-                App.notifyIcon.Visible = !App.isexit;
-                App.IsMainWindowInShow = false;
-                if (!App.isexit)
-                {
-                    new ToastContentBuilder().AddArgument("kind", "Background").AddText("提示").AddText("ArkHelper已进入后台运行").Show();
-                }
-
-                WithSystem.GarbageCollect();
+                new ToastContentBuilder().AddArgument("kind", "Background").AddText("提示").AddText("ArkHelper已进入后台运行").Show();
             }
         }
         #endregion

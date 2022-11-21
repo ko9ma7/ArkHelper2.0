@@ -58,10 +58,68 @@
     </Page.Resources>
 
     <ScrollViewer>
-        <DockPanel LastChildFill="False">
+        <StackPanel>
             <akhc:Title DockPanel.Dock="Top"
                         Icon="ThermostatAuto"
                         Text="RHODES ISLAND™ 定时事项处理指挥器控制台" />
+
+            <StackPanel Margin="0,0,40,20" DockPanel.Dock="Top">
+                <Border Background="#BBEFEFEF" CornerRadius="12">
+                    <Expander Background="Transparent" IsExpanded="True">
+                        <Expander.Header>
+                            <WrapPanel HorizontalAlignment="Center">
+                                <materialDesign:PackIcon Width="20"
+                                                         Height="20"
+                                                         VerticalAlignment="Center"
+                                                         Kind="HelpCircleOutline" />
+                                <TextBlock Margin="10,0,0,0"
+                                           VerticalAlignment="Center"
+                                           FontSize="20">
+                                    说明
+                                </TextBlock>
+                            </WrapPanel>
+                        </Expander.Header>
+                        <WrapPanel Margin="20,0,20,20" Orientation="Vertical">
+                            <WrapPanel Name="SimuSel"
+                                       Margin="5"
+                                       Orientation="Vertical">
+                                <TextBlock FontSize="{StaticResource h2}" Foreground="Red">
+                                    警告
+                                </TextBlock>
+                                <Button BorderBrush="Red"
+                                        Click="Button_Click_1"
+                                        Foreground="Red"
+                                        Style="{StaticResource MaterialDesignOutlinedButton}">
+                                    未选择模拟器快捷方式
+                                </Button>
+
+                            </WrapPanel>
+                            <WrapPanel Margin="5" Orientation="Vertical">
+                                <TextBlock FontSize="{StaticResource h2}">运行时间</TextBlock>
+                                <TextBlock>星期一至星期日每天7:58、19:58</TextBlock>
+                                <TextBlock>星期五至星期日每天19:58（防沉迷模式）</TextBlock>
+                                <TextBlock>
+                                    下次运行：<Run Name="nextRunTime" /></TextBlock>
+                            </WrapPanel>
+
+                            <WrapPanel Margin="5" Orientation="Vertical">
+                                <TextBlock FontSize="{StaticResource h2}">注意</TextBlock>
+                                <TextBlock>任务执行前需确保电脑开启、ArkHelper在后台运行、电脑UAC已关闭（UAC会阻断任务运行）</TextBlock>
+                            </WrapPanel>
+                            <WrapPanel Margin="5" Orientation="Vertical">
+                                <TextBlock FontSize="{StaticResource h2}">运行范围</TextBlock>
+                                <TextBlock>启动模拟器；指定关卡作战；邮件附件收取；线索交流；信用商店消费；剿灭作战；任务奖励收取等</TextBlock>
+                            </WrapPanel>
+                            <WrapPanel Margin="5" Orientation="Vertical">
+                                <TextBlock FontSize="{StaticResource h2}">目前支持的模拟器</TextBlock>
+                                <TextBlock Name="SimuSupport" />
+                                <TextBlock>（设置中可以自定义模拟器连接）</TextBlock>
+                            </WrapPanel>
+
+                        </WrapPanel>
+                    </Expander>
+                </Border>
+            </StackPanel>
 
             <Grid Margin="0,0,20,0" DockPanel.Dock="Top">
                 <Grid.ColumnDefinitions>
@@ -419,6 +477,6 @@
 
             <Grid Height="80" />
 
-        </DockPanel>
+        </StackPanel>
     </ScrollViewer>
 </Page>

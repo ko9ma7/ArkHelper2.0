@@ -10,7 +10,6 @@
       d:DesignHeight="450"
       d:DesignWidth="652"
       Background="White"
-      
       mc:Ignorable="d">
 
     <Grid>
@@ -140,11 +139,6 @@
                         <akhc:Break />
 
                         <TextBlock FontSize="{StaticResource p}">
-                            <Run>数据保存地址：</Run>
-                            <Run Name="address">测试地址</Run>
-                        </TextBlock>
-
-                        <TextBlock FontSize="{StaticResource p}">
                             <Hyperlink Click="Hyperlink_github">开源仓库地址</Hyperlink>
                         </TextBlock>
 
@@ -158,6 +152,11 @@
                         <TextBlock FontSize="{StaticResource p}">
                             <Hyperlink Click="Hyperlink_EULA">《ArkHelper最终用户许可协议》</Hyperlink>
                             <Hyperlink Click="Hyperlink_PriPol">《ArkHelper隐私政策》</Hyperlink>
+                        </TextBlock>
+
+                        <TextBlock FontSize="{StaticResource p}" Foreground="Gray">
+                            <Run>数据保存地址：</Run>
+                            <Run Name="address">测试地址</Run>
                         </TextBlock>
                     </StackPanel>
 

@@ -34,15 +34,11 @@ namespace ArkHelper
         /// <summary>
         /// 版本号
         /// </summary>
-        public readonly static string tag = "v1.9.9.9";
+        public readonly static string tag = "v2.0.0.0";
         /// <summary>
         /// 版本种类
         /// </summary>
         public readonly static Kind kind = Kind.realese;
-        /// <summary>
-        /// ArkHelperConfig版本
-        /// </summary>
-        public readonly static double ArkHelperConfig = 1.0;
         public enum Kind
         {
             realese,
@@ -83,15 +79,23 @@ namespace ArkHelper
                     {
 
                     }*/
-                    new ToastContentBuilder()
+                    /*new ToastContentBuilder()
                         .AddArgument("kind", "Update")
                         .AddArgument("UpdateIsNecessary", necessary.ToString())
                         .AddArgument("url", url)
                         .AddText("提示：ArkHelper有更新")
                         .AddText("版本：" + ver)
-                        .AddText(necessary ? "正在更新中" : "点击本消息下载更新")
-                        .Show(); //通知
-                    if (necessary) Apply(url);
+                        //.AddText(necessary ? "正在更新中" : "点击本消息下载更新")
+                        .AddText("点击获取更新")
+                        .Show(); //通知*/
+                    MessageBox.Show("ArkHelper有更新。", "ArkHelper");
+                    Process.Start("https://github.com/ArkHelper/ArkHelper2.0/releases");
+                    if (necessary)
+                    {
+                        //Apply(url);
+                        MessageBox.Show("本次更新为必要更新，更新后才能使用ArkHelper。");
+                        App.ExitApp();
+                    }
                 }
             }
 
@@ -230,6 +234,8 @@ namespace ArkHelper
                 {
                     public bool status { get; set; } = false;
                 }
+
+                public bool showHelperInSCHT { get; set; } = true;
             }
 
             public Message message { get; set; } = new Message();
@@ -941,21 +947,31 @@ namespace ArkHelper
 
         public static void Create()
         {
+            void CD(string add)
+            {
+                try
+                {
+                    Directory.CreateDirectory(add);
+                }
+                catch
+                {
+
+                }
+            }
             //创建目录
-            Directory.CreateDirectory(programData);
+            CD(programData);
 
-            Directory.CreateDirectory(data);
-            Directory.CreateDirectory(log);
+            CD(data);
+            CD(log);
+            CD(dataExternal);
+            CD(Cache.main);
 
-            Directory.CreateDirectory(dataExternal);
+            CD(Screenshot.main);
+            CD(Screenshot.MB);
+            CD(Screenshot.SCHT);
 
-            Directory.CreateDirectory(Screenshot.main);
-            Directory.CreateDirectory(Screenshot.MB);
-            Directory.CreateDirectory(Screenshot.SCHT);
-
-            Directory.CreateDirectory(Cache.main);
-            Directory.CreateDirectory(Cache.message);
-            Directory.CreateDirectory(Cache.update);
+            CD(Cache.message);
+            CD(Cache.update);
         }
     }
 

@@ -128,6 +128,9 @@
     <Compile Include="Xaml\MaterialCalc.xaml.cs">
       <DependentUpon>MaterialCalc.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Xaml\NewUserPolicyWindow.xaml.cs">
+      <DependentUpon>NewUserPolicyWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Xaml\NewUser\Configure.xaml.cs">
       <DependentUpon>Configure.xaml</DependentUpon>
     </Compile>
@@ -194,6 +197,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Xaml\MaterialCalc.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Xaml\NewUserPolicyWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -384,4 +391,9 @@
     <Resource Include="Asset\ArkHelper.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>rmdir /s /q $(TargetDir)\external
+md $(TargetDir)\external
+xcopy $(ProjectDir)\external $(TargetDir)\external /s /e</PostBuildEvent>
+  </PropertyGroup>
 </Project>
