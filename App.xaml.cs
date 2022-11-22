@@ -1,4 +1,5 @@
-﻿using ArkHelper.Xaml;
+﻿using ArkHelper.Pages;
+using ArkHelper.Xaml;
 using Microsoft.Toolkit.Uwp.Notifications;
 using System;
 using System.Collections;
@@ -94,82 +95,6 @@ namespace ArkHelper
 
         #region Arg
         public static ArkHelperArg mainArg = new ArkHelperArg();
-        #endregion
-
-        #region 消息
-        public static ArrayList UserList;
-        public static bool isMessageInited = false;
-        public static List<ArkHelperMessage> messages = new List<ArkHelperMessage>();
-        public static Task MessageInit = new Task(() =>
-        {
-            UserList = new ArrayList
-            {
-                new User(ArkHelperDataStandard.MessageSource.weibo, "7745672941"),//END
-                new User(ArkHelperDataStandard.MessageSource.weibo, "6441489862"),//CHO
-                new User(ArkHelperDataStandard.MessageSource.weibo, "7499841383"),//TER
-                new User(ArkHelperDataStandard.MessageSource.weibo, "7506039414"),//MOU
-                new User(ArkHelperDataStandard.MessageSource.weibo, "7461423907"),//HYP
-                new User(ArkHelperDataStandard.MessageSource.weibo, "6279793937"),//ARK
-                new User(ArkHelperDataStandard.MessageSource.weibo, "7753678921"),//GAW
-                new User(ArkHelperDataStandard.MessageSource.weibo, "2954409082"),//PLG
-                new User(ArkHelperDataStandard.MessageSource.official_communication,""), //COM
-                //new Pages.Message.User(UniData.MessageSource.weibo, "7404330062") //test
-            };
-
-            for (; ; Thread.Sleep(60000))
-            {
-                isMessageInited = false;
-                int _a = messages.Count;
-                var createat = DateTime.Now;
-                if (_a > 0) createat = messages[0].CreateAt;
-                messages.Clear();
-                foreach (User user in UserList)
-                {
-                    var _me = user.UpdateMessage();
-                    if (_a > 0)
-                    {
-                        foreach (ArkHelperMessage _message in _me)
-                        {
-                            //更新通知
-                            if (_message.CreateAt > createat)
-                            {
-                                ToastContentBuilder messageToast = new ToastContentBuilder();
-                                messageToast.AddArgument("kind", "Message");
-                                messageToast.AddText(user.Name + "发布了新的动态");
-                                messageToast.AddText(_message.Text);
-                                messageToast.AddCustomTimeStamp(_message.CreateAt);
-                                foreach (var me in _message.Medias)
-                                {
-                                    if (me.Type == Pages.Message.ArkHelperMessage.Media.MediaType.photo)
-                                    {
-                                        messageToast.AddHeroImage(new Uri(me.Link));
-                                        break;
-                                    }
-                                    if (me.Type == Pages.Message.ArkHelperMessage.Media.MediaType.video)
-                                    {
-                                        messageToast.AddHeroImage(new Uri(me.Small));
-                                        break;
-                                    }
-                                }
-                                messageToast.Show(_toast =>
-                                {
-                                    _toast.Tag = "Message";
-                                });
-                            }
-                            else { break; }
-                        }
-                    }
-
-                    foreach (ArkHelperMessage message in _me)
-                    {
-                        messages.Add(message);
-                    }
-                }
-                messages.Sort();
-                //if (messages.Count > 20) { messages.RemoveRange(19, messages.Count - 19); }
-                isMessageInited = true;
-            }
-        });
         #endregion
 
         private void Application_Startup(object sender, StartupEventArgs e)

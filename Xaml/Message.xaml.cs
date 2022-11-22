@@ -1,5 +1,7 @@
-﻿using RestSharp;
+﻿using Microsoft.Toolkit.Uwp.Notifications;
+using RestSharp;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -201,7 +203,7 @@ namespace ArkHelper.Pages
                     }
                     //解析作者
                     var userID = json.GetProperty("user").GetProperty("id").GetDouble();
-                    foreach (User user in App.UserList)
+                    foreach (User user in UserList)
                     {
                         if (userID.ToString() == user.UID)
                         {
@@ -252,7 +254,7 @@ namespace ArkHelper.Pages
                     if (json.TryGetProperty("retweeted_status", out var _ret))
                     {
                         var _resu = _ret.GetProperty("id").GetString();
-                        foreach (var aa in App.messages)
+                        foreach (var aa in Messages)
                         {
                             if (aa.ID == "weibo" + _resu)
                             {
@@ -407,58 +409,113 @@ namespace ArkHelper.Pages
         }
         #endregion
 
+        #region 更新消息
+        static ArrayList UserList;
+        static bool firstUpdate = true;
+        public static Task MessageInit = new Task(() =>
+        {
+            UserList = new ArrayList
+            {
+                new User(ArkHelperDataStandard.MessageSource.weibo, "7745672941"),//END
+                new User(ArkHelperDataStandard.MessageSource.weibo, "6441489862"),//CHO
+                new User(ArkHelperDataStandard.MessageSource.weibo, "7499841383"),//TER
+                new User(ArkHelperDataStandard.MessageSource.weibo, "7506039414"),//MOU
+                new User(ArkHelperDataStandard.MessageSource.weibo, "7461423907"),//HYP
+                new User(ArkHelperDataStandard.MessageSource.weibo, "6279793937"),//ARK
+                new User(ArkHelperDataStandard.MessageSource.weibo, "7753678921"),//GAW
+                new User(ArkHelperDataStandard.MessageSource.weibo, "2954409082"),//PLG
+                new User(ArkHelperDataStandard.MessageSource.official_communication,""), //COM
+                //new Pages.Message.User(UniData.MessageSource.weibo, "7404330062") //test
+            };
+
+            for (; ; Thread.Sleep(40000))
+            {
+                var createat = DateTime.Now;
+                if (!firstUpdate) createat = Messages[0].CreateAt;
+
+                foreach (User user in UserList)
+                {
+                    foreach (ArkHelperMessage message in user.UpdateMessage())
+                    {
+                        //更新通知
+                        if (message.CreateAt > createat && !firstUpdate)
+                        {
+                            ToastContentBuilder Toast = new ToastContentBuilder();
+                            Toast.AddArgument("kind", "Message");
+                            Toast.AddText(user.Name + "发布了新的动态");
+                            Toast.AddText(message.Text);
+                            Toast.AddCustomTimeStamp(message.CreateAt);
+
+                            var me = message.Medias[0];
+                            switch (me.Type)
+                            {
+                                case ArkHelperMessage.Media.MediaType.photo:
+                                    Toast.AddHeroImage(new Uri(me.Link));
+                                    break;
+                                case ArkHelperMessage.Media.MediaType.video:
+                                    Toast.AddHeroImage(new Uri(me.Small));
+                                    break;
+                            }
+
+                            Toast.Show(tag =>
+                            {
+                                tag.Tag = "Message";
+                            });
+                        }
+
+                        //加入消息池
+                        if (!Messages.Exists(mes => mes.ID == message.ID))
+                            Messages.Add(message);
+                    }
+                }
+                Messages.Sort();
+                ////if (messages.Count > 20) { messages.RemoveRange(19, messages.Count - 19); }
+
+                firstUpdate = false;
+            }
+        });
+        static List<ArkHelperMessage> Messages = new List<ArkHelperMessage>();
+        #endregion
+
+        #region 页面更新
         public int AlreadyInitedCards = 0;
         public List<DateTime> DTList = new List<DateTime>();
-        public List<ArkHelperMessage> Messages = new List<ArkHelperMessage>();
-
-        public Message()
-        {
-            InitializeComponent();
-            InitFromBlank();
-        }
         private void InitFromBlank()
         {
-            Task.Run(() =>
+            if (App.Data.message.status)
             {
-                if (App.Data.message.status)
-                {
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        pgb.Visibility = Visibility.Visible;
-                        //MessageListDock.Children.Clear();
-                        off.Visibility = Visibility.Collapsed;
-                        cancel.Visibility = Visibility.Visible;
-                        //UserListXaml.Children.Clear();
-                    });
-                    while (!App.isMessageInited)
-                    {
-                        Thread.Sleep(2000);
-                    }
-                    foreach (ArkHelperMessage akms in App.messages)
-                    {
-                        Messages.Add(akms);
-                    }
-                    Messages.Sort();
-                }
-                else
-                {
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        pgb.Visibility = Visibility.Collapsed;
-                        off.Visibility = Visibility.Visible;
-                        cancel.Visibility = Visibility.Collapsed;
-                    });
-                    return;
-                }
-
-                Thread.Sleep(300);
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    pgb.IsIndeterminate = false;
-                    InitCard(3);
-                    pgb.Visibility = Visibility.Collapsed;
+                    pgb.Visibility = Visibility.Visible;
+                    off.Visibility = Visibility.Collapsed;
+                    cancel.Visibility = Visibility.Visible;
                 });
-            });
+
+                Task.Run(() =>
+                {
+                    while (firstUpdate)
+                        Thread.Sleep(2000);
+
+                    Thread.Sleep(100);
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        pgb.IsIndeterminate = false;
+                        InitCard(3);
+                        pgb.Visibility = Visibility.Collapsed;
+                    });
+
+                });
+            }
+            else
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    pgb.Visibility = Visibility.Collapsed;
+                    off.Visibility = Visibility.Visible;
+                    cancel.Visibility = Visibility.Collapsed;
+                });
+                return;
+            }
         }
         private void InitCard(int num = 3)
         {
@@ -499,6 +556,7 @@ namespace ArkHelper.Pages
                 AlreadyInitedCards++;
             }
         }
+
         /// <summary>
         /// 构建卡片
         /// </summary>
@@ -694,6 +752,13 @@ namespace ArkHelper.Pages
 
             return endBorder;
         }
+        #endregion
+
+        public Message()
+        {
+            InitializeComponent();
+            InitFromBlank();
+        }
 
         #region 图片
         private List<BitmapImage> UserAvatarList = new List<BitmapImage>();
@@ -817,7 +882,7 @@ namespace ArkHelper.Pages
         {
             try
             {
-                App.MessageInit.Start();
+                MessageInit.Start();
             }
             catch { }
             App.Data.message.status = true;
