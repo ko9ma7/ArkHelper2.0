@@ -125,38 +125,50 @@ namespace ArkHelper.Pages.OtherList
                 while (ADB.ConnectedInfo == null) Thread.Sleep(2000);
                 Thread.Sleep(50000);
 
-                Akhcmd("shell am start -n " + packname + "/com.u8.sdk.U8UnityContext", "/// 正在启动" + packname + "...", 5);
-
-                for (; ; )
+                void StartGame()
                 {
-                    if (PictureProcess.ColorCheck(719, 759, "#FFD802", 720, 759, "#FFD802")) { break; }
-                    Thread.Sleep(3000);
+                    Akhcmd("shell am start -n " + packname + "/com.u8.sdk.U8UnityContext", "/// 正在启动" + packname + "...", 7);
+                    while (!PictureProcess.ColorCheck(719, 759, "#FFD802", 720, 759, "#FFD802")
+                    || (DateTime.Now.Hour <= 20&&App.Data.scht.fcm.status)
+                    )
+                        Thread.Sleep(3000);
+
+                    Akhcmd("shell input tap 934 220", "/// 指令：START", 9);
+                    if (App.Data.scht.server.id != "CB")
+                    {
+                        Akhcmd("shell input tap 721 574", "/// 指令：开始唤醒", 15);
+                    }
                 }
 
-                for (; ; )
-                {
-                    if (DateTime.Now.Hour >= 20 || !App.Data.scht.fcm.status) { break; }
-                    Thread.Sleep(2000);
-                }
-
-                Akhcmd("shell input tap 934 220", "/// 指令：START", 9);
-                if (App.Data.scht.server.id != "CB") { Akhcmd("shell input tap 721 574", "/// 指令：开始唤醒", 15); }
+                StartGame();
                 Akhcmd("shell input tap 722 719", "/// 指令：收取", 3);
-                Akhcmd("shell input tap 1354 90", "/// 指令：退出签到界面", 3);
-                Akhcmd("shell input tap 1389 64", "/// 指令：关闭公告", 3);
-                Akhcmd("shell input tap 677 49", "/// 指令：关闭窗口", 3);
-                for (int i = 1; i <= 2; i++)
+                for (; ; )
                 {
-                    if (PictureProcess.ColorCheck(887, 508, "#424242", 398, 638, "#424242")) { break; }
+                    using (Screenshot sc = new Screenshot())
+                    {
+                        var closePosition = sc.PicToPoint(Address.res + @"\pic\UI\close.png");
+                        if (closePosition.Count != 0)
+                        {
+                            Tap(closePosition[0]);
+                        }
+                        else { break; }
+                    }
+                }
+
+                for (; ; )
+                {
+                    if (new Screenshot().PicToPoint(Address.res + @"\pic\UI\shopCenter.png").Count != 0)
+                    {
+                        break;
+                    }
                     else
                     {
                         Info("/// 遇到无法关闭的窗口，正在尝试重启游戏解决...", true, Output.InfoKind.Warning);
                         Akhcmd("shell am force-stop " + packname, "/// 指令：强制结束" + packname, 1);
-                        Akhcmd("shell am start -n " + packname + "/com.u8.sdk.U8UnityContext", "/// 正在启动" + packname + "...", 30);
-                        Akhcmd("shell input tap 934 220", "/// 指令：START", 15);
-                        Akhcmd("shell input tap 724 577", "/// 指令：开始唤醒", 25);
+                        StartGame();
                     }
                 }
+
                 //邮件
                 Akhcmd("shell input tap 217 48", "/// 指令：打开邮件列表", 3);
                 Akhcmd("shell input tap 1294 748", "/// 指令：一键收取", 3);
@@ -323,7 +335,7 @@ namespace ArkHelper.Pages.OtherList
                 }
                 void GetCustomCp(string _unit)
                 {
-                    var akhcpiaddress = _unit.Replace("custom:##", "").Replace("##","");
+                    var akhcpiaddress = _unit.Replace("custom:##", "").Replace("##", "");
                     foreach (var akhcmd in akhcpiMaker.ReadFromAKHcpi(akhcpiaddress))
                     {
                         Akhcmd(akhcmd);
@@ -374,7 +386,7 @@ namespace ArkHelper.Pages.OtherList
                                     ADB.Tap(_point[0]);
                                     goto NativeUnitInited;
                                 }
-                                    
+
                             }
                         }
                     }
@@ -450,7 +462,7 @@ namespace ArkHelper.Pages.OtherList
                 Akhcmd("shell input tap 908 676", "/// 指令：任务", 2);
                 Akhcmd("shell input tap 767 41", "/// 指令：日常任务", 3);
                 Akhcmd("shell input tap 1246 168", "/// 指令：收集", 2, 3);
-                if (week == DayOfWeek.Sunday||App.Data.scht.fcm.status)
+                if (week == DayOfWeek.Sunday || App.Data.scht.fcm.status)
                 {
                     Akhcmd("shell input tap 1051 51", "/// 指令：周常任务", 3);
                     Akhcmd("shell input tap 1246 168", "/// 指令：收集", 2, 3);

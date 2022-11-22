@@ -446,15 +446,18 @@ namespace ArkHelper.Pages
                             Toast.AddText(message.Text);
                             Toast.AddCustomTimeStamp(message.CreateAt);
 
-                            var me = message.Medias[0];
-                            switch (me.Type)
+                            if (message.Medias.Count > 0)
                             {
-                                case ArkHelperMessage.Media.MediaType.photo:
-                                    Toast.AddHeroImage(new Uri(me.Link));
-                                    break;
-                                case ArkHelperMessage.Media.MediaType.video:
-                                    Toast.AddHeroImage(new Uri(me.Small));
-                                    break;
+                                var me = message.Medias[0];
+                                switch (me.Type)
+                                {
+                                    case ArkHelperMessage.Media.MediaType.photo:
+                                        Toast.AddHeroImage(new Uri(me.Link));
+                                        break;
+                                    case ArkHelperMessage.Media.MediaType.video:
+                                        Toast.AddHeroImage(new Uri(me.Small));
+                                        break;
+                                }
                             }
 
                             Toast.Show(tag =>
