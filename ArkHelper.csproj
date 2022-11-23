@@ -397,4 +397,8 @@ rmdir /s /q $(TargetDir)\external
 md $(TargetDir)\external
 xcopy $(ProjectDir)\external $(TargetDir)\external /s /e</PostBuildEvent>
   </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+  </PropertyGroup>
 </Project>

@@ -107,8 +107,18 @@ namespace ArkHelper.Pages
                         break;
                     case ArkHelperDataStandard.MessageSource.official_communication:
                         var _aa = new RestClient("https://ak.hypergryph.com/news");
-                        var _ab = _aa.Get(new RestRequest { Method = Method.Get });
-                        string _aaa = _ab.Content.ToString();
+                        string _ab = "";
+                    start:;
+                        try
+                        {
+                            _ab = _aa.Get(new RestRequest { Method = Method.Get }).Content;
+                        }
+                        catch
+                        {
+                            goto start;
+                        }
+                        
+                        string _aaa = _ab.ToString();
                         var _aaaa = new ArkHelperMessage(Source, _aaa)
                         {
                             User = this

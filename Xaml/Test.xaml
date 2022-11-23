@@ -15,43 +15,7 @@
 
     <Grid>
         <WrapPanel Orientation="Vertical">
-
-            <Border Height="80"
-                    Margin="10"
-                    Background="AliceBlue">
-                <TextBlock>sssss</TextBlock>
-            </Border>
-
-
-            <DataGrid Name="datagrid"
-                      Grid.Row="2"
-                      Width="300"
-                      AutoGenerateColumns="False"
-                      CanUserDeleteRows="True"
-                      GridLinesVisibility="Horizontal"
-                      HeadersVisibility="Column"
-                      ItemsSource="{Binding UserModel}"
-                      SelectionUnit="FullRow">
-                <DataGrid.Columns>
-                    <DataGridCheckBoxColumn Width="Auto"
-                                            MinWidth="25"
-                                            Binding="{Binding IsEnabled}"
-                                            EditingElementStyle="{StaticResource MaterialDesignDataGridCheckBoxColumnEditingStyle}"
-                                            ElementStyle="{StaticResource MaterialDesignDataGridCheckBoxColumnStyle}"
-                                            Header="启用" />
-                    <DataGridTextColumn Width="*"
-                                        Binding="{Binding UserName}"
-                                        Header="名称" />
-                </DataGrid.Columns>
-            </DataGrid>
-            <Button Click="Button_Click_1" Content="utftest" />
             <TextBlock Name="text" Text="null" />
-            <Button Width="400"
-                    Height="400"
-                    AllowDrop="True"
-                    DragEnter="Button_DragEnter"
-                    Drop="Button_Drop" />
-            <!--<Grid Width="400" Height="400" Background="AliceBlue" DragEnter="Grid_DragEnter" Drop="Grid_Drop"></Grid>-->
         </WrapPanel>
     </Grid>
 </Page>

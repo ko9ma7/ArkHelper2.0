@@ -475,6 +475,32 @@ namespace ArkHelper
             return address + "\\" + name;
         }
 
+        /// <summary>
+        /// 获取当前运行的游戏类型
+        /// </summary>
+        /// <returns></returns>
+        public static string GetCurrentGameKind()
+        {
+            string r = ADB.CMD("shell \"dumpsys window | grep mCurrentFocus\"");
+            string server = "CO";
+            if (r.Contains("com.hypergryph.arknights")) { server = "CO"; }
+            if (r.Contains("com.hypergryph.arknights.bilibili")) { server = "CB"; }
+            if (r.Contains("com.YoStarJP.Arknights")) { server = "JP"; }
+            if (r.Contains("com.YoStarEN.Arknights")) { server = "EN"; }
+            if (r.Contains("com.YoStarKR.Arknights")) { server = "KR"; }
+            if (r.Contains("tw.txwy.and.arknights")) { server = "TW"; }
+            return server;
+        }
+
+        /// <summary>
+        /// 获取游戏类型对应的包名
+        /// </summary>
+        /// <returns></returns>
+        public static string GetGamePackageName(string server)
+        {
+            return PinnedData.Server.dataSheet.Select("id = '" + server + "'")[0][3].ToString();
+        }
+
         public class Screenshot : IDisposable
         {
             private string Location { get; set; }
