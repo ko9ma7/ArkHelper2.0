@@ -150,6 +150,8 @@ namespace ArkHelper.Pages.OtherList
                         if (closePosition.Count != 0)
                         {
                             Tap(closePosition[0]);
+                            Info("关闭窗口");
+                            Thread.Sleep(2000);
                         }
                         else { break; }
                     }
