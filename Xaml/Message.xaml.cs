@@ -322,7 +322,7 @@ namespace ArkHelper.Pages
                                 }
                                 if (mediaInfo.TryGetProperty("stream_url_hd", out var streamUrl))
                                 {
-                                    media.Link = streamUrl.GetString();
+                                    media.Link = pageInfo.GetProperty("page_url").GetString();
                                 }
                                 Medias.Add(media);
                             }

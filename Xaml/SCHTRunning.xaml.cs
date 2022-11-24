@@ -39,11 +39,11 @@ namespace ArkHelper.Pages.OtherList
         }
 
         //表达 + Log
-        void Info(string content, bool show = true, Output.InfoKind infokind = Output.InfoKind.Infomational)
+        void Info(string content, Output.InfoKind infokind = Output.InfoKind.Infomational)
         {
             Output.Log(content, "SCHT", infokind);
 
-            if (show == true)
+            if (true)
             {
                 //表达
                 string forcolor = "#00FFFFFF";
@@ -68,8 +68,7 @@ namespace ArkHelper.Pages.OtherList
             Task SCHT = Task.Run(() =>
             {
                 //时间
-                string starttime = DateTime.Now.ToString("g");
-                long starttime_sec = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
+                var starttime = DateTime.Now;
 
                 //游戏
                 string packname = PinnedData.Server.dataSheet.Select("id = '" + App.Data.scht.server.id + "'")[0][3].ToString();
@@ -165,7 +164,7 @@ namespace ArkHelper.Pages.OtherList
                     }
                     else
                     {
-                        Info("/// 遇到无法关闭的窗口，正在尝试重启游戏解决...", true, Output.InfoKind.Warning);
+                        Info("/// 遇到无法关闭的窗口，正在尝试重启游戏解决...", Output.InfoKind.Warning);
                         Akhcmd("shell am force-stop " + packname, "/// 指令：强制结束" + packname, 1);
                         StartGame();
                     }

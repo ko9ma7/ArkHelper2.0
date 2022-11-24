@@ -79,7 +79,21 @@ namespace ArkHelper
 
             Task.Run(() =>
             {
-                MBCore(mode, time);
+                var startTime = DateTime.Now;//启动时间
+
+                var alreadyTime = MBCore(mode, time);
+
+                var endTime = DateTime.Now;//结束时间
+                TimeSpan UsingTime = endTime - startTime;
+                double speed = (alreadyTime == 0) ? -1 : (UsingTime.TotalSeconds / alreadyTime);
+
+                //通知
+                var toast = new ToastContentBuilder();
+                toast.AddArgument("kind", "MB");
+                toast.AddText("提示：连续作战指挥已结束");
+                toast.AddText("开始时间：" + startTime.ToString("g") + "\n" + "结束时间：" + endTime.ToString("g"));
+                toast.AddText("作战次数：" + alreadyTime + ((alreadyTime != 0) ? ("\n单次配速：" + speed.ToString("0.00") + "秒/次") : ""));
+                toast.Show();
 
                 //读取action
                 string after_action;
@@ -98,22 +112,22 @@ namespace ArkHelper
                 if (after_action == "返回游戏首页")
                 {
                     ADB.Tap(301, 45);//呼出菜单
-                    Info("/// 呼出菜单");
+                    Show("/// 呼出菜单");
                     Thread.Sleep(1000);
 
                     ADB.Tap(102, 192);//返回主页
-                    Info("/// 正在返回游戏首页...");
+                    Show("/// 正在返回游戏首页...");
                 }
                 if (after_action == "关闭游戏")
                 {
                     string package = ADB.GetGamePackageName(ADB.GetCurrentGameKind());
                     ADB.CMD("shell am force-stop " + package);//结束进程
-                    Info("/// 正在结束" + package + "进程...");
+                    Show("/// 正在结束" + package + "进程...");
                 }
                 if (after_action == "关闭模拟器")
                 {
                     WithSystem.KillSimulator();
-                    Info("/// 正在关闭模拟器...");
+                    Show("/// 正在关闭模拟器...");
                 }
                 if (after_action == "关机") { WithSystem.Shutdown(); }
                 if (after_action == "锁定") { WithSystem.LockWorkStation(); }
@@ -145,7 +159,7 @@ namespace ArkHelper
         }
         public delegate void MBMessage(string content, Output.InfoKind infoKind = Output.InfoKind.Infomational);
         public static event MBMessage Info;
-        public static void MBCore(Mode mode, int time)
+        public static int MBCore(Mode mode, int time)
         {
             void Logger(string content, Output.InfoKind infoKind = Output.InfoKind.Infomational)
             {
@@ -153,7 +167,6 @@ namespace ArkHelper
             }
 
             int alreadyTime = 0;//已经执行作战次数
-            var startTime = DateTime.Now;//启动时间
 
             //准备运行
             Logger("--- MB START ---");
@@ -181,7 +194,7 @@ namespace ArkHelper
                 {
                     Info("/// 未检测到关卡信息界面 /请切换至关卡信息界面", Output.InfoKind.Warning);
                     Thread.Sleep(3000);
-                    return;
+                    return 0;
                 }
 
                 //检测代理指挥是否已经勾选，否则勾选
@@ -266,23 +279,9 @@ namespace ArkHelper
         MBend:;
             //结束通知
             Info("/// 连续作战指挥系统运行结束");
-
-            var endTime = DateTime.Now;
-
-            TimeSpan UsingTime = endTime - startTime;
-            double speed = (alreadyTime == 0) ? -1 : (UsingTime.TotalSeconds / alreadyTime);
             Logger("--- MB END ---");
-            Logger("totalTime=" + alreadyTime + ",speed=" + speed);
 
-            //通知
-            var toast = new ToastContentBuilder();
-            toast.AddArgument("kind", "MB");
-            toast.AddText("提示：连续作战指挥已结束");
-            toast.AddText("开始时间：" + startTime.ToString("g") + "\n" + "结束时间：" + endTime.ToString("g"));
-            toast.AddText("作战次数：" + alreadyTime + ((alreadyTime != 0)?("\n单次配速：" + speed.ToString("0.00") + "秒/次"):""));
-            toast.Show();
+            return alreadyTime;
         }
-
-
     }
 }
