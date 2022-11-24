@@ -32,18 +32,18 @@ namespace ArkHelper.Pages.OtherList
             Info(akhcmd.OutputText);
             akhcmd.RunCmd();
         }
-        void Akhcmd(string body, string show = "null", int wait = 0, int repeat = 1)
+        void Akhcmd(string body, string show = "", int wait = 0, int repeat = 1)
         {
             var akhcmd = new AKHcmd(body, show, wait, repeat);
             Akhcmd(akhcmd);
         }
 
         //表达 + Log
-        void Info(string content, bool show = true, Output.InfoKind infokind = Output.InfoKind.Infomational)
+        void Info(string content, Output.InfoKind infokind = Output.InfoKind.Infomational)
         {
             Output.Log(content, "SCHT", infokind);
 
-            if (show == true)
+            if (true)
             {
                 //表达
                 string forcolor = "#00FFFFFF";
@@ -64,15 +64,15 @@ namespace ArkHelper.Pages.OtherList
 
         void Page_Loaded(object sender, RoutedEventArgs e)
         {
+            MB.Info += Info;
             //开始工作
             Task SCHT = Task.Run(() =>
             {
                 //时间
-                string starttime = DateTime.Now.ToString("g");
-                long starttime_sec = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
+                var starttime = DateTime.Now;
 
                 //游戏
-                string packname = PinnedData.Server.dataSheet.Select("id = '" + App.Data.scht.server.id + "'")[0][3].ToString();
+                string packname = ADB.GetGamePackageName(App.Data.scht.server.id);
 
                 //周期
                 bool AMmode;
@@ -81,12 +81,6 @@ namespace ArkHelper.Pages.OtherList
                 //EN时差-1（天数），早晚反转
                 if (App.Data.scht.server.id == "EN") { DateTime.Now.AddDays(-1).DayOfWeek.ToString(); AMmode = !AMmode; }
 
-                //代理指挥位置调整
-                //适用场景 外服开始作战块跟进下沉之前
-                int scht_mb_adjust_check_daili_xy_y1 = 680;
-                int scht_mb_adjust_check_daili_xy_y2 = 684;
-                if (App.Data.scht.server.id == "CO" || App.Data.scht.server.id == "CB") { } else { scht_mb_adjust_check_daili_xy_y1 = 669; scht_mb_adjust_check_daili_xy_y2 = 665; }
-
                 //adcmd计算
                 var week = DateTime.Now.DayOfWeek;
 
@@ -94,7 +88,6 @@ namespace ArkHelper.Pages.OtherList
                 int anntime = 0;
 
                 anntime = 1; //normal
-
                 if (App.Data.scht.fcm.status)
                 {
                     switch ((int)week)
@@ -108,7 +101,6 @@ namespace ArkHelper.Pages.OtherList
                             break;
                     }
                 }//fcm
-
                 if (App.Data.scht.ann.customTime)
                 {
                     var _wek = (int)week - 1;
@@ -116,47 +108,63 @@ namespace ArkHelper.Pages.OtherList
                     anntime = App.Data.scht.ann.time[_wek];
                 }//custom
 
-                //输出到log
-                //Info("name=" + name + "," + "ann.status=" + ann.status + "," + "ann.select=" + ann.select + "," + "anntime=" + anntime, false);
-
                 //模拟器未启动则启动
-                Info("/// 正在启动神经网络依托平台...");
-                Process.Start(Address.dataExternal + @"\simulator.lnk");
-                while (ADB.ConnectedInfo == null) Thread.Sleep(2000);
-                Thread.Sleep(50000);
-
-                Akhcmd("shell am start -n " + packname + "/com.u8.sdk.U8UnityContext", "/// 正在启动" + packname + "...", 5);
-
-                for (; ; )
+                if (ADB.ConnectedInfo == null)
                 {
-                    if (PictureProcess.ColorCheck(719, 759, "#FFD802", 720, 759, "#FFD802")) { break; }
-                    Thread.Sleep(3000);
+                    Info("/// 正在启动神经网络依托平台...");
+                    Process.Start(Address.dataExternal + @"\simulator.lnk");
+                    Thread.Sleep(50000);
                 }
-
-                for (; ; )
+                while (ADB.ConnectedInfo == null)
                 {
-                    if (DateTime.Now.Hour >= 20 || !App.Data.scht.fcm.status) { break; }
                     Thread.Sleep(2000);
                 }
-
-                Akhcmd("shell input tap 934 220", "/// 指令：START", 9);
-                if (App.Data.scht.server.id != "CB") { Akhcmd("shell input tap 721 574", "/// 指令：开始唤醒", 15); }
-                Akhcmd("shell input tap 722 719", "/// 指令：收取", 3);
-                Akhcmd("shell input tap 1354 90", "/// 指令：退出签到界面", 3);
-                Akhcmd("shell input tap 1389 64", "/// 指令：关闭公告", 3);
-                Akhcmd("shell input tap 677 49", "/// 指令：关闭窗口", 3);
-                for (int i = 1; i <= 2; i++)
+                void StartGame()
                 {
-                    if (PictureProcess.ColorCheck(887, 508, "#424242", 398, 638, "#424242")) { break; }
-                    else
+                    Akhcmd("shell am start -n " + packname + "/com.u8.sdk.U8UnityContext", "/// 正在启动" + packname + "...", 7);
+                    while (!PictureProcess.ColorCheck(719, 759, "#FFD802", 720, 759, "#FFD802")
+                    || (DateTime.Now.Hour <= 20 && App.Data.scht.fcm.status)
+                    )
+                        Thread.Sleep(3000);
+
+                    Akhcmd("shell input tap 934 220", "/// 指令：START", 9);
+                    if (App.Data.scht.server.id != "CB")
                     {
-                        Info("/// 遇到无法关闭的窗口，正在尝试重启游戏解决...", true, Output.InfoKind.Warning);
-                        Akhcmd("shell am force-stop " + packname, "/// 指令：强制结束" + packname, 1);
-                        Akhcmd("shell am start -n " + packname + "/com.u8.sdk.U8UnityContext", "/// 正在启动" + packname + "...", 30);
-                        Akhcmd("shell input tap 934 220", "/// 指令：START", 15);
-                        Akhcmd("shell input tap 724 577", "/// 指令：开始唤醒", 25);
+                        Akhcmd("shell input tap 721 574", "/// 指令：开始唤醒", 15);
                     }
                 }
+
+                StartGame();
+                Akhcmd("shell input tap 722 719", "/// 指令：收取", 3);
+                for (; ; )
+                {
+                    using (Screenshot sc = new Screenshot())
+                    {
+                        var closePosition = sc.PicToPoint(Address.res + @"\pic\UI\close.png");
+                        if (closePosition.Count != 0)
+                        {
+                            Tap(closePosition[0]);
+                            Info("关闭窗口");
+                            Thread.Sleep(2000);
+                        }
+                        else { break; }
+                    }
+                }
+
+                for (; ; )
+                {
+                    if (new Screenshot().PicToPoint(Address.res + @"\pic\UI\shopCenter.png").Count != 0)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        Info("/// 遇到无法关闭的窗口，正在尝试重启游戏解决...", Output.InfoKind.Warning);
+                        Akhcmd("shell am force-stop " + packname, "/// 指令：强制结束" + packname, 1);
+                        StartGame();
+                    }
+                }
+
                 //邮件
                 Akhcmd("shell input tap 217 48", "/// 指令：打开邮件列表", 3);
                 Akhcmd("shell input tap 1294 748", "/// 指令：一键收取", 3);
@@ -320,10 +328,11 @@ namespace ArkHelper.Pages.OtherList
                             ADB.Tap(point1);
                         }
                     }
+                    Thread.Sleep(1000);
                 }
                 void GetCustomCp(string _unit)
                 {
-                    var akhcpiaddress = _unit.Replace("custom:##", "").Replace("##","");
+                    var akhcpiaddress = _unit.Replace("custom:##", "").Replace("##", "");
                     foreach (var akhcmd in akhcpiMaker.ReadFromAKHcpi(akhcpiaddress))
                     {
                         Akhcmd(akhcmd);
@@ -374,7 +383,7 @@ namespace ArkHelper.Pages.OtherList
                                     ADB.Tap(_point[0]);
                                     goto NativeUnitInited;
                                 }
-                                    
+
                             }
                         }
                     }
@@ -406,51 +415,14 @@ namespace ArkHelper.Pages.OtherList
                 Thread.Sleep(2000);
                 TouchCp();
             UnitInited:;
-
-                if (PictureProcess.ColorCheck(1200, scht_mb_adjust_check_daili_xy_y1, "#FFFFFF", 1196, scht_mb_adjust_check_daili_xy_y2, "#FFFFFF")) { }
-                else //检测代理指挥是否已经勾选，否则勾选
-                {
-                    Akhcmd(@"shell input tap 1200 680", "/// 指令：激活代理指挥"); //激活代理指挥
-                }
-                for (; ; )
-                {
-                    if (App.Data.scht.fcm.status && Convert.ToInt32(DateTime.Now.Minute) > 56) { break; }
-                    Akhcmd(@"shell input tap 1266 753", "/// 指令：开始行动", 1);//开始作战
-
-                    if (PictureProcess.ColorCheck(1241, 449, "#313131", 859, 646, "#313131"))
-                    {
-                        Akhcmd("shell input tap 871 651"); //点叉
-                        goto emptysan;
-                    }
-
-                    Akhcmd("shell input tap 1240 559", "/// 指令：开始行动", 30);//开始行动
-
-                    for (; ; )
-                    {
-                        Thread.Sleep(3000);
-                        //检查是否在本里
-                        if (PictureProcess.ColorCheck(77, 70, "#8C8C8C", 1341, 62, "#FFFFFF") == false)
-                        {
-                            Thread.Sleep(4500);
-                            break;
-                        }
-                    }
-
-                    GetScreenshot(Address.Screenshot.MB, ArkHelperDataStandard.Screenshot);
-
-                    for (int i = 1; i <= 2; i++)
-                    {
-                        Akhcmd("shell input tap 1204 290", "/// 指令：", 1); //点击空白
-                    }
-                    Thread.Sleep(1500);
-                }
-            emptysan:
+                MB.MBCore(MB.Mode.san);
+            emptysan:;
                 Akhcmd("shell input tap 299 46", "/// 指令：菜单", 1);
                 Akhcmd("shell input tap 103 305", "/// 指令：首页", 3);
                 Akhcmd("shell input tap 908 676", "/// 指令：任务", 2);
                 Akhcmd("shell input tap 767 41", "/// 指令：日常任务", 3);
                 Akhcmd("shell input tap 1246 168", "/// 指令：收集", 2, 3);
-                if (week == DayOfWeek.Sunday||App.Data.scht.fcm.status)
+                if (week == DayOfWeek.Sunday || App.Data.scht.fcm.status)
                 {
                     Akhcmd("shell input tap 1051 51", "/// 指令：周常任务", 3);
                     Akhcmd("shell input tap 1246 168", "/// 指令：收集", 2, 3);
@@ -460,7 +432,12 @@ namespace ArkHelper.Pages.OtherList
                 WithSystem.KillSimulator();
                 Info("/// 正在关闭模拟器...");
                 Info("/// 系统任务运行完毕。");
-                new ToastContentBuilder().AddArgument("kind", "SCHT").AddText("提示：定时事项处理指挥器任务已结束").AddText("开始时间：" + starttime + "\n" + "结束时间：" + DateTime.Now.ToString("g")).Show(); //结束通知
+
+                new ToastContentBuilder()
+                .AddArgument("kind", "SCHT")
+                .AddText("提示：定时事项处理指挥器任务已结束")
+                .AddText("开始时间：" + starttime.ToString("g") + "\n" + "结束时间：" + DateTime.Now.ToString("g"))
+                .Show(); //结束通知
                 Thread.Sleep(2000);
 
                 App.OKtoOpenSCHT = true;

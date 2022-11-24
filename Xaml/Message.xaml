@@ -21,9 +21,9 @@
             <Border Width="220"
                     Height="50"
                     Margin="0,0,0,10"
-                    Style="{StaticResource card}"
                     Background="AliceBlue"
-                    DockPanel.Dock="Top">
+                    DockPanel.Dock="Top"
+                    Style="{StaticResource card}">
                 <WrapPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                     <materialDesign:PackIcon Width="25"
                                              Height="25"
@@ -34,16 +34,16 @@
                                FontSize="18">
                         消息列表
                     </TextBlock>
-                    <Button Width="30"
+                    <Button Name="cancel"
+                            Width="30"
                             Height="30"
                             Margin="10,0,0,0"
-                            Name="cancel"
                             VerticalAlignment="Center"
                             Background="Transparent"
                             BorderBrush="Transparent"
+                            Click="cancel_Click"
                             Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}"
-                            ToolTip="禁用该功能"
-                            Click="cancel_Click">
+                            ToolTip="禁用该功能">
                         <materialDesign:PackIcon Width="20"
                                                  Height="20"
                                                  Foreground="Gray"
