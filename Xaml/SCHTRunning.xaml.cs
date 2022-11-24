@@ -323,6 +323,7 @@ namespace ArkHelper.Pages.OtherList
                             ADB.Tap(point1);
                         }
                     }
+                    Thread.Sleep(1000);
                 }
                 void GetCustomCp(string _unit)
                 {
@@ -409,7 +410,6 @@ namespace ArkHelper.Pages.OtherList
                 Thread.Sleep(2000);
                 TouchCp();
             UnitInited:;
-
                 MB.MBCore(MB.Mode.san);
             emptysan:;
                 Akhcmd("shell input tap 299 46", "/// 指令：菜单", 1);

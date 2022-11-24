@@ -7,6 +7,7 @@ using Microsoft.Toolkit.Uwp.Notifications;
 using System.Windows.Media;
 using static ArkHelper.Output;
 using System.Web.UI.WebControls;
+using System.Runtime.CompilerServices;
 
 namespace ArkHelper
 {
