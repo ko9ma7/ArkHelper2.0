@@ -159,7 +159,7 @@ namespace ArkHelper
         }
         public delegate void MBMessage(string content, Output.InfoKind infoKind = Output.InfoKind.Infomational);
         public static event MBMessage Info;
-        public static int MBCore(Mode mode, int time)
+        public static int MBCore(Mode mode, int time = -1)
         {
             void Logger(string content, Output.InfoKind infoKind = Output.InfoKind.Infomational)
             {

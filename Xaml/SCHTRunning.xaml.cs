@@ -32,7 +32,7 @@ namespace ArkHelper.Pages.OtherList
             Info(akhcmd.OutputText);
             akhcmd.RunCmd();
         }
-        void Akhcmd(string body, string show = "null", int wait = 0, int repeat = 1)
+        void Akhcmd(string body, string show = "", int wait = 0, int repeat = 1)
         {
             var akhcmd = new AKHcmd(body, show, wait, repeat);
             Akhcmd(akhcmd);
@@ -64,6 +64,7 @@ namespace ArkHelper.Pages.OtherList
 
         void Page_Loaded(object sender, RoutedEventArgs e)
         {
+            MB.Info += Info;
             //开始工作
             Task SCHT = Task.Run(() =>
             {
@@ -71,7 +72,7 @@ namespace ArkHelper.Pages.OtherList
                 var starttime = DateTime.Now;
 
                 //游戏
-                string packname = PinnedData.Server.dataSheet.Select("id = '" + App.Data.scht.server.id + "'")[0][3].ToString();
+                string packname = ADB.GetGamePackageName(App.Data.scht.server.id);
 
                 //周期
                 bool AMmode;
@@ -80,12 +81,6 @@ namespace ArkHelper.Pages.OtherList
                 //EN时差-1（天数），早晚反转
                 if (App.Data.scht.server.id == "EN") { DateTime.Now.AddDays(-1).DayOfWeek.ToString(); AMmode = !AMmode; }
 
-                //代理指挥位置调整
-                //适用场景 外服开始作战块跟进下沉之前
-                int scht_mb_adjust_check_daili_xy_y1 = 680;
-                int scht_mb_adjust_check_daili_xy_y2 = 684;
-                if (App.Data.scht.server.id == "CO" || App.Data.scht.server.id == "CB") { } else { scht_mb_adjust_check_daili_xy_y1 = 669; scht_mb_adjust_check_daili_xy_y2 = 665; }
-
                 //adcmd计算
                 var week = DateTime.Now.DayOfWeek;
 
@@ -93,7 +88,6 @@ namespace ArkHelper.Pages.OtherList
                 int anntime = 0;
 
                 anntime = 1; //normal
-
                 if (App.Data.scht.fcm.status)
                 {
                     switch ((int)week)
@@ -107,16 +101,12 @@ namespace ArkHelper.Pages.OtherList
                             break;
                     }
                 }//fcm
-
                 if (App.Data.scht.ann.customTime)
                 {
                     var _wek = (int)week - 1;
                     if (_wek < 0) { _wek += 7; }
                     anntime = App.Data.scht.ann.time[_wek];
                 }//custom
-
-                //输出到log
-                //Info("name=" + name + "," + "ann.status=" + ann.status + "," + "ann.select=" + ann.select + "," + "anntime=" + anntime, false);
 
                 //模拟器未启动则启动
                 Info("/// 正在启动神经网络依托平台...");
@@ -420,44 +410,8 @@ namespace ArkHelper.Pages.OtherList
                 TouchCp();
             UnitInited:;
 
-                if (PictureProcess.ColorCheck(1200, scht_mb_adjust_check_daili_xy_y1, "#FFFFFF", 1196, scht_mb_adjust_check_daili_xy_y2, "#FFFFFF")) { }
-                else //检测代理指挥是否已经勾选，否则勾选
-                {
-                    Akhcmd(@"shell input tap 1200 680", "/// 指令：激活代理指挥"); //激活代理指挥
-                }
-                for (; ; )
-                {
-                    if (App.Data.scht.fcm.status && Convert.ToInt32(DateTime.Now.Minute) > 56) { break; }
-                    Akhcmd(@"shell input tap 1266 753", "/// 指令：开始行动", 1);//开始作战
-
-                    if (PictureProcess.ColorCheck(1241, 449, "#313131", 859, 646, "#313131"))
-                    {
-                        Akhcmd("shell input tap 871 651"); //点叉
-                        goto emptysan;
-                    }
-
-                    Akhcmd("shell input tap 1240 559", "/// 指令：开始行动", 30);//开始行动
-
-                    for (; ; )
-                    {
-                        Thread.Sleep(3000);
-                        //检查是否在本里
-                        if (PictureProcess.ColorCheck(77, 70, "#8C8C8C", 1341, 62, "#FFFFFF") == false)
-                        {
-                            Thread.Sleep(4500);
-                            break;
-                        }
-                    }
-
-                    GetScreenshot(Address.Screenshot.MB, ArkHelperDataStandard.Screenshot);
-
-                    for (int i = 1; i <= 2; i++)
-                    {
-                        Akhcmd("shell input tap 1204 290", "/// 指令：", 1); //点击空白
-                    }
-                    Thread.Sleep(1500);
-                }
-            emptysan:
+                MB.MBCore(MB.Mode.san);
+            emptysan:;
                 Akhcmd("shell input tap 299 46", "/// 指令：菜单", 1);
                 Akhcmd("shell input tap 103 305", "/// 指令：首页", 3);
                 Akhcmd("shell input tap 908 676", "/// 指令：任务", 2);
