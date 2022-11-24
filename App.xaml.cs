@@ -191,10 +191,10 @@ namespace ArkHelper
                                 if (window.GetType() == typeof(MainWindow))
                                 {
                                     window.Close();
-                                    mainArg = new ArkHelperArg(ArkHelperDataStandard.ArkHelperArg.ArgKind.Navigate, "SCHTRunning", "MainWindow");
-                                    OpenMainWindow();
                                 }
                             }
+                            mainArg = new ArkHelperArg(ArkHelperDataStandard.ArkHelperArg.ArgKind.Navigate, "SCHTRunning", "MainWindow");
+                            OpenMainWindow();
                         });
                     }
                 end:;
