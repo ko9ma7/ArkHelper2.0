@@ -109,16 +109,21 @@ namespace ArkHelper.Pages.OtherList
                 }//custom
 
                 //模拟器未启动则启动
-                Info("/// 正在启动神经网络依托平台...");
-                Process.Start(Address.dataExternal + @"\simulator.lnk");
-                while (ADB.ConnectedInfo == null) Thread.Sleep(2000);
-                Thread.Sleep(50000);
-
+                if (ADB.ConnectedInfo == null)
+                {
+                    Info("/// 正在启动神经网络依托平台...");
+                    Process.Start(Address.dataExternal + @"\simulator.lnk");
+                    Thread.Sleep(50000);
+                }
+                while (ADB.ConnectedInfo == null)
+                {
+                    Thread.Sleep(2000);
+                }
                 void StartGame()
                 {
                     Akhcmd("shell am start -n " + packname + "/com.u8.sdk.U8UnityContext", "/// 正在启动" + packname + "...", 7);
                     while (!PictureProcess.ColorCheck(719, 759, "#FFD802", 720, 759, "#FFD802")
-                    || (DateTime.Now.Hour <= 20&&App.Data.scht.fcm.status)
+                    || (DateTime.Now.Hour <= 20 && App.Data.scht.fcm.status)
                     )
                         Thread.Sleep(3000);
 
@@ -427,7 +432,12 @@ namespace ArkHelper.Pages.OtherList
                 WithSystem.KillSimulator();
                 Info("/// 正在关闭模拟器...");
                 Info("/// 系统任务运行完毕。");
-                new ToastContentBuilder().AddArgument("kind", "SCHT").AddText("提示：定时事项处理指挥器任务已结束").AddText("开始时间：" + starttime + "\n" + "结束时间：" + DateTime.Now.ToString("g")).Show(); //结束通知
+
+                new ToastContentBuilder()
+                .AddArgument("kind", "SCHT")
+                .AddText("提示：定时事项处理指挥器任务已结束")
+                .AddText("开始时间：" + starttime.ToString("g") + "\n" + "结束时间：" + DateTime.Now.ToString("g"))
+                .Show(); //结束通知
                 Thread.Sleep(2000);
 
                 App.OKtoOpenSCHT = true;

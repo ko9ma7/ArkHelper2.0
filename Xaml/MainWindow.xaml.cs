@@ -46,7 +46,7 @@ namespace ArkHelper.Xaml
             new List<Menu>()
             {
                 new Menu("设置","Setting",PackIconKind.Settings),
-                new Menu("Test","Test",PackIconKind.TestTube),
+                //new Menu("Test","Test",PackIconKind.TestTube),
             },
         };
         #endregion
