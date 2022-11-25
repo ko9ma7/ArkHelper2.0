@@ -206,20 +206,27 @@ namespace ArkHelper.Pages.OtherList
                         {
                             Akhcmd("shell input tap 211 771", "待办事项", 1);
                         }
+                        Akhcmd("shell input tap 473 214", "", 1);
                     }
                 }
 
-                Akhcmd("shell input tap 417 354", "制造站1", 2);
-                Akhcmd("shell input tap 327 691", "制造计划", 2);
-                Akhcmd("shell input tap 1084 233", "最多", 1);
-                Akhcmd("shell input tap 1064 670", "确定", 2);
-                Akhcmd("shell input tap 131 334", "制造站2", 1);
-                Akhcmd("shell input tap 1371 603", "加速", 2);
-                Akhcmd("shell input tap 1081 377", "最多", 1);
-                Akhcmd("shell input tap 1069 653", "确定", 2);
-                Akhcmd("shell input tap 1258 711", "收取", 2);
-                Akhcmd("shell input tap 89 50", "返回", 2);
-                Akhcmd("shell input tap 89 50", "返回", 2);
+                using (ADB.Screenshot sc = new Screenshot())
+                {
+                    var mfPosition = sc.PicToPoint(Address.res + @"\pic\UI\manufacturStationInAllView.png");
+                    if (mfPosition.Count != 0)
+                    {
+                        Tap(mfPosition[0]);
+                        Info("指令：制造站");
+                        Thread.Sleep(2000);
+                        Akhcmd("shell input tap 327 691", "/// 指令：制造计划", 2);
+                        Akhcmd("shell input tap 1371 603", "加速", 2);
+                        Akhcmd("shell input tap 1081 377", "最多", 1);
+                        Akhcmd("shell input tap 1069 653", "确定", 2);
+                        Akhcmd("shell input tap 1258 711", "收取", 2);
+                        Akhcmd("shell input tap 89 50", "返回", 2);
+                        Akhcmd("shell input tap 89 50", "返回", 2);
+                    }
+                }
                 Akhcmd("shell input tap 89 50", "返回", 2);
                 Akhcmd("shell input tap 962 555", "确认", 5);
                 if (AMmode == true)
