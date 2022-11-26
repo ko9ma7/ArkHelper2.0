@@ -176,17 +176,6 @@ namespace ArkHelper
             string server = ADB.GetCurrentGameKind();
             //log记录，初始化
             Logger("mode=" + mode + "," + "times=" + time);
-            //代理指挥位置调整
-            //适用场景：外服开始作战块跟进下沉之前
-            int mb_adjust_check_daili_xy_y1 = 680;
-            int mb_adjust_check_daili_xy_y2 = 684;
-            if (server == "CO" || server == "CB") { }
-            else
-            {
-                mb_adjust_check_daili_xy_y1 = 669;
-                mb_adjust_check_daili_xy_y2 = 665;
-            }
-
             //进本前检查和准备
             using (ADB.Screenshot screenshot = new ADB.Screenshot())
             {
@@ -199,7 +188,7 @@ namespace ArkHelper
                 }
 
                 //检测代理指挥是否已经勾选，否则勾选
-                if (screenshot.ColorPick(1200, mb_adjust_check_daili_xy_y1) != "#FFFFFF" && screenshot.ColorPick(1196, mb_adjust_check_daili_xy_y2) != "#FFFFFF")
+                if (screenshot.ColorPick(1200, 680) != "#FFFFFF" && screenshot.ColorPick(1196, 684) != "#FFFFFF")
                 {
                     Info("/// 代理指挥模块未激活 /正在激活代理指挥模块...");
                     ADB.Tap(1200, 680); //激活代理指挥
