@@ -81,6 +81,7 @@ namespace ArkHelper.Pages.OtherList
             //开始工作
             Task SCHT = Task.Run(() =>
             {
+                //Thread.Sleep(300000);
                 //时间
                 var starttime = DateTime.Now;
 
@@ -193,7 +194,8 @@ namespace ArkHelper.Pages.OtherList
                 Akhcmd("shell input tap 715 54", "", 2);
                 Akhcmd("shell input tap 109 51", "返回", 2);
                 //基建
-                Akhcmd("shell input tap 1154 697", "基建", 8);
+                Akhcmd("shell input tap 1154 697", "基建", 1);
+                Akhcmd("shell input tap 962 555", "确认", 7);
                 using (ADB.Screenshot sc = new Screenshot())
                 {
                     var notiPosition = sc.PicToPoint(Address.res + @"\pic\UI\notification.png");
@@ -204,7 +206,7 @@ namespace ArkHelper.Pages.OtherList
                         Thread.Sleep(2000);
                         for (int i = 0; i < 3; i++)
                         {
-                            Akhcmd("shell input tap 211 771", "待办事项", 1);
+                            Akhcmd("shell input tap 211 771", "待办事项", 2);
                         }
                         Akhcmd("shell input tap 473 214", "", 1);
                     }
@@ -212,13 +214,13 @@ namespace ArkHelper.Pages.OtherList
 
                 using (ADB.Screenshot sc = new Screenshot())
                 {
-                    var mfPosition = sc.PicToPoint(Address.res + @"\pic\UI\manufacturStationInAllView.png");
+                    var mfPosition = sc.PicToPoint(Address.res + @"\pic\UI\manufacturStationInAllView"+App.Data.scht.server.id+".png");
                     if (mfPosition.Count != 0)
                     {
                         Tap(mfPosition[0]);
                         Info("指令：制造站");
                         Thread.Sleep(2000);
-                        Akhcmd("shell input tap 327 691", "/// 指令：制造计划", 2);
+                        Akhcmd("shell input tap 327 691", "制造计划", 2);
                         Akhcmd("shell input tap 1371 603", "加速", 2);
                         Akhcmd("shell input tap 1081 377", "最多", 1);
                         Akhcmd("shell input tap 1069 653", "确定", 2);
