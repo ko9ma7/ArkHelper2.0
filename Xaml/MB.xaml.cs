@@ -167,6 +167,8 @@ namespace ArkHelper
                 Output.Log(content, "MBCore", infoKind);
             }
 
+            int firstSleepTime = 35000;
+
             int alreadyTime = 0;//已经执行作战次数
 
             //准备运行
@@ -238,7 +240,7 @@ namespace ArkHelper
 
             //已进本，等待出本
             Info("代理指挥作战运行中");
-            Thread.Sleep(35000);
+            Thread.Sleep(firstSleepTime);
             //循环检查是否在本里
             for (; ; )
             {
