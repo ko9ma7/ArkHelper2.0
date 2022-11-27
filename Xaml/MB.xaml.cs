@@ -204,7 +204,7 @@ namespace ArkHelper
 
             //开始行动
             ADB.Tap(1266, 753);
-            Info("开始行动");
+            Info("指令：开始行动");
             Thread.Sleep(1000);
 
             //检查是否有回理智界面
@@ -223,7 +223,7 @@ namespace ArkHelper
                     Thread.Sleep(3000);
 
                     ADB.Tap(1266, 753);//开始行动（蓝）
-                    Info("开始行动");
+                    Info("指令：开始行动");
                     Thread.Sleep(2000);
 
                     //检查是否进入编队展示界面
@@ -236,7 +236,7 @@ namespace ArkHelper
                 }
             }
             ADB.Tap(1240, 559);//开始行动（红）
-            Info("开始行动");
+            Info("指令：开始行动");
 
             //已进本，等待出本
             Info("代理指挥作战运行中");
@@ -259,7 +259,7 @@ namespace ArkHelper
             for (int i = 1; i <= 2; i++)
             {
                 ADB.Tap(1204, 290); //点击空白
-                Info("正在退出作战...");
+                Info("指令：退出作战");
                 Thread.Sleep(1000);
             }
             Thread.Sleep(1500);
@@ -269,6 +269,7 @@ namespace ArkHelper
             goto battle;
 
         MBend:;
+            Thread.Sleep(3000);
             //结束通知
             Info("连续作战指挥系统运行结束");
             Logger("--- MB END ---");
