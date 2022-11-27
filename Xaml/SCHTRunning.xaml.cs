@@ -140,12 +140,12 @@ namespace ArkHelper.Pages.OtherList
                         )
                             Thread.Sleep(3000);
 
-                        Akhcmd("shell input tap 934 220", "START", 9);
+                        Akhcmd("shell input tap 934 220", "START", 12);
                         if (App.Data.scht.server.id != "CB")
                         {
                             Akhcmd("shell input tap 721 574", "开始唤醒", 0);
                         }
-                        Thread.Sleep(20000);
+                        Thread.Sleep(25000);
                     }
 
                     StartGame();
@@ -229,7 +229,7 @@ namespace ArkHelper.Pages.OtherList
                         }
                     }
                     Akhcmd("shell input tap 89 50", "返回", 2);
-                    Akhcmd("shell input tap 962 555", "确认", 5);
+                    Akhcmd("shell input tap 349 555", "确认", 5);
                     if (AMmode == true)
                     {
                         void Buy(int x, int y)
