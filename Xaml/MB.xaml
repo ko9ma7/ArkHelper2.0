@@ -139,6 +139,7 @@
                 <TextBlock Margin="0,0,20,0"
                            VerticalAlignment="Bottom"
                            FontSize="15">
+                    <Run Text="/// " />
                     <Run x:Name="times_textblock" Text=" " />
                     <Run x:Name="log_textblock" />
                 </TextBlock>

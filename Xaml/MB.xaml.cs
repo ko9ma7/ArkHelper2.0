@@ -113,22 +113,22 @@ namespace ArkHelper
                 if (after_action == "返回游戏首页")
                 {
                     ADB.Tap(301, 45);//呼出菜单
-                    Show("/// 呼出菜单");
+                    Show("呼出菜单");
                     Thread.Sleep(1000);
 
                     ADB.Tap(102, 192);//返回主页
-                    Show("/// 正在返回游戏首页...");
+                    Show("正在返回游戏首页...");
                 }
                 if (after_action == "关闭游戏")
                 {
                     string package = ADB.GetGamePackageName(ADB.GetCurrentGameKind());
                     ADB.CMD("shell am force-stop " + package);//结束进程
-                    Show("/// 正在结束" + package + "进程...");
+                    Show("正在结束" + package + "进程...");
                 }
                 if (after_action == "关闭模拟器")
                 {
                     WithSystem.KillSimulator();
-                    Show("/// 正在关闭模拟器...");
+                    Show("正在关闭模拟器...");
                 }
                 if (after_action == "关机") { WithSystem.Shutdown(); }
                 if (after_action == "锁定") { WithSystem.LockWorkStation(); }
@@ -171,7 +171,7 @@ namespace ArkHelper
 
             //准备运行
             Logger("--- MB START ---");
-            Info("/// 连续作战指挥系统启动");
+            Info("连续作战指挥系统启动");
             //读取服务器
             string server = ADB.GetCurrentGameKind();
             //log记录，初始化
@@ -182,7 +182,7 @@ namespace ArkHelper
                 //作战状态：不在本前：
                 if (screenshot.ColorPick(1384, 212) != "#C65342" && screenshot.ColorPick(1371, 211) != "#C65342")
                 {
-                    Info("/// 未检测到关卡信息界面 /请切换至关卡信息界面", Output.InfoKind.Warning);
+                    Info("未检测到关卡信息界面 /请切换至关卡信息界面", Output.InfoKind.Warning);
                     Thread.Sleep(3000);
                     return 0;
                 }
@@ -190,7 +190,7 @@ namespace ArkHelper
                 //检测代理指挥是否已经勾选，否则勾选
                 if (screenshot.ColorPick(1200, 680) != "#FFFFFF" && screenshot.ColorPick(1196, 684) != "#FFFFFF")
                 {
-                    Info("/// 代理指挥模块未激活 /正在激活代理指挥模块...");
+                    Info("代理指挥模块未激活 /正在激活代理指挥模块...");
                     ADB.Tap(1200, 680); //激活代理指挥
                 }
             }
@@ -202,7 +202,7 @@ namespace ArkHelper
 
             //开始行动
             ADB.Tap(1266, 753);
-            Info("/// 开始行动");
+            Info("开始行动");
             Thread.Sleep(1000);
 
             //检查是否有回理智界面
@@ -210,34 +210,34 @@ namespace ArkHelper
             {
                 if (mode == Mode.san)
                 {
-                    Info("/// 剩余理智不足以指挥本次作战");
+                    Info("剩余理智不足以指挥本次作战");
                     ADB.Tap(871, 651); //点叉
                     goto MBend;
                 }
                 if (mode == Mode.time)
                 {
-                    Info("/// 剩余理智不足以指挥本次作战 /正在使用理智恢复物恢复理智...");
+                    Info("剩余理智不足以指挥本次作战 /正在使用理智恢复物恢复理智...");
                     ADB.Tap(1224, 648);//点对号
                     Thread.Sleep(3000);
 
                     ADB.Tap(1266, 753);//开始行动（蓝）
-                    Info("/// 开始行动");
+                    Info("开始行动");
                     Thread.Sleep(2000);
 
                     //检查是否进入编队展示界面
                     if (!PictureProcess.ColorCheck(1281, 455, "#953000", 1298, 432, "#C14600"))
                     {
                         ADB.Tap(871, 651); //点空白
-                        Info("/// 理智恢复物不足以恢复理智");
+                        Info("理智恢复物不足以恢复理智");
                         goto MBend;
                     }
                 }
             }
             ADB.Tap(1240, 559);//开始行动（红）
-            Info("/// 开始行动");
+            Info("开始行动");
 
             //已进本，等待出本
-            Info("/// 代理指挥作战运行中");
+            Info("代理指挥作战运行中");
             Thread.Sleep(35000);
             //循环检查是否在本里
             for (; ; )
@@ -257,7 +257,7 @@ namespace ArkHelper
             for (int i = 1; i <= 2; i++)
             {
                 ADB.Tap(1204, 290); //点击空白
-                Info("/// 正在退出作战...");
+                Info("正在退出作战...");
                 Thread.Sleep(1000);
             }
             Thread.Sleep(1500);
@@ -268,7 +268,7 @@ namespace ArkHelper
 
         MBend:;
             //结束通知
-            Info("/// 连续作战指挥系统运行结束");
+            Info("连续作战指挥系统运行结束");
             Logger("--- MB END ---");
 
             return alreadyTime;
