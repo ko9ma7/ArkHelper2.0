@@ -194,7 +194,7 @@ namespace ArkHelper.Pages.OtherList
                     Akhcmd("shell input tap 109 51", "返回", 2);
                     //基建
                     Akhcmd("shell input tap 1154 697", "基建", 1);
-                    Akhcmd("shell input tap 962 555", "确认", 7);
+                    Akhcmd("shell input tap 349 555", "确认", 7);
                     using (ADB.Screenshot sc = new Screenshot())
                     {
                         var notiPosition = sc.PicToPoint(Address.res + @"\pic\UI\notification.png");
@@ -229,7 +229,7 @@ namespace ArkHelper.Pages.OtherList
                         }
                     }
                     Akhcmd("shell input tap 89 50", "返回", 2);
-                    Akhcmd("shell input tap 349 555", "确认", 5);
+                    Akhcmd("shell input tap 962 555", "确认", 5);
                     if (AMmode == true)
                     {
                         void Buy(int x, int y)
