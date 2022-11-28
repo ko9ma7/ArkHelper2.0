@@ -82,7 +82,7 @@ namespace ArkHelper
             {
                 var startTime = DateTime.Now;//启动时间
 
-                var alreadyTime = MBCore(mode, time);
+                var alreadyTime = MBCore(mode:mode,time:time);
 
                 var endTime = DateTime.Now;//结束时间
                 TimeSpan UsingTime = endTime - startTime;
@@ -160,16 +160,26 @@ namespace ArkHelper
         }
         public delegate void MBMessage(string content, Output.InfoKind infoKind = Output.InfoKind.Infomational);
         public static event MBMessage Info;
-        public static int MBCore(Mode mode, int time = -1)
+        /// <summary>
+        /// MB的核心作战单元
+        /// </summary>
+        /// <param name="mode">模式</param>
+        /// <param name="time">次数（仅当mode=Mode.time时可用）</param>
+        /// <param name="ann_cardToUse">可用剿灭代理卡数量（仅当作战类型为剿灭时可用）</param>
+        /// <returns>MB作战次数</returns>
+        public static int MBCore(Mode mode, int time = -1,int ann_cardToUse = -1)
         {
             void Logger(string content, Output.InfoKind infoKind = Output.InfoKind.Infomational)
             {
                 Output.Log(content, "MBCore", infoKind);
             }
 
-            int firstSleepTime = 35000;
+            int battleKind = 0;//0：普通，1：剿灭
+
+            int firstSleepTime = 35000;//进入作战到开始检测等待时间
 
             int alreadyTime = 0;//已经执行作战次数
+            int ann_cardAlreadyUsed = 0;//已经使用过的剿灭卡数量
 
             //准备运行
             Logger("--- MB START ---");

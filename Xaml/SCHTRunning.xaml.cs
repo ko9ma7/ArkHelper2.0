@@ -82,17 +82,17 @@ namespace ArkHelper.Pages.OtherList
             //开始工作
             Task SCHT = Task.Run(() =>
             {
-                void main()
+                void main(Data.SCHT schtData)
                 {
                     //游戏
-                    string packname = ADB.GetGamePackageName(App.Data.scht.server.id);
+                    string packname = ADB.GetGamePackageName(schtData.server.id);
 
                     //周期
                     bool AMmode;
                     if (4 < DateTime.Now.Hour && 16 > DateTime.Now.Hour) { AMmode = true; } else { AMmode = false; }
                     //外服适配
                     //EN时差-1（天数），早晚反转
-                    if (App.Data.scht.server.id == "EN") { DateTime.Now.AddDays(-1).DayOfWeek.ToString(); AMmode = !AMmode; }
+                    if (schtData.server.id == "EN") { DateTime.Now.AddDays(-1).DayOfWeek.ToString(); AMmode = !AMmode; }
 
                     //adcmd计算
                     var week = DateTime.Now.DayOfWeek;
@@ -101,7 +101,7 @@ namespace ArkHelper.Pages.OtherList
                     int anntime = 0;
 
                     anntime = 1; //normal
-                    if (App.Data.scht.fcm.status)
+                    if (schtData.fcm.status)
                     {
                         switch ((int)week)
                         {
@@ -114,11 +114,11 @@ namespace ArkHelper.Pages.OtherList
                                 break;
                         }
                     }//fcm
-                    if (App.Data.scht.ann.customTime)
+                    if (schtData.ann.customTime)
                     {
                         var _wek = (int)week - 1;
                         if (_wek < 0) { _wek += 7; }
-                        anntime = App.Data.scht.ann.time[_wek];
+                        anntime = schtData.ann.time[_wek];
                     }//custom
 
                     //模拟器未启动则启动
@@ -136,12 +136,12 @@ namespace ArkHelper.Pages.OtherList
                     {
                         Akhcmd("shell am start -n " + packname + "/com.u8.sdk.U8UnityContext", "启动" + packname, 7);
                         while (!PictureProcess.ColorCheck(719, 759, "#FFD802", 720, 759, "#FFD802")
-                        || (DateTime.Now.Hour < 20 && App.Data.scht.fcm.status)
+                        || (DateTime.Now.Hour < 20 && schtData.fcm.status)
                         )
                             Thread.Sleep(3000);
 
                         Akhcmd("shell input tap 934 220", "START", 12);
-                        if (App.Data.scht.server.id != "CB")
+                        if (schtData.server.id != "CB")
                         {
                             Akhcmd("shell input tap 721 574", "开始唤醒", 0);
                         }
@@ -213,7 +213,7 @@ namespace ArkHelper.Pages.OtherList
 
                     using (ADB.Screenshot sc = new Screenshot())
                     {
-                        var mfPosition = sc.PicToPoint(Address.res + @"\pic\UI\manufacturStationInAllView" + App.Data.scht.server.id + ".png");
+                        var mfPosition = sc.PicToPoint(Address.res + @"\pic\UI\manufacturStationInAllView" + schtData.server.id + ".png");
                         if (mfPosition.Count != 0)
                         {
                             Tap(mfPosition[0]);
@@ -270,19 +270,19 @@ namespace ArkHelper.Pages.OtherList
                     }
 
                     //剿灭
-                    if (App.Data.scht.ann.status)
+                    if (schtData.ann.status)
                     {
                         Akhcmd("shell input tap 921 214", "终端", 2);
                         Akhcmd("shell input tap 986 754", "常态事务", 2);
                         Akhcmd("shell input tap 706 517", "当期委托", 3);
 
-                        if (App.Data.scht.ann.select != "TT")
+                        if (schtData.ann.select != "TT")
                         {
                             Akhcmd("shell input tap 109 51", "返回", 2);
                             Akhcmd("shell input tap 1270 763", "切换", 3);
-                            if (App.Data.scht.ann.select == "CHNB") { Akhcmd("shell input tap 1009 529", "切尔诺伯格", 3); }
-                            if (App.Data.scht.ann.select == "LMOB") { Akhcmd("shell input tap 1044 295", "龙门外环", 3); }
-                            if (App.Data.scht.ann.select == "LMDT") { Akhcmd("shell input tap 1086 417", "龙门市区", 3); }
+                            if (schtData.ann.select == "CHNB") { Akhcmd("shell input tap 1009 529", "切尔诺伯格", 3); }
+                            if (schtData.ann.select == "LMOB") { Akhcmd("shell input tap 1044 295", "龙门外环", 3); }
+                            if (schtData.ann.select == "LMDT") { Akhcmd("shell input tap 1086 417", "龙门市区", 3); }
                         }
 
                         for (int i = 0; i < anntime; i++)
@@ -375,19 +375,19 @@ namespace ArkHelper.Pages.OtherList
                         }
                     }
                     //first
-                    if (!App.Data.scht.first.unit.Contains("custom"))
+                    if (!schtData.first.unit.Contains("custom"))
                     {
                         AKHcmd.FormatAKHcmd["zhongduan"].RunCmd();
                         AKHcmd.FormatAKHcmd["ziyuanshouji"].RunCmd();
 
-                        if (App.Data.scht.first.unit == "LS")
+                        if (schtData.first.unit == "LS")
                         {
                             ADB.Tap(717, 374);
                             goto NativeUnitInited;
                         }
                         else
                         {
-                            if (App.Data.scht.first.unit.Contains("-"))
+                            if (schtData.first.unit.Contains("-"))
                             {
                                 //左滑找PR
                                 ADB.Swipe(1404, 591, 0, 591);
@@ -399,7 +399,7 @@ namespace ArkHelper.Pages.OtherList
                             }
                             using (var _screenshot = new ADB.Screenshot())
                             {
-                                var _point = _screenshot.PicToPoint(Address.res + "\\pic\\battle\\" + App.Data.scht.first.unit + ".png");
+                                var _point = _screenshot.PicToPoint(Address.res + "\\pic\\battle\\" + schtData.first.unit + ".png");
                                 if (_point.Count != 0)
                                 {
                                     var allowEnter = true;
@@ -426,15 +426,15 @@ namespace ArkHelper.Pages.OtherList
                     }
                     else
                     {
-                        GetCustomCp(App.Data.scht.first.unit);
+                        GetCustomCp(schtData.first.unit);
                         goto UnitInited;
                     }
                     //second
-                    if (!App.Data.scht.second.unit.Contains("custom"))
+                    if (!schtData.second.unit.Contains("custom"))
                     {
                         AKHcmd.FormatAKHcmd["zhongduan_menu_zhongduan"].RunCmd();
                         AKHcmd.FormatAKHcmd["ziyuanshouji"].RunCmd();
-                        if (App.Data.scht.second.unit == "LS")
+                        if (schtData.second.unit == "LS")
                         {
                             ADB.Tap(717, 374);
                             goto NativeUnitInited;
@@ -444,21 +444,21 @@ namespace ArkHelper.Pages.OtherList
                     {
                         AKHcmd.FormatAKHcmd["menu"].RunCmd();
                         AKHcmd.FormatAKHcmd["menu_home"].RunCmd();
-                        GetCustomCp(App.Data.scht.second.unit);
+                        GetCustomCp(schtData.second.unit);
                         goto UnitInited;
                     }
                 NativeUnitInited:;
                     Thread.Sleep(2000);
                     TouchCp();
                 UnitInited:;
-                    MB.MBCore(MB.Mode.san);
+                    MB.MBCore(mode:MB.Mode.san);
                 emptysan:;
                     Akhcmd("shell input tap 299 46", "菜单", 1);
                     Akhcmd("shell input tap 103 305", "首页", 3);
                     Akhcmd("shell input tap 908 676", "任务", 2);
                     Akhcmd("shell input tap 767 41", "日常任务", 3);
                     Akhcmd("shell input tap 1246 168", "收集", 2, 3);
-                    if (week == DayOfWeek.Sunday || App.Data.scht.fcm.status)
+                    if (week == DayOfWeek.Sunday || schtData.fcm.status)
                     {
                         Akhcmd("shell input tap 1051 51", "周常任务", 3);
                         Akhcmd("shell input tap 1246 168", "收集", 2, 3);
@@ -472,19 +472,18 @@ namespace ArkHelper.Pages.OtherList
                 var starttime = DateTime.Now;//时间
                 //Thread.Sleep(300000);
 
-                main();
+                main(App.Data.scht);
                 if (File.Exists(Address.dataExternal + "\\moreSCHT.json"))
                 {
                     var schts = JsonSerializer.Deserialize<JsonElement>(File.ReadAllText(Address.dataExternal + "\\moreSCHT.json"));
                     foreach (var scht in schts.EnumerateArray())
                     {
-                        App.Data.scht = JsonSerializer.Deserialize<Data.SCHT>(scht.ToString());
-                        main();
+                        var schtdt = JsonSerializer.Deserialize<Data.SCHT>(scht.ToString());
+                        main(schtdt);
                     }
                 }
 
                 //结束
-                App.LoadData();
                 WithSystem.KillSimulator();
                 Info("正在关闭模拟器神经网络依托平台...");
                 Info("系统任务运行完毕");
