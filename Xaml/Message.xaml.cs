@@ -479,7 +479,8 @@ namespace ArkHelper.Pages
                         //加入消息池
                         if (!Messages.Exists(mes => mes.ID == message.ID))
                             if (!message.Text.Contains("对本次抽奖进行监督，结果公正有效。公示链接："))
-                                Messages.Add(message);
+                                if ((DateTime.Now - message.CreateAt) < new TimeSpan(60, 0, 0, 0, 0))
+                                    Messages.Add(message);
                     }
                 }
                 Messages.Sort();

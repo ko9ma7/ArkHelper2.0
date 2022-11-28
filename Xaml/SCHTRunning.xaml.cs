@@ -130,7 +130,7 @@ namespace ArkHelper.Pages.OtherList
                     }
                     while (ADB.ConnectedInfo == null)
                     {
-                        Thread.Sleep(2000);
+                        Thread.Sleep(4000);
                     }
                     void StartGame()
                     {
