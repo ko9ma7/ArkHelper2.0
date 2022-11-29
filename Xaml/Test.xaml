@@ -16,6 +16,7 @@
     <Grid>
         <WrapPanel Orientation="Vertical">
             <TextBlock Name="text" Text="null" />
+            <Button Click="Button_Click"></Button>
         </WrapPanel>
     </Grid>
 </Page>

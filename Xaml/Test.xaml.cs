@@ -15,6 +15,7 @@ using System.Diagnostics;
 using Windows.ApplicationModel.Appointments;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices.ComTypes;
 
 namespace ArkHelper.Xaml
 {
@@ -55,5 +56,12 @@ namespace ArkHelper.Xaml
             Clipboard.SetText(result.Content.ToString());
         }
         #endregion
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            
+               
+            
+        }
     }
 }

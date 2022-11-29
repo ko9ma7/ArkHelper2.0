@@ -399,27 +399,11 @@ namespace ArkHelper.Pages.OtherList
                             }
                             using (var _screenshot = new ADB.Screenshot())
                             {
-                                var _point = _screenshot.PicToPoint(Address.res + "\\pic\\battle\\" + schtData.first.unit + ".png");
+                                var _point = _screenshot.PicToPoint(Address.res + "\\pic\\battle\\" + schtData.first.unit + ".png", opencv_errorCon: 0.9);
                                 if (_point.Count != 0)
                                 {
-                                    var allowEnter = true;
-                                    using (var _screenshot2 = new ADB.Screenshot())
-                                    {
-                                        var point2 = _screenshot2.PicToPoint(Address.res + "\\pic\\battle\\cannotEnter.png");
-                                        foreach (var point in point2)
-                                        {
-                                            if (Math.Abs(point.X - _point[0].X) < 100)
-                                            {
-                                                allowEnter = false;
-                                            }
-                                        }
-                                    }
-                                    if (allowEnter)
-                                    {
-                                        ADB.Tap(_point[0]);
-                                        goto NativeUnitInited;
-                                    }
-
+                                    ADB.Tap(_point[0]);
+                                    goto NativeUnitInited;
                                 }
                             }
                         }
@@ -451,7 +435,7 @@ namespace ArkHelper.Pages.OtherList
                     Thread.Sleep(2000);
                     TouchCp();
                 UnitInited:;
-                    MB.MBCore(mode:MB.Mode.san);
+                    MB.MBCore(mode: MB.Mode.san);
                 emptysan:;
                     Akhcmd("shell input tap 299 46", "菜单", 1);
                     Akhcmd("shell input tap 103 305", "首页", 3);
@@ -465,7 +449,7 @@ namespace ArkHelper.Pages.OtherList
                     }
                     Akhcmd("shell input tap 109 51", "返回", 2);
                     GetScreenshot(Address.Screenshot.SCHT, ArkHelperDataStandard.Screenshot);
-                    Akhcmd("shell am force-stop " + packname,"关闭" + packname,1);
+                    Akhcmd("shell am force-stop " + packname, "关闭" + packname, 1);
                 }
 
                 //开始

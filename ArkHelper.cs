@@ -543,7 +543,7 @@ namespace ArkHelper
             }
             #endregion
 
-            public List<Point> PicToPoint(string smallimg, double errorCon = 0.7, int errorRange = 16, int num = 50)
+            public List<Point> PicToPoint(string smallimg, double errorCon = 0.7, int errorRange = 16, int num = 50,double opencv_errorCon = 0.8)
             {
                 if (!File.Exists(smallimg)) { return new List<Point>(); }
 
@@ -551,7 +551,7 @@ namespace ArkHelper
                 InitBitmap();
                 var smallBM = new Bitmap(smallimg);
                 return PictureProcess.PicToPoint.GetPointUsingNative(this.ImgBitmap, smallBM, errorCon, errorRange, num);*/
-                return PictureProcess.PicToPoint.GetPointUsingOpenCV(this.Location, smallimg);
+                return PictureProcess.PicToPoint.GetPointUsingOpenCV(this.Location, smallimg,errorCon: opencv_errorCon);
             }
             private void InitBitmap()
             {
@@ -849,7 +849,7 @@ namespace ArkHelper
             /// <param name="bigPicLocation">大图地址</param>
             /// <param name="smallPicLocation">小图地址</param>
             /// <returns></returns>
-            public static List<Point> GetPointUsingOpenCV(string bigPicLocation, string smallPicLocation)
+            public static List<Point> GetPointUsingOpenCV(string bigPicLocation, string smallPicLocation,double errorCon = 0.8)
             {
                 List<Point> @return = new List<Point>();
 
@@ -866,7 +866,7 @@ namespace ArkHelper
 
                     while (true)
                     {
-                        double minval, maxval, threshold = 0.8;
+                        double minval, maxval, threshold = errorCon;
                         OpenCvSharp.Point minloc, maxloc;
                         Cv2.MinMaxLoc(res, out minval, out maxval, out minloc, out maxloc);
 
