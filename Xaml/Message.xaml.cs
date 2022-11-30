@@ -435,10 +435,10 @@ namespace ArkHelper.Pages
                 new User(ArkHelperDataStandard.MessageSource.weibo, "7753678921"),//GAW
                 new User(ArkHelperDataStandard.MessageSource.weibo, "2954409082"),//PLG
                 new User(ArkHelperDataStandard.MessageSource.official_communication,""), //COM
-                //new Pages.Message.User(UniData.MessageSource.weibo, "7404330062") //test
+                //new Pages.Message.User(ArkHelperDataStandard.MessageSource.weibo, "7784464307") //test
             };
 
-            for (; ; Thread.Sleep(40000))
+            for (; ; Thread.Sleep(1000))
             {
                 var createat = DateTime.Now;
                 if (!firstUpdate) createat = Messages[0].CreateAt;

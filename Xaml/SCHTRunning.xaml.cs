@@ -132,32 +132,59 @@ namespace ArkHelper.Pages.OtherList
                     {
                         Thread.Sleep(4000);
                     }
+
                     void StartGame()
                     {
-                        Akhcmd("shell am start -n " + packname + "/com.u8.sdk.U8UnityContext", "启动" + packname, 7);
-                        while (!PictureProcess.ColorCheck(719, 759, "#FFD802", 720, 759, "#FFD802")
-                        || (DateTime.Now.Hour < 20 && schtData.fcm.status)
+                        Akhcmd("shell am start -n " + packname + "/com.u8.sdk.U8UnityContext", "启动" + packname, 7);//启动游戏
+                        while
+                        (!PictureProcess.ColorCheck(719, 759, "#FFD802", 720, 759, "#FFD802")//START图标未显示（可能是在更新或者未加载好）
+                        || (DateTime.Now.Hour < 20 && schtData.fcm.status)//防沉迷
                         )
                             Thread.Sleep(3000);
 
-                        Akhcmd("shell input tap 934 220", "START", 12);
-                        if (schtData.server.id != "CB")
+                        Akhcmd("shell input tap 934 220", "START", 6);
+                        //持续等待直到出现开始唤醒标志出现，点击开始唤醒
+                        switch (schtData.server.id)
                         {
-                            Akhcmd("shell input tap 721 574", "开始唤醒", 0);
+                            case "CO":
+                            case "EN":
+                            case "JP":
+                                for (; ; )
+                                {
+                                    using (ADB.Screenshot sc = new ADB.Screenshot())
+                                    {
+                                        var point = sc.PicToPoint(Address.res + "\\pic\\UI\\loginButton" + schtData.server.id + ".png");
+                                        if (point.Count != 0)
+                                        {
+                                            Akhcmd("shell input tap 721 574", "开始唤醒", 0);
+                                            break;
+                                        }
+                                    }
+                                    Thread.Sleep(3000);
+                                }
+                                break;
+                            case "CB":
+                                Thread.Sleep(6000);//B服自动登录，不用点击开始唤醒
+                                break;
+                            default:
+                                Thread.Sleep(6000);
+                                Akhcmd("shell input tap 721 574", "开始唤醒", 0);
+                                break;
                         }
-                        Thread.Sleep(25000);
+                        Thread.Sleep(3000);
                     }
 
-                    StartGame();
+                    StartGame();//启动游戏并登录
 
-                    for (; ; )
+                    for (int i = 0; ; i++)
                     {
+                        Thread.Sleep(2000);
                         using (Screenshot sc = new Screenshot())
                         {
-                            var itemPosition = sc.PicToPoint(Address.res + @"pic\UI\signItems.png");
+                            var itemPosition = sc.PicToPoint(Address.res + @"\pic\UI\signItems.png",opencv_errorCon:0.5);
                             if (itemPosition.Count != 0)
                             {
-                                Akhcmd("shell input tap 722 719", "收取", 3);
+                                Akhcmd("shell input tap 722 719", "收取");
                                 continue;
                             }
 
@@ -166,24 +193,34 @@ namespace ArkHelper.Pages.OtherList
                             {
                                 Tap(closePosition[0]);
                                 Info("指令：关闭窗口");
-                                Thread.Sleep(2000);
+                                continue;
                             }
-                            else { break; }
-                        }
-                    }
 
-                    for (; ; )
-                    {
-                        using (ADB.Screenshot sc = new Screenshot())
-                        {
-                            if (sc.PicToPoint(Address.res + @"\pic\UI\shopCenter.png").Count != 0)
+                            var loginSucceedSymbolPosition = sc.PicToPoint(Address.res + @"\pic\UI\shopCenter.png");
+                            if (loginSucceedSymbolPosition.Count != 0)
                             {
-                                break;
+                                Thread.Sleep(3000);
+                                //有时候会先显示UI再显示公告框，再识别一次保证准确性
+                                using (Screenshot sc1 = new Screenshot())
+                                {
+                                    if (sc1.PicToPoint(Address.res + @"\pic\UI\shopCenter.png").Count != 0)
+                                    {
+                                        break;//如果确实加载完毕，break
+                                    }
+                                    else
+                                    {
+                                        continue;//如果没有加载，continue
+                                    }
+                                }
                             }
                         }
-                        Info("遇到无法关闭的窗口，正在尝试重启游戏解决...", Output.InfoKind.Warning);
-                        Akhcmd("shell am force-stop " + packname, "强制结束" + packname, 1);
-                        StartGame();
+                        if (i > 12)
+                        {
+                            i = 0;
+                            Info("遇到无法关闭的窗口，正在尝试重启游戏解决...", Output.InfoKind.Warning);
+                            Akhcmd("shell am force-stop " + packname, "强制结束" + packname, 1);
+                            StartGame();
+                        }
                     }
 
                     //邮件
@@ -347,7 +384,7 @@ namespace ArkHelper.Pages.OtherList
                         Akhcmd("shell input tap 103 305", "首页", 3);
                     }
 
-                    //准备作战 //fu关卡
+                    //准备作战
                     void TouchCp()
                     {
                         using (var _screenshot = new ADB.Screenshot())
