@@ -101,19 +101,6 @@ namespace ArkHelper.Pages.OtherList
                     int anntime = 0;
 
                     anntime = 1; //normal
-                    if (schtData.fcm.status)
-                    {
-                        switch ((int)week)
-                        {
-                            case 5:
-                            case 6:
-                                anntime = 2;
-                                break;
-                            case 0:
-                                anntime = 1;
-                                break;
-                        }
-                    }//fcm
                     if (schtData.ann.customTime)
                     {
                         var _wek = (int)week - 1;
@@ -138,7 +125,6 @@ namespace ArkHelper.Pages.OtherList
                         Akhcmd("shell am start -n " + packname + "/com.u8.sdk.U8UnityContext", "启动" + packname, 7);//启动游戏
                         while
                         (!PictureProcess.ColorCheck(719, 759, "#FFD802", 720, 759, "#FFD802")//START图标未显示（可能是在更新或者未加载好）
-                        || (DateTime.Now.Hour < 20 && schtData.fcm.status)//防沉迷
                         )
                             Thread.Sleep(3000);
 
@@ -479,7 +465,7 @@ namespace ArkHelper.Pages.OtherList
                     Akhcmd("shell input tap 908 676", "任务", 2);
                     Akhcmd("shell input tap 767 41", "日常任务", 3);
                     Akhcmd("shell input tap 1246 168", "收集", 2, 3);
-                    if (week == DayOfWeek.Sunday || schtData.fcm.status)
+                    if (true)
                     {
                         Akhcmd("shell input tap 1051 51", "周常任务", 3);
                         Akhcmd("shell input tap 1246 168", "收集", 2, 3);

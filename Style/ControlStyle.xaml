@@ -252,6 +252,7 @@
         <Setter Property="HorizontalAlignment" Value="Left" />
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="Tag" Value="" />
+        <!--<Setter Property="ToolTip" Value="{TemplateBinding ContentStringFormat}" />-->
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type RadioButton}">
@@ -273,7 +274,8 @@
                                            VerticalAlignment="Center"
                                            FontSize="18"
                                            Foreground="Black"
-                                           Text="{TemplateBinding ContentStringFormat}" />
+                                           Text="{TemplateBinding ContentStringFormat}"
+                                           Visibility="Visible" />
                             </WrapPanel>
                         </Border>
                     </Border>
@@ -338,11 +340,6 @@
                         </Trigger>-->
 
                     </ControlTemplate.Triggers>
-
-
-
-
-
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

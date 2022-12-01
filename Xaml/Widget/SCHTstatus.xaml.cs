@@ -10,7 +10,7 @@ namespace ArkHelper.Xaml.Widget
             string res = "";
             if (App.Data.scht.status)
             {
-                if (App.Data.scht.fcm.status)
+                if (true)
                 {
                     //防沉迷
                     DateTime dateTime = DateTime.Now;

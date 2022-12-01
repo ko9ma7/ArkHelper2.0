@@ -228,14 +228,6 @@ namespace ArkHelper
                 {
                     public string id { get; set; } = "CO";
                 }
-
-                public Fcm fcm { get; set; } = new Fcm();
-                public class Fcm
-                {
-                    public bool status { get; set; } = false;
-                }
-
-                public bool showHelperInSCHT { get; set; } = true;
             }
 
             public Message message { get; set; } = new Message();
@@ -248,6 +240,21 @@ namespace ArkHelper
             public class ArkHelper
             {
                 public bool pure { get; set; } = true;
+                public bool showHelperInSCHT { get; set; } = true;
+                public bool showGuideInSCHT { get; set; } = true;
+                public SCHTct schtct { get; set; } = new SCHTct();
+                public class SCHTct
+                {
+                    public bool status { get; set; } = false;
+                    public bool[] weekFliter { get; set; } = new bool[7] { true, true, true, true, true, true, true };
+                    public List<DateTime> times { get; set; } = new List<DateTime>()
+                    {
+                        new DateTime(2000, 1, 1, 7, 58, 0),
+                        new DateTime(2000, 1, 1, 19, 58, 0)
+                    };
+                    public List<DateTime> forceTimes { get; set; } = new List<DateTime>();
+                }
+
             }
         }
         #endregion
@@ -543,7 +550,7 @@ namespace ArkHelper
             }
             #endregion
 
-            public List<Point> PicToPoint(string smallimg, double errorCon = 0.7, int errorRange = 16, int num = 50,double opencv_errorCon = 0.8)
+            public List<Point> PicToPoint(string smallimg, double errorCon = 0.7, int errorRange = 16, int num = 50, double opencv_errorCon = 0.8)
             {
                 if (!File.Exists(smallimg)) { return new List<Point>(); }
 
@@ -551,7 +558,7 @@ namespace ArkHelper
                 InitBitmap();
                 var smallBM = new Bitmap(smallimg);
                 return PictureProcess.PicToPoint.GetPointUsingNative(this.ImgBitmap, smallBM, errorCon, errorRange, num);*/
-                return PictureProcess.PicToPoint.GetPointUsingOpenCV(this.Location, smallimg,errorCon: opencv_errorCon);
+                return PictureProcess.PicToPoint.GetPointUsingOpenCV(this.Location, smallimg, errorCon: opencv_errorCon);
             }
             private void InitBitmap()
             {
@@ -849,7 +856,7 @@ namespace ArkHelper
             /// <param name="bigPicLocation">大图地址</param>
             /// <param name="smallPicLocation">小图地址</param>
             /// <returns></returns>
-            public static List<Point> GetPointUsingOpenCV(string bigPicLocation, string smallPicLocation,double errorCon = 0.8)
+            public static List<Point> GetPointUsingOpenCV(string bigPicLocation, string smallPicLocation, double errorCon = 0.8)
             {
                 List<Point> @return = new List<Point>();
 

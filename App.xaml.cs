@@ -87,6 +87,8 @@ namespace ArkHelper
         public static void ExitApp()
         {
             notifyIcon.Visible = false;
+            CloseMainWindow();
+            
             App.SaveData();
             Process.GetCurrentProcess().Kill();
             Current.Shutdown();
@@ -178,29 +180,33 @@ namespace ArkHelper
                     //
                     if ((DateTime.Now.Hour == 7 || DateTime.Now.Hour == 19) && DateTime.Now.Minute == 58 && OKtoOpenSCHT && Data.scht.status)
                     {
-                        if (Data.scht.fcm.status)
+                        /*if (Data.scht.fcm.status)
                         {
                             if (DateTime.Now.Hour == 7 || !(DateTime.Now.DayOfWeek == DayOfWeek.Friday || DateTime.Now.DayOfWeek == DayOfWeek.Saturday || DateTime.Now.DayOfWeek == DayOfWeek.Sunday))
                                 goto end;
-                        }
+                        }*/
                         OKtoOpenSCHT = false;
                         Application.Current.Dispatcher.Invoke(delegate
                         {
-                            foreach (Window window in Application.Current.Windows)
-                            {
-                                if (window.GetType() == typeof(MainWindow))
-                                {
-                                    window.Close();
-                                }
-                            }
+                            CloseMainWindow();
                             mainArg = new ArkHelperArg(ArkHelperDataStandard.ArkHelperArg.ArgKind.Navigate, "SCHTRunning", "MainWindow");
                             OpenMainWindow();
                         });
                     }
-                end:;
                 }
             });
             #endregion
+        }
+
+        private static void CloseMainWindow()
+        {
+            foreach (Window window in Application.Current.Windows)
+            {
+                if (window.GetType() == typeof(MainWindow))
+                {
+                    window.Close();
+                }
+            }
         }
     }
 }

@@ -16,6 +16,7 @@ using Windows.ApplicationModel.Appointments;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices.ComTypes;
+using MaterialDesignThemes.Wpf;
 
 namespace ArkHelper.Xaml
 {
@@ -27,9 +28,6 @@ namespace ArkHelper.Xaml
         public Test()
         {
             InitializeComponent();
-            
-            if (ADB.ConnectedInfo != null)
-                text.Text = ADB.ConnectedInfo.ToString();
         }
 
         #region
@@ -56,12 +54,5 @@ namespace ArkHelper.Xaml
             Clipboard.SetText(result.Content.ToString());
         }
         #endregion
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            
-               
-            
-        }
     }
 }

@@ -236,13 +236,13 @@ namespace ArkHelper.Xaml
 
         private void Window_Closing(object sender, CancelEventArgs e)
         {
-            App.SaveData();
             if (App.Data.arkHelper.pure && !App.Data.scht.status)
             {
                 App.ExitApp();
             }
             else
             {
+                App.SaveData();
                 new ToastContentBuilder().AddArgument("kind", "Background").AddText("提示").AddText("ArkHelper已进入后台运行").Show();
             }
         }

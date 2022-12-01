@@ -51,32 +51,7 @@
                                 Click="Button_Click"
                                 Content="更换模拟器快捷方式"
                                 Style="{StaticResource MaterialDesignOutlinedButton}" />
-                        <WrapPanel Orientation="Vertical">
-                            <WrapPanel>
-                                <CheckBox x:Name="custom"
-                                          Margin="0,0,7,0"
-                                          Click="custom_Click" />
-                                <TextBlock FontSize="{StaticResource h2}" Text="自定义模拟器连接信息" />
-                                <materialDesign:PackIcon Margin="5,0,0,0"
-                                                         Style="{DynamicResource help}"
-                                                         ToolTip="如何找到模拟器adb连接端口：&#x0a;1.在该模拟器官网查询“adb连接方法”&#x0a;2.找到“adb connect 127.0.0.1:xxxx”字样&#x0a;3.其中的xxxx即为模拟器adb连接端口&#x0a;&#x0a;如何获取模拟器前台进程名称：&#x0a;1.启动该模拟器&#x0a;2.打开任务管理器，找到该模拟器对应的前台进程，右键选择“详细信息”&#x0a;3.定位到的名字即为模拟器前台进程&#x0a;4.请将该文件名复制（不包括“.exe”扩展名），填入下面的横线上"
-                                                         Visibility="{Binding ElementName=custom, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                            </WrapPanel>
-                            <WrapPanel Orientation="Horizontal" Visibility="{Binding ElementName=custom, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                <TextBox x:Name="port"
-                                         MinWidth="100"
-                                         Margin="0,0,5,5"
-                                         materialDesign:HintAssist.Hint="模拟器ADB连接端口"
-                                         Style="{StaticResource MaterialDesignFloatingHintTextBox}"
-                                         TextChanged="port_TextChanged" />
-                                <TextBox x:Name="im"
-                                         MinWidth="130"
-                                         Margin="0,0,5,5"
-                                         materialDesign:HintAssist.Hint="模拟器进程名"
-                                         Style="{StaticResource MaterialDesignFloatingHintTextBox}"
-                                         TextChanged="im_TextChanged" />
-                            </WrapPanel>
-                        </WrapPanel>
+                        <akhc:CustomSimulator />
 
                     </WrapPanel>
 

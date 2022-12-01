@@ -19,9 +19,6 @@ namespace ArkHelper.Pages.OtherList
             address.Text = Address.programData;
 
             pure.IsChecked = App.Data.arkHelper.pure;
-            im.Text = App.Data.simulator.custom.im;
-            port.Text = App.Data.simulator.custom.port.ToString();
-            custom.IsChecked = App.Data.simulator.custom.status;
             /*if (Data.SCHT.status)
             {
                 pure.IsChecked = true;
@@ -88,27 +85,7 @@ namespace ArkHelper.Pages.OtherList
         #endregion
         private void pure_Click(object sender, RoutedEventArgs e) => App.Data.arkHelper.pure = (bool)pure.IsChecked;
 
-        private void port_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            try
-            {
-                App.Data.simulator.custom.port = Convert.ToInt32(port.Text);
-            }
-            catch
-            {
-
-            }
-        }
-
-        private void im_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            App.Data.simulator.custom.im = im.Text;
-        }
-
-        private void custom_Click(object sender, RoutedEventArgs e)
-        {
-            App.Data.simulator.custom.status = (bool)custom.IsChecked;
-        }
+        
 
         public static string SelectSimu()
         {

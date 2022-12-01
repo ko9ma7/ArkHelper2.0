@@ -74,7 +74,7 @@
                             <LineBreak />
 
                             <Run FontSize="12" Foreground="LightGray">
-                                ArkHelper本地化计划任务系统和扩展管理单元正常运作中
+                                ArkHelper扩展管理单元正常运作中
                             </Run>
                         </TextBlock>
                     </DockPanel>
