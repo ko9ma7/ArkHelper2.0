@@ -351,7 +351,7 @@ namespace ArkHelper.Pages
                     int _classendadd = _timearea.IndexOf(@"</span>");
                     string _createat = _timearea.Substring(_classadd + 17, _classendadd - _classadd - 17);
                     var _dt = DateTime.ParseExact(_createat, "yyyy-MM-dd", CultureInfo.CreateSpecificCulture("en-US"));
-                    CreateAt = new DateTime(_dt.Year, _dt.Month, _dt.Day, 16, 0, 0);
+                    CreateAt = new DateTime(_dt.Year, _dt.Month, _dt.Day, (DateTime.Now.Hour > 16) ? 16 : 10, 0, 0);
 
                     Text = "第" + num + "期制作组通讯已经发布。";
                 }
@@ -438,7 +438,7 @@ namespace ArkHelper.Pages
                 //new Pages.Message.User(ArkHelperDataStandard.MessageSource.weibo, "7784464307") //test
             };
 
-            for (; ; Thread.Sleep(1000))
+            for (; ; Thread.Sleep(20000))
             {
                 var createat = DateTime.Now;
                 if (!firstUpdate) createat = Messages[0].CreateAt;
@@ -514,6 +514,7 @@ namespace ArkHelper.Pages
                     Thread.Sleep(100);
                     Application.Current.Dispatcher.Invoke(() =>
                     {
+                        MessageListDock.Children.Clear();
                         pgb.IsIndeterminate = false;
                         InitCard(3);
                         pgb.Visibility = Visibility.Collapsed;
@@ -826,7 +827,6 @@ namespace ArkHelper.Pages
 
             return bitImage;
         }
-
 
         #endregion
         #region 页面响应

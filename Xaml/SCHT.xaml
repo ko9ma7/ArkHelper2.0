@@ -150,7 +150,7 @@
 
                 <StackPanel Margin="0,0,40,20" DockPanel.Dock="Top">
                     <Border Background="#BBEFEFEF" CornerRadius="12">
-                        <Expander Background="Transparent" IsExpanded="True">
+                        <Expander Background="Transparent" IsExpanded="False">
                             <Expander.Header>
                                 <WrapPanel HorizontalAlignment="Center">
                                     <materialDesign:PackIcon Width="20"
@@ -159,7 +159,7 @@
                                                              Kind="HelpCircleOutline" />
                                     <TextBlock Margin="10,0,0,0"
                                                VerticalAlignment="Center"
-                                               FontSize="20">
+                                               FontSize="{StaticResource h2}">
                                         说明
                                     </TextBlock>
                                 </WrapPanel>
@@ -180,10 +180,7 @@
 
                                 </WrapPanel>
                                 <WrapPanel Margin="5" Orientation="Vertical">
-                                    <TextBlock FontSize="{StaticResource h2}">运行时间</TextBlock>
-                                    <TextBlock>星期一至星期日每天7:58、19:58</TextBlock>
-                                    <TextBlock>星期五至星期日每天19:58（防沉迷模式）</TextBlock>
-                                    <TextBlock>
+                                    <TextBlock FontSize="{StaticResource h2}">
                                         下次运行：<Run Name="nextRunTime" /></TextBlock>
                                 </WrapPanel>
 
@@ -531,8 +528,7 @@
                                    VerticalAlignment="Center"
                                    Orientation="Vertical">
                             <WrapPanel Name="ctWeek" />
-                            <WrapPanel Name="ctTime"
-                                       Orientation="Vertical" />
+                            <WrapPanel Name="ctTime" Orientation="Vertical" />
                             <Button x:Name="addTime"
                                     Width="40"
                                     Height="40"

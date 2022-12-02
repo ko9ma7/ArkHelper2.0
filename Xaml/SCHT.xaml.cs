@@ -10,6 +10,7 @@ using System.Diagnostics;
 using Windows.ApplicationModel.Wallet;
 using static System.Net.Mime.MediaTypeNames;
 using System.ComponentModel;
+using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace ArkHelper.Pages.OtherList
 {
@@ -21,7 +22,7 @@ namespace ArkHelper.Pages.OtherList
         {
             InitializeComponent();
 
-            nextRunTime.Text = ArkHelper.Xaml.Widget.SCHTstatus.GetTime();
+            nextRunTime.Text = GetNextRunTimeStringFormat();
             foreach (ArkHelper.PinnedData.Simulator.SimuInfo simulator in ArkHelper.PinnedData.Simulator.Support)
             {
                 SimuSupport.Text += simulator.Name + " ";
@@ -111,6 +112,11 @@ namespace ArkHelper.Pages.OtherList
             VisChange();
         }
 
+        private void VisChange()
+        {
+            first_unit.Visibility = second_unit.Visibility = ann_stack.Visibility = ct_stack.Visibility = server_stack.Visibility = (bool)(status_togglebutton.IsChecked) ? Visibility.Visible : Visibility.Collapsed;
+            if ((bool)status_togglebutton.IsChecked && ((bool)LSFirst.IsChecked || (bool)customFirst.IsChecked)) { second_unit.Visibility = Visibility.Collapsed; }
+        }
         private void CreateNewTime(DateTime num)
         {
             WrapPanel wrapPanel = new WrapPanel() { Margin = new Thickness(0, 0, 0, 0) };
@@ -139,24 +145,22 @@ namespace ArkHelper.Pages.OtherList
 
             ctTime.Children.Add(wrapPanel);
         }
-
         private void TimePicker_SelectedTimeChanged(object sender, RoutedPropertyChangedEventArgs<DateTime?> e)
         {
             ctTimeChanged();
         }
-
         private void TimeAdd(object sender, RoutedEventArgs e)
         {
             CreateNewTime(new DateTime(2000, 1, 1, 1, 0, 0));
             ctTimeChanged();
         }
-
         private void DatetimeDelete(object sender, RoutedEventArgs e)
         {
             ctTime.Children.Remove((sender as Button).Parent as WrapPanel);
             ctTimeChanged();
         }
 
+        #region 监听页面
         private void weekFilterChanged(object sender, RoutedEventArgs e)
         {
             if (!inited) return;
@@ -168,7 +172,6 @@ namespace ArkHelper.Pages.OtherList
             }
             catch { }
         }
-
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (!inited) return;
@@ -179,7 +182,6 @@ namespace ArkHelper.Pages.OtherList
             }
             catch { }
         }
-
         private void status_togglebutton_Click(object sender, RoutedEventArgs e)
         {
             App.Data.scht.status = (bool)status_togglebutton.IsChecked;
@@ -189,13 +191,6 @@ namespace ArkHelper.Pages.OtherList
             }
             VisChange();
         }
-
-        private void VisChange()
-        {
-            first_unit.Visibility = second_unit.Visibility = ann_stack.Visibility = ct_stack.Visibility = server_stack.Visibility = (bool)(status_togglebutton.IsChecked) ? Visibility.Visible : Visibility.Collapsed;
-            if ((bool)status_togglebutton.IsChecked && ((bool)LSFirst.IsChecked || (bool)customFirst.IsChecked)) { second_unit.Visibility = Visibility.Collapsed; }
-        }
-
         private void First_Unit_Selected(object sender, RoutedEventArgs e)
         {
             //检测是哪个button被激活
@@ -254,6 +249,30 @@ namespace ArkHelper.Pages.OtherList
             //检测是哪个button被激活
             App.Data.scht.ann.select = (sender as RadioButton).Name;
         }
+        private void ann_custom_time_status_checkbox_Click(object sender, RoutedEventArgs e)
+        {
+            App.Data.scht.ann.customTime = (bool)ann_custom_time_status_checkbox.IsChecked;
+        }
+        private void server_combobox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            App.Data.scht.server.id = server_combobox.SelectedValue.ToString();
+        }
+        private void ann_status_togglebutton_Click(object sender, RoutedEventArgs e)
+        {
+            App.Data.scht.ann.status = (bool)ann_status_togglebutton.IsChecked;
+        }
+        private void ctTimeChanged()
+        {
+            if (!inited) return;
+            App.Data.arkHelper.schtct.times.Clear();
+            foreach (var timebox in ctTime.Children)
+                foreach (var item in (timebox as WrapPanel).Children)
+                    if (item.GetType() == typeof(TimePicker))
+                    {
+                        App.Data.arkHelper.schtct.times.Add((DateTime)(item as TimePicker).SelectedTime);
+                    }
+        }
+        #endregion
 
         /// <summary>
         /// 选择一个Akhcpi文件
@@ -305,31 +324,43 @@ namespace ArkHelper.Pages.OtherList
         }
         #endregion
 
-        private void ann_custom_time_status_checkbox_Click(object sender, RoutedEventArgs e)
+        public static DateTime GetNextRunTime()
         {
-            App.Data.scht.ann.customTime = (bool)ann_custom_time_status_checkbox.IsChecked;
-        }
-
-        private void server_combobox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            App.Data.scht.server.id = server_combobox.SelectedValue.ToString();
-        }
-
-        private void ann_status_togglebutton_Click(object sender, RoutedEventArgs e)
-        {
-            App.Data.scht.ann.status = (bool)ann_status_togglebutton.IsChecked;
-        }
-
-        private void ctTimeChanged()
-        {
-            if (!inited) return;
-            App.Data.arkHelper.schtct.times.Clear();
-            foreach (var timebox in ctTime.Children)
-                foreach (var item in (timebox as WrapPanel).Children)
-                    if (item.GetType() == typeof(TimePicker))
+            DateTime dateTime = DateTime.Now;
+            DateTime nullTime = new DateTime(2000, 1, 1, 0, 0, 0);
+            if (App.Data.scht.status)
+            {
+                for(int i = 0; i < 10; i++)
+                {
+                    foreach(DateTime timeInList in App.Data.arkHelper.schtct.times)
                     {
-                        App.Data.arkHelper.schtct.times.Add((DateTime)(item as TimePicker).SelectedTime);
+                        DateTime time = new DateTime(year: dateTime.Year,
+                                                     month: dateTime.Month,
+                                                     day: dateTime.Day+i,
+                                                     hour: timeInList.Hour,
+                                                     minute: timeInList.Minute,
+                                                     second:59);
+                        if (time >= dateTime) return time;
                     }
+                }
+                return nullTime;
+            }
+            else
+            {
+                return nullTime;
+            }
+        }
+        public static string GetNextRunTimeStringFormat()
+        {
+            var a = GetNextRunTime();
+            if (a.Year == 2000)
+            {
+                return "不会运行";
+            }
+            else
+            {
+                return a.ToString("g");
+            }
         }
     }
 }

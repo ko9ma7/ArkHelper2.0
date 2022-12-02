@@ -12,7 +12,7 @@ namespace ArkHelper.Xaml
     {
         DispatcherTimer dispatcherTimer = new DispatcherTimer()
         {
-            Interval = new TimeSpan(0, 0, 0, 1),
+            Interval = new TimeSpan(0, 0, 0, 1,0),
         };
         public Home()
         {

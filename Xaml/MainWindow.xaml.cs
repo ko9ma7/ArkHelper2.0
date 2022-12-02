@@ -236,6 +236,7 @@ namespace ArkHelper.Xaml
 
         private void Window_Closing(object sender, CancelEventArgs e)
         {
+            WithSystem.GarbageCollect();
             if (App.Data.arkHelper.pure && !App.Data.scht.status)
             {
                 App.ExitApp();

@@ -24,6 +24,8 @@ namespace ArkHelper
         public static void LoadData()
         {
             App.Data = JsonSerializer.Deserialize<Data>(File.ReadAllText(Address.config));
+
+            App.Data.arkHelper.schtct.times.Sort();
         }
         public static void SaveData()
         {
@@ -87,7 +89,6 @@ namespace ArkHelper
         public static void ExitApp()
         {
             notifyIcon.Visible = false;
-            CloseMainWindow();
             
             App.SaveData();
             Process.GetCurrentProcess().Kill();
@@ -175,16 +176,19 @@ namespace ArkHelper
             #region SCHT等待
             Task SCHT = Task.Run(() =>
             {
-                for (; ; Thread.Sleep(1000))
+                for (; ; Thread.Sleep(20000))
                 {
-                    //
-                    if ((DateTime.Now.Hour == 7 || DateTime.Now.Hour == 19) && DateTime.Now.Minute == 58 && OKtoOpenSCHT && Data.scht.status)
+                    var nextTime = ArkHelper.Pages.OtherList.SCHT.GetNextRunTime();
+                    var dateTime = DateTime.Now;
+                    if (OKtoOpenSCHT 
+                    && Data.scht.status
+                    && nextTime.Year == dateTime.Year
+                    && nextTime.Month == dateTime.Month
+                    && nextTime.Day == dateTime.Day
+                    && nextTime.Hour == dateTime.Hour
+                    && nextTime.Minute == dateTime.Minute
+                    )
                     {
-                        /*if (Data.scht.fcm.status)
-                        {
-                            if (DateTime.Now.Hour == 7 || !(DateTime.Now.DayOfWeek == DayOfWeek.Friday || DateTime.Now.DayOfWeek == DayOfWeek.Saturday || DateTime.Now.DayOfWeek == DayOfWeek.Sunday))
-                                goto end;
-                        }*/
                         OKtoOpenSCHT = false;
                         Application.Current.Dispatcher.Invoke(delegate
                         {
@@ -205,6 +209,7 @@ namespace ArkHelper
                 if (window.GetType() == typeof(MainWindow))
                 {
                     window.Close();
+                    WithSystem.GarbageCollect();
                 }
             }
         }
