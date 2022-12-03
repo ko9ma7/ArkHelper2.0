@@ -176,7 +176,7 @@ namespace ArkHelper
             #region SCHT等待
             Task SCHT = Task.Run(() =>
             {
-                for (; ; Thread.Sleep(20000))
+                for (; ; Thread.Sleep(1000))
                 {
                     var nextTime = ArkHelper.Pages.OtherList.SCHT.GetNextRunTime();
                     var dateTime = DateTime.Now;

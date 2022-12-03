@@ -332,6 +332,7 @@ namespace ArkHelper.Pages.OtherList
             {
                 for(int i = 0; i < 10; i++)
                 {
+                    
                     foreach(DateTime timeInList in App.Data.arkHelper.schtct.times)
                     {
                         DateTime time = new DateTime(year: dateTime.Year,

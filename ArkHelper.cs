@@ -142,7 +142,8 @@ namespace ArkHelper
             twitter,
             facebook,
             web,
-            official_communication
+            official_communication,
+            neteaseMusic
         }
 
         /// <summary>

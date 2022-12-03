@@ -52,10 +52,16 @@ namespace ArkHelper.Pages
                         Name = _userinfo.GetProperty("screen_name").GetString();
                         break;
                     case ArkHelperDataStandard.MessageSource.official_communication:
-
                         Avatar = null;//
                         Name = "制作组通讯";
                         break;
+                }
+                if (Source == ArkHelperDataStandard.MessageSource.neteaseMusic)
+                {
+                    var res = Net.GetFromApi("http://music.163.com/api/artist/albums/"+uid);
+                    Avatar = res.GetProperty("artist").GetProperty("picUrl").GetString();
+                    Name = res.GetProperty("artist").GetProperty("name").GetString();
+
                 }
                 if (Avatar != null)
                 {
@@ -91,7 +97,6 @@ namespace ArkHelper.Pages
                                 if (card.GetProperty("profile_type_id").GetString().Contains("top")) { _top = true; }
                                 var json = card.GetProperty("mblog");
 
-
                                 //交给构造函数解析
                                 var message = new ArkHelperMessage(Source, json)
                                 {
@@ -125,9 +130,18 @@ namespace ArkHelper.Pages
                         };
                         back.Add(_aaaa);
                         break;
-
-                    default:
-                        break;
+                }
+                if (Source == ArkHelperDataStandard.MessageSource.neteaseMusic)
+                {
+                    var res = Net.GetFromApi("http://music.163.com/api/artist/albums/32540734");
+                    foreach (var item in res.GetProperty("hotAlbums").EnumerateArray())
+                    {
+                        var _aaaa = new ArkHelperMessage(Source, item)
+                        {
+                            User = this
+                        };
+                        back.Add(_aaaa);
+                    }
                 }
                 GC.Collect();
                 return back;
@@ -331,16 +345,14 @@ namespace ArkHelper.Pages
                 }
                 if (source == ArkHelperDataStandard.MessageSource.official_communication)
                 {
-                    int num = 0;
-
-                    ID = source.ToString() + num;
                     IsTop = true;
 
                     string origin = (string)content;
 
                     int _txadd = origin.IndexOf("制作组通讯#");
 
-                    num = Convert.ToInt32(origin.Substring(_txadd + 6, 2));
+                    int num = Convert.ToInt32(origin.Substring(_txadd + 6, 2));
+                    ID = source.ToString() + num;
 
                     int _herfadd = origin.Substring(0, _txadd).LastIndexOf(@"href=""");
                     string _html = origin.Substring(_herfadd + 6, origin.IndexOf(@"""", _herfadd + 10) - _herfadd - 6);
@@ -354,6 +366,21 @@ namespace ArkHelper.Pages
                     CreateAt = new DateTime(_dt.Year, _dt.Month, _dt.Day, (DateTime.Now.Hour > 16) ? 16 : 10, 0, 0);
 
                     Text = "第" + num + "期制作组通讯已经发布。";
+                }
+                if (source == ArkHelperDataStandard.MessageSource.neteaseMusic)
+                {
+
+                    JsonElement origin = (JsonElement)content;
+
+                    var id = origin.GetProperty("id").GetInt64();
+                    ID = source.ToString() + id;
+                    Links.Add(@"https://music.163.com/#/album?id=" + id);
+                    var name = origin.GetProperty("name").GetString();
+                    Text = "发布了新的专辑" + "《" + name + "》。";
+
+                    var time = origin.GetProperty("publishTime").GetInt64();
+                    System.DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
+                    CreateAt = dtDateTime.AddMilliseconds(time).ToLocalTime();
                 }
 
                 //处理图片确定缩略图
@@ -435,6 +462,7 @@ namespace ArkHelper.Pages
                 new User(ArkHelperDataStandard.MessageSource.weibo, "7753678921"),//GAW
                 new User(ArkHelperDataStandard.MessageSource.weibo, "2954409082"),//PLG
                 new User(ArkHelperDataStandard.MessageSource.official_communication,""), //COM
+                new User(ArkHelperDataStandard.MessageSource.neteaseMusic,"32540734"), //MSR
                 //new Pages.Message.User(ArkHelperDataStandard.MessageSource.weibo, "7784464307") //test
             };
 
