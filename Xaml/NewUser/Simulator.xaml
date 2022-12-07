@@ -11,13 +11,21 @@
       d:DesignWidth="800"
       mc:Ignorable="d">
 
-    <StackPanel Orientation="Vertical">
-        <akhc:Title Icon="Settings" Text="模拟器" />
-        <Button Name="button"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Top"
-                Click="Button_Click"
-                Content="选择模拟器快捷方式"
-                Style="{StaticResource MaterialDesignOutlinedButton}" />
+    <StackPanel>
+        <akhc:Title Icon="Text" Text="模拟器设置" />
+        <StackPanel>
+            <TextBlock Margin="0,0,0,0" FontSize="{StaticResource h3}">
+                <Run>请将模拟器分辨率设置为</Run><Underline>1440*810。</Underline>
+                <LineBreak />
+                <LineBreak />
+                <Run Foreground="Gray">ArkHelper目前支持自动连接以下模拟器：</Run>
+                <LineBreak />
+                <akhc:SimuSupport />
+                <LineBreak />
+                <LineBreak />
+                <Run Foreground="Gray">请查看你的模拟器是否受支持。若否，你需要：</Run>
+            </TextBlock>
+            <akhc:CustomSimulator Margin="0,0,0,0" />
+        </StackPanel>
     </StackPanel>
 </Page>

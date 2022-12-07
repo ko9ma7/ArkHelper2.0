@@ -1,26 +1,31 @@
 ﻿<Window x:Class="ArkHelper.NewUser"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" ResizeMode="CanMinimize"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:local="clr-namespace:ArkHelper"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:ArkHelper" xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        mc:Ignorable="d" Loaded="Window_Loaded" Unloaded="Window_Unloaded"
-        Title="ArkHelper" Height="520" Width="845" Background="White">
-    <Grid>
+        Title="ArkHelper"
+        Width="800"
+        Height="450"
+        Background="White"
+        Loaded="Window_Loaded"
+        ResizeMode="CanResize"
+        Unloaded="Window_Unloaded"
+        mc:Ignorable="d">
+    <Grid Margin="50,0,50,0">
         <Frame x:Name="PagesNavigation" NavigationUIVisibility="Hidden" />
-        <Button Background="{DynamicResource MaterialDesignTextFieldBoxBackground}"
-                x:Name="next"
-                Click="next_Click"
-                ToolTip="下一步"
-                HorizontalAlignment="Right" 
+        <Button x:Name="next"
+                Margin="0,0,10,50"
+                HorizontalAlignment="Right"
                 VerticalAlignment="Bottom"
-                Margin="0,0,50,50" 
-                Style="{DynamicResource MaterialDesignIconButton}" 
+                Background="{DynamicResource MaterialDesignTextFieldBoxBackground}"
+                Click="next_Click"
                 Cursor="Hand"
-                IsEnabled="False">
-            <materialDesign:PackIcon
-                Kind="ChevronRight"
-                x:Name="next_icon" />
+                IsEnabled="False"
+                Style="{DynamicResource MaterialDesignIconButton}"
+                ToolTip="下一步">
+            <materialDesign:PackIcon x:Name="next_icon" Kind="ChevronRight" />
         </Button>
     </Grid>
 </Window>

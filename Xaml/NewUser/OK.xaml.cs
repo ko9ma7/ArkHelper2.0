@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace ArkHelper.Xaml.NewUser
 {
     /// <summary>
-    /// Simulator.xaml 的交互逻辑
+    /// OK.xaml 的交互逻辑
     /// </summary>
-    public partial class Simulator : Page
+    public partial class OK : Page
     {
-        public Simulator()
+        public OK()
         {
             InitializeComponent();
         }

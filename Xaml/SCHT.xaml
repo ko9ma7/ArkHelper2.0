@@ -9,8 +9,10 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       Title="SCHT"
       d:Background="White"
-      d:DesignHeight="1900"
+      d:DesignHeight="1000"
       d:DesignWidth="652"
+      Loaded="Page_Loaded"
+      Unloaded="Page_Unloaded"
       mc:Ignorable="d">
     <Page.Resources>
         <!--  作战单元样式  -->
@@ -75,58 +77,29 @@
                 <Grid Name="GuidePage2" Visibility="Collapsed">
                     <StackPanel>
                         <akhc:Title Icon="Text" Text="模拟器" />
-                        <Button Width="200"
-                                Click="Button_Click_1"
-                                Content="选择模拟器快捷方式"
-                                Style="{StaticResource MaterialDesignOutlinedButton}" />
+
+                        <akhc:SimuSelect HorizontalAlignment="Center" />
+
                     </StackPanel>
+
                 </Grid>
                 <Grid Name="GuidePage3" Visibility="Collapsed">
                     <StackPanel>
-                        <akhc:Title Icon="Text" Text="模拟器" />
-                        <TextBlock Margin="40,0,0,0" FontSize="{StaticResource h3}">
-                            <Run Foreground="Gray">ArkHelper目前支持自动连接以下模拟器：</Run>
-                            <LineBreak />
-                            <Run Name="SimuSupport" />
-                            <LineBreak />
-                            <LineBreak />
-                            <Run Foreground="Gray">请查看你的模拟器是否受支持。若否，你需要：</Run>
-                        </TextBlock>
-                        <akhc:CustomSimulator Margin="40,0,0,0" />
-                    </StackPanel>
-                </Grid>
-                <Grid Name="GuidePage4" Visibility="Collapsed">
-                    <StackPanel>
-                        <akhc:Title Icon="Key" Text="权限" />
-                        <TextBlock Margin="40,0,0,0" FontSize="{StaticResource h3}">
-                            在使用SCHT前，建议您关闭系统UAC。<LineBreak /><Hyperlink Click="closeUAC">如何关闭系统UAC？</Hyperlink>
-                        </TextBlock>
-                    </StackPanel>
-                </Grid>
-                <Grid Name="GuidePage5" Visibility="Collapsed">
-                    <StackPanel>
                         <akhc:Title Icon="Note" Text="提示" />
                         <TextBlock Margin="40,0,40,0" FontSize="{StaticResource h3}">
-                            SCHT会在每天7:58和19:58开始自动运行。
-                            （对于防沉迷用户，可以在该向导结束后的设置界面勾选“防沉迷模式”，SCHT改为每周五、周六、周日晚上7:58运行。）<LineBreak />
+                            SCHT默认会在每天7:58和19:58开始自动运行。<LineBreak />
+                            <Run Foreground="Gray">
+                                对于防沉迷用户或想自定义时间的用户，可以在该向导结束后的设置界面手动调整运行时间。
+                            </Run>
                             <LineBreak />
-                            <Run Foreground="IndianRed">在运行前，请确保电脑开启，且ArkHelper在前台或后台运行。</Run>
+                            <LineBreak />
+                            <Run Foreground="IndianRed">在运行前，请确保电脑处在开启状态，且ArkHelper在前台或后台运行。</Run>
 
                         </TextBlock>
                     </StackPanel>
                 </Grid>
-                <Grid Name="GuidePage6" Visibility="Collapsed">
-                    <WrapPanel Margin="0,0,0,20"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Center"
-                               Orientation="Vertical">
-                        <materialDesign:PackIcon Width="100"
-                                                 Height="100"
-                                                 HorizontalAlignment="Center"
-                                                 Kind="Check" />
-                        <TextBlock HorizontalAlignment="Center" FontSize="{StaticResource h1}">SCHT配置完毕</TextBlock>
-                        <TextBlock HorizontalAlignment="Center" FontSize="{StaticResource p}">欢迎使用SCHT！</TextBlock>
-                    </WrapPanel>
+                <Grid Name="GuidePage4" Visibility="Collapsed">
+                    <akhc:OK Margin="0,0,0,30" Text="SCHT" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Grid>
 
                 <Button x:Name="next"
@@ -171,12 +144,7 @@
                                     <TextBlock FontSize="{StaticResource h2}" Foreground="Red">
                                         警告
                                     </TextBlock>
-                                    <Button BorderBrush="Red"
-                                            Click="Button_Click_1"
-                                            Foreground="Red"
-                                            Style="{StaticResource MaterialDesignOutlinedButton}">
-                                        未选择模拟器快捷方式
-                                    </Button>
+                                    <akhc:SimuSelect />
 
                                 </WrapPanel>
                                 <WrapPanel Margin="5" Orientation="Vertical">
@@ -528,16 +496,28 @@
                                    VerticalAlignment="Center"
                                    Orientation="Vertical">
                             <WrapPanel Name="ctWeek" Margin="0,0,0,0" />
-                            <WrapPanel Name="ctTime" Margin="0,10,0,0" Orientation="Vertical" />
-                            <Button x:Name="addTime"
-                                    Width="40"
-                                    Height="40"
-                                    Margin="0,0,0,0"
-                                    HorizontalAlignment="Left"
-                                    Click="TimeAdd"
-                                    Style="{DynamicResource MaterialDesignIconButton}">
-                                <materialDesign:PackIcon Kind="Add" />
-                            </Button>
+                            <WrapPanel Name="ctTime"
+                                       Margin="0,10,0,0"
+                                       Orientation="Vertical" />
+                            <WrapPanel>
+                                <Button x:Name="addTime"
+                                        Width="40"
+                                        Height="40"
+                                        Margin="0,0,0,0"
+                                        HorizontalAlignment="Left"
+                                        Click="TimeAdd"
+                                        Style="{DynamicResource MaterialDesignIconButton}">
+                                    <materialDesign:PackIcon Kind="Add" />
+                                </Button>
+                                <Button Width="40"
+                                        Height="40"
+                                        Margin="5,0,0,0"
+                                        HorizontalAlignment="Left"
+                                        Click="Button_Click_2"
+                                        Style="{DynamicResource MaterialDesignIconButton}">
+                                    <materialDesign:PackIcon Kind="ContentSave" />
+                                </Button>
+                            </WrapPanel>
                         </WrapPanel>
 
 

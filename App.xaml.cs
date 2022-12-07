@@ -148,7 +148,7 @@ namespace ArkHelper
             {
                 //if (Directory.Exists(Address.programData)) { Directory.Delete(Address.programData, true); } //删除残缺的数据文件
                 //new NewUser().ShowDialog(); //导航到新用户窗口
-                var win = new NewUserPolicyWindow();
+                var win = new NewUser();
                 win.ShowDialog();
             }
             try

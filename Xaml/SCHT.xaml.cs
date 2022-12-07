@@ -14,6 +14,8 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using System.Runtime.InteropServices;
 using System.CodeDom;
 using System.Linq;
+using ArkHelper.Style.Control;
+using OpenCvSharp.Detail;
 
 namespace ArkHelper.Pages.OtherList
 {
@@ -26,13 +28,9 @@ namespace ArkHelper.Pages.OtherList
             InitializeComponent();
 
             nextRunTime.Text = GetNextRunTimeStringFormat();
-            foreach (ArkHelper.PinnedData.Simulator.SimuInfo simulator in ArkHelper.PinnedData.Simulator.Support)
-            {
-                SimuSupport.Text += simulator.Name + " ";
-            }
             if (File.Exists(Address.dataExternal + "\\simulator.lnk"))
             {
-                SimuSel.Visibility = Visibility.Collapsed;
+                CSimuSelWrap();
             }
 
             //UI
@@ -91,7 +89,6 @@ namespace ArkHelper.Pages.OtherList
                 CheckBox checkBox = new CheckBox()
                 {
                     IsChecked = num,
-                    Tag = _num
                 };
                 TextBlock textBlock = new TextBlock()
                 {
@@ -99,7 +96,6 @@ namespace ArkHelper.Pages.OtherList
                     VerticalAlignment = VerticalAlignment.Center,
                     Margin = new Thickness(5, 0, 0, 0),
                 };
-                checkBox.Click += weekFilterChanged;
                 wrapPanel.Children.Add(checkBox);
                 wrapPanel.Children.Add(textBlock);
                 ctWeek.Children.Add(wrapPanel);
@@ -117,6 +113,11 @@ namespace ArkHelper.Pages.OtherList
 
             inited = true;
             VisChange();
+        }
+
+        private void CSimuSelWrap()
+        {
+            SimuSel.Visibility = Visibility.Collapsed;
         }
 
         private void VisChange()
@@ -184,10 +185,6 @@ namespace ArkHelper.Pages.OtherList
                 Text = "："
             };
 
-            timePicker.SelectedTimeChanged += TimePicker_SelectedTimeChanged;
-            dp.SelectedDateChanged += Dp_SelectedDateChanged; ;
-
-
             if (isForce)
             {
                 textBlock.Visibility = Visibility.Collapsed;
@@ -204,11 +201,6 @@ namespace ArkHelper.Pages.OtherList
             wrapPanel.Children.Add(button);
 
             ctTime.Children.Add(wrapPanel);
-        }
-
-        private void Dp_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
-        {
-            ctTimeChanged();
         }
 
         private void TimeKindChange(object sender, RoutedEventArgs e)
@@ -234,37 +226,18 @@ namespace ArkHelper.Pages.OtherList
 
                 }
             }
-            ctTimeChanged();
 
-        }
-
-        private void TimePicker_SelectedTimeChanged(object sender, RoutedPropertyChangedEventArgs<DateTime?> e)
-        {
-            ctTimeChanged();
         }
         private void TimeAdd(object sender, RoutedEventArgs e)
         {
             CreateNewTime(ArkHelperDataStandard.GetDateTimeFromDateAndTime(DateTime.Now, new DateTime(2000, 1, 1, 0, 0, 0)));
-            ctTimeChanged();
         }
         private void DatetimeDelete(object sender, RoutedEventArgs e)
         {
             ctTime.Children.Remove((sender as Button).Parent as WrapPanel);
-            ctTimeChanged();
         }
 
         #region 监听页面
-        private void weekFilterChanged(object sender, RoutedEventArgs e)
-        {
-            if (!inited) return;
-            try
-            {
-                var _sender = (CheckBox)sender;
-                App.Data.arkHelper.schtct.weekFliter[(int)_sender.Tag] = (bool)_sender.IsChecked;
-
-            }
-            catch { }
-        }
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (!inited) return;
@@ -358,44 +331,6 @@ namespace ArkHelper.Pages.OtherList
         {
             App.Data.scht.ann.status = (bool)ann_status_togglebutton.IsChecked;
         }
-        private void ctTimeChanged()
-        {
-            if (!inited) return;
-            App.Data.arkHelper.schtct.times.Clear();
-            App.Data.arkHelper.schtct.forceTimes.Clear();
-            foreach (var timebox in ctTime.Children)
-            {
-                bool force = false;
-                DateTime date = DateTime.Now;
-                DateTime time = DateTime.Now;
-                foreach (var item in (timebox as WrapPanel).Children)
-                {
-                    if (item.GetType() == typeof(DatePicker))
-                    {
-                        if ((item as DatePicker).Visibility == Visibility.Visible)
-                        {
-                            force = true;
-                            date = (DateTime)(item as DatePicker).SelectedDate;
-                        }
-                    }
-
-                    if (item.GetType() == typeof(TimePicker))
-                    {
-                        time = (DateTime)(item as TimePicker).SelectedTime;
-                    }
-                }
-                if (force)
-                {
-                    App.Data.arkHelper.schtct.forceTimes.Add(new DateTime(date.Year,date.Month,date.Day,time.Hour,time.Minute,59));
-                }
-                else
-                {
-                    App.Data.arkHelper.schtct.times.Add(new DateTime(time.Year, time.Month, time.Day, time.Hour, time.Minute, 59));
-                }
-            }
-            App.Data.arkHelper.schtct.times.Sort();
-            App.Data.arkHelper.schtct.forceTimes.Sort();
-        }
         #endregion
 
         /// <summary>
@@ -434,17 +369,6 @@ namespace ArkHelper.Pages.OtherList
                 App.Data.arkHelper.showGuideInSCHT = false;
             }
             nowPage++;
-        }
-        private void closeUAC(object sender, RoutedEventArgs e)
-        {
-            Process.Start("https://cn.bing.com/search?q=%E5%85%B3%E9%97%ADuac");
-        }
-        private void Button_Click_1(object sender, RoutedEventArgs e)
-        {
-            if (Setting.SelectSimu() != "")
-            {
-                SimuSel.Visibility = Visibility.Collapsed;
-            };
         }
         #endregion
 
@@ -530,5 +454,67 @@ namespace ArkHelper.Pages.OtherList
             }
         }
         #endregion
+
+        private void Button_Click_2(object sender, RoutedEventArgs e)
+        {
+            if (!inited) return;
+            App.Data.arkHelper.schtct.times.Clear();
+            App.Data.arkHelper.schtct.forceTimes.Clear();
+            foreach (var timebox in ctTime.Children)
+            {
+                bool force = false;
+                DateTime date = DateTime.Now;
+                DateTime time = DateTime.Now;
+                foreach (var item in (timebox as WrapPanel).Children)
+                {
+                    if (item.GetType() == typeof(DatePicker))
+                    {
+                        if ((item as DatePicker).Visibility == Visibility.Visible)
+                        {
+                            force = true;
+                            date = (DateTime)(item as DatePicker).SelectedDate;
+                        }
+                    }
+
+                    if (item.GetType() == typeof(TimePicker))
+                    {
+                        time = (DateTime)(item as TimePicker).SelectedTime;
+                    }
+                }
+                if (force)
+                {
+                    App.Data.arkHelper.schtct.forceTimes.Add(new DateTime(date.Year, date.Month, date.Day, time.Hour, time.Minute, 59));
+                }
+                else
+                {
+                    App.Data.arkHelper.schtct.times.Add(new DateTime(time.Year, time.Month, time.Day, time.Hour, time.Minute, 59));
+                }
+            }
+            App.Data.arkHelper.schtct.times.Sort();
+            App.Data.arkHelper.schtct.forceTimes.Sort();
+            int aa = 0;
+            foreach(var item in ctWeek.Children)
+            {
+                foreach(var item2 in (item as WrapPanel).Children)
+                {
+                    if (item2.GetType() == typeof(CheckBox))
+                    {
+                        App.Data.arkHelper.schtct.weekFliter[aa] = (bool)(item2 as CheckBox).IsChecked;
+                    }
+                }
+                aa++;
+            }
+        }
+
+        private void Page_Loaded(object sender, RoutedEventArgs e)
+        {
+            SimuSelect.SSelected += CSimuSelWrap;
+        }
+
+        private void Page_Unloaded(object sender, RoutedEventArgs e)
+        {
+            SimuSelect.SSelected -= CSimuSelWrap;
+
+        }
     }
 }

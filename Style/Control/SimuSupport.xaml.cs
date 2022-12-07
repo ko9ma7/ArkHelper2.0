@@ -13,16 +13,21 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace ArkHelper.Xaml.NewUser
+namespace ArkHelper.Style.Control
 {
     /// <summary>
-    /// Simulator.xaml 的交互逻辑
+    /// SimuSupport.xaml 的交互逻辑
     /// </summary>
-    public partial class Simulator : Page
+    public partial class SimuSupport : UserControl
     {
-        public Simulator()
+        public SimuSupport()
         {
             InitializeComponent();
+            foreach (ArkHelper.PinnedData.Simulator.SimuInfo simulator in ArkHelper.PinnedData.Simulator.Support)
+            {
+                text.Text += simulator.Name + " ";
+            }
+
         }
     }
 }

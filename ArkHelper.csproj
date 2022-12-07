@@ -115,6 +115,15 @@
     <Compile Include="Style\Control\CustomSimulator.xaml.cs">
       <DependentUpon>CustomSimulator.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Style\Control\SimuSelect.xaml.cs">
+      <DependentUpon>SimuSelect.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Style\Control\SimuSupport.xaml.cs">
+      <DependentUpon>SimuSupport.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Style\Control\Okey.xaml.cs">
+      <DependentUpon>Okey.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Style\Control\Title.xaml.cs">
       <DependentUpon>Title.xaml</DependentUpon>
     </Compile>
@@ -134,11 +143,8 @@
     <Compile Include="Xaml\MaterialCalc.xaml.cs">
       <DependentUpon>MaterialCalc.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Xaml\NewUserPolicyWindow.xaml.cs">
-      <DependentUpon>NewUserPolicyWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Xaml\NewUser\Configure.xaml.cs">
-      <DependentUpon>Configure.xaml</DependentUpon>
+    <Compile Include="Xaml\NewUser\Check.xaml.cs">
+      <DependentUpon>Check.xaml</DependentUpon>
     </Compile>
     <Compile Include="Xaml\NewUser\NewUser.xaml.cs">
       <DependentUpon>NewUser.xaml</DependentUpon>
@@ -149,8 +155,8 @@
     <Compile Include="Xaml\NewUser\Guide.xaml.cs">
       <DependentUpon>Guide.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Xaml\NewUser\SCHT.xaml.cs">
-      <DependentUpon>SCHT.xaml</DependentUpon>
+    <Compile Include="Xaml\NewUser\OK.xaml.cs">
+      <DependentUpon>OK.xaml</DependentUpon>
     </Compile>
     <Compile Include="Xaml\NewUser\Simulator.xaml.cs">
       <DependentUpon>Simulator.xaml</DependentUpon>
@@ -186,6 +192,18 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Style\Control\SimuSelect.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Style\Control\SimuSupport.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Style\Control\Okey.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Style\Control\Title.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -210,11 +228,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Xaml\NewUserPolicyWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Xaml\NewUser\Configure.xaml">
+    <Page Include="Xaml\NewUser\Check.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -241,7 +255,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Xaml\NewUser\SCHT.xaml">
+    <Page Include="Xaml\NewUser\OK.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
