@@ -17,6 +17,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.UI.WebControls;
 using System.Windows;
 using System.Windows.Markup;
 using Windows.ApplicationModel.Appointments;
@@ -187,6 +188,26 @@ namespace ArkHelper
             }
         }
 
+        /// <summary>
+        /// 获取星期在中文中对应的下标
+        /// </summary>
+        /// <param name="week"></param>
+        /// <returns>对于星期日，返回6；否则返回x（其中x为“星期”后的数字）</returns>
+        public static int GetWeekSubInChinese(System.DayOfWeek week)
+        {
+            var _wek = (int)week - 1;
+            if (_wek < 0) { _wek += 7; }
+
+            return _wek;
+        }
+        
+        /// <summary>
+        /// 根据日期和时间获取datetime
+        /// </summary>
+        public static DateTime GetDateTimeFromDateAndTime(DateTime date,DateTime time)
+        {
+            return new DateTime(date.Year, date.Month, date.Day, time.Hour, time.Minute, time.Second);
+        }
 
         #region 配置数据
         public class Data

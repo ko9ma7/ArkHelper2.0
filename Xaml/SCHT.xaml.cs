@@ -11,6 +11,9 @@ using Windows.ApplicationModel.Wallet;
 using static System.Net.Mime.MediaTypeNames;
 using System.ComponentModel;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Runtime.InteropServices;
+using System.CodeDom;
+using System.Linq;
 
 namespace ArkHelper.Pages.OtherList
 {
@@ -107,6 +110,10 @@ namespace ArkHelper.Pages.OtherList
             {
                 CreateNewTime(num);
             }
+            foreach (DateTime num in App.Data.arkHelper.schtct.forceTimes)
+            {
+                CreateNewTime(num, true);
+            }
 
             inited = true;
             VisChange();
@@ -117,7 +124,7 @@ namespace ArkHelper.Pages.OtherList
             first_unit.Visibility = second_unit.Visibility = ann_stack.Visibility = ct_stack.Visibility = server_stack.Visibility = (bool)(status_togglebutton.IsChecked) ? Visibility.Visible : Visibility.Collapsed;
             if ((bool)status_togglebutton.IsChecked && ((bool)LSFirst.IsChecked || (bool)customFirst.IsChecked)) { second_unit.Visibility = Visibility.Collapsed; }
         }
-        private void CreateNewTime(DateTime num)
+        private void CreateNewTime(DateTime num, bool isForce = false)
         {
             WrapPanel wrapPanel = new WrapPanel() { Margin = new Thickness(0, 0, 0, 0) };
             Button button = new Button()
@@ -128,30 +135,116 @@ namespace ArkHelper.Pages.OtherList
                     /*Height = 30,
                     Width = 30,*/
                 },
+                Margin = new Thickness(0, 0, 0, 0),
                 Height = 40,
                 Width = 40,
                 Style = (System.Windows.Style)FindResource("MaterialDesignIconButton"),
             };
             button.Click += DatetimeDelete;
+            Button changeButton = new Button()
+            {
+                Content = new PackIcon()
+                {
+                    Kind = PackIconKind.CalendarEdit,
+                    Height = 22,
+                    Width = 22,
+                },
+                Height = 40,
+                Width = 40,
+                Margin = new Thickness(10, 0, 0, 0),
+                ToolTip = "从“周期时间”和“固定时间”之间转换",
+                Style = (System.Windows.Style)FindResource("MaterialDesignIconButton"),
+            };
+            changeButton.Click += TimeKindChange;
             TimePicker timePicker = new TimePicker()
             {
-                Width = 93,
+                Width = 85,
                 SelectedTime = num,
                 Margin = new Thickness(0, 0, 5, 0)
             };
+            TextBlock textBlock = new TextBlock()
+            {
+                Text = "每个勾选日期的",
+                VerticalAlignment = VerticalAlignment.Center,
+                Width = 93,/*
+                FontSize=18*/
+            };
+            DatePicker dp = new DatePicker()
+            {
+                SelectedDate = num,
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(0, 0, 6, 0),
+                Width = 87
+                /*
+                FontSize=18*/
+            };
+            TextBlock textBlock1 = new TextBlock()
+            {
+                VerticalAlignment = VerticalAlignment.Center,
+                Text = "："
+            };
+
             timePicker.SelectedTimeChanged += TimePicker_SelectedTimeChanged;
+            dp.SelectedDateChanged += Dp_SelectedDateChanged; ;
+
+
+            if (isForce)
+            {
+                textBlock.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                dp.Visibility = Visibility.Collapsed;
+            }
+            wrapPanel.Children.Add(textBlock);
+            wrapPanel.Children.Add(dp);/*
+            wrapPanel.Children.Add(textBlock1);*/
             wrapPanel.Children.Add(timePicker);
+            wrapPanel.Children.Add(changeButton);
             wrapPanel.Children.Add(button);
 
             ctTime.Children.Add(wrapPanel);
         }
+
+        private void Dp_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ctTimeChanged();
+        }
+
+        private void TimeKindChange(object sender, RoutedEventArgs e)
+        {
+            var a = (Button)sender;
+            var wrap = a.Parent as WrapPanel;
+            foreach (var item in wrap.Children)
+            {
+                if (item.GetType() == typeof(DatePicker))
+                {
+                    if ((item as DatePicker).Visibility == Visibility.Visible)
+                        (item as DatePicker).Visibility = Visibility.Collapsed;
+                    else
+                        (item as DatePicker).Visibility = Visibility.Visible;
+
+                }
+                if (item.GetType() == typeof(TextBlock) && (item as TextBlock).Text.Contains("勾选日期"))
+                {
+                    if ((item as TextBlock).Visibility == Visibility.Visible)
+                        (item as TextBlock).Visibility = Visibility.Collapsed;
+                    else
+                        (item as TextBlock).Visibility = Visibility.Visible;
+
+                }
+            }
+            ctTimeChanged();
+
+        }
+
         private void TimePicker_SelectedTimeChanged(object sender, RoutedPropertyChangedEventArgs<DateTime?> e)
         {
             ctTimeChanged();
         }
         private void TimeAdd(object sender, RoutedEventArgs e)
         {
-            CreateNewTime(new DateTime(2000, 1, 1, 1, 0, 0));
+            CreateNewTime(ArkHelperDataStandard.GetDateTimeFromDateAndTime(DateTime.Now, new DateTime(2000, 1, 1, 0, 0, 0)));
             ctTimeChanged();
         }
         private void DatetimeDelete(object sender, RoutedEventArgs e)
@@ -193,6 +286,8 @@ namespace ArkHelper.Pages.OtherList
         }
         private void First_Unit_Selected(object sender, RoutedEventArgs e)
         {
+            if (!inited) return;
+
             //检测是哪个button被激活
             var unit = (sender as RadioButton).Name.Replace("First", "").Replace("PR", "PR-"); //first.unit
 
@@ -200,7 +295,7 @@ namespace ArkHelper.Pages.OtherList
             second_unit.Visibility = (unit == "LS" || unit == "custom") ? Visibility.Collapsed : Visibility.Visible;
 
             //关卡
-            if (unit == "custom" && inited)
+            if (unit.Contains("custom"))
             {
                 //选取作战配置
                 string cpiAddress = OpenFileAsAkhcpi();
@@ -222,9 +317,11 @@ namespace ArkHelper.Pages.OtherList
         }
         private void Second_Unit_Selected(object sender, RoutedEventArgs e)
         {
+            if (!inited) return;
+
             var unit = (sender as RadioButton).Name.Replace("Second", "");
 
-            if (unit == "custom" && inited)
+            if (unit.Contains("custom"))
             {
                 //选取配置
                 string cpiAddress = OpenFileAsAkhcpi();
@@ -265,12 +362,39 @@ namespace ArkHelper.Pages.OtherList
         {
             if (!inited) return;
             App.Data.arkHelper.schtct.times.Clear();
+            App.Data.arkHelper.schtct.forceTimes.Clear();
             foreach (var timebox in ctTime.Children)
+            {
+                bool force = false;
+                DateTime date = DateTime.Now;
+                DateTime time = DateTime.Now;
                 foreach (var item in (timebox as WrapPanel).Children)
+                {
+                    if (item.GetType() == typeof(DatePicker))
+                    {
+                        if ((item as DatePicker).Visibility == Visibility.Visible)
+                        {
+                            force = true;
+                            date = (DateTime)(item as DatePicker).SelectedDate;
+                        }
+                    }
+
                     if (item.GetType() == typeof(TimePicker))
                     {
-                        App.Data.arkHelper.schtct.times.Add((DateTime)(item as TimePicker).SelectedTime);
+                        time = (DateTime)(item as TimePicker).SelectedTime;
                     }
+                }
+                if (force)
+                {
+                    App.Data.arkHelper.schtct.forceTimes.Add(new DateTime(date.Year,date.Month,date.Day,time.Hour,time.Minute,59));
+                }
+                else
+                {
+                    App.Data.arkHelper.schtct.times.Add(new DateTime(time.Year, time.Month, time.Day, time.Hour, time.Minute, 59));
+                }
+            }
+            App.Data.arkHelper.schtct.times.Sort();
+            App.Data.arkHelper.schtct.forceTimes.Sort();
         }
         #endregion
 
@@ -285,7 +409,7 @@ namespace ArkHelper.Pages.OtherList
         }
 
         /// <summary>
-        /// AKHCPI
+        /// 打开AKHCPIMaker
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -324,33 +448,75 @@ namespace ArkHelper.Pages.OtherList
         }
         #endregion
 
+        #region
+        /// <summary>
+        /// 获取下一次SCHT运行的时间。
+        /// </summary>
+        /// <returns></returns>
         public static DateTime GetNextRunTime()
         {
-            DateTime dateTime = DateTime.Now;
+            DateTime nowTime = DateTime.Now;
             DateTime nullTime = new DateTime(2000, 1, 1, 0, 0, 0);
+
             if (App.Data.scht.status)
             {
-                for(int i = 0; i < 10; i++)
+                //找到周期时间中最早的DateTime
+                var weekEarliestTime = nullTime;
+                for (int i = 0; i < 14; i++)//不成就加一，代表次日
                 {
-                    
-                    foreach(DateTime timeInList in App.Data.arkHelper.schtct.times)
+                    foreach (DateTime ableToRunTimeInList in App.Data.arkHelper.schtct.times)
                     {
-                        DateTime time = new DateTime(year: dateTime.Year,
-                                                     month: dateTime.Month,
-                                                     day: dateTime.Day+i,
-                                                     hour: timeInList.Hour,
-                                                     minute: timeInList.Minute,
-                                                     second:59);
-                        if (time >= dateTime) return time;
+                        DateTime time = new DateTime(year: nowTime.Year,
+                                                     month: nowTime.Month,
+                                                     day: nowTime.Day + i,
+                                                     hour: ableToRunTimeInList.Hour,
+                                                     minute: ableToRunTimeInList.Minute,
+                                                     second: 59);
+                        if (time >= nowTime
+                            && App.Data.arkHelper.schtct.weekFliter[ArkHelperDataStandard.GetWeekSubInChinese(time.DayOfWeek)])
+                        {
+                            weekEarliestTime = time; goto end;//如果生成时间晚于或等于当前时间，且当日未被禁用，则返回这个
+                        }
                     }
                 }
-                return nullTime;
+            end:;
+                var forceEarlistTime = nullTime;
+                foreach (DateTime time in App.Data.arkHelper.schtct.forceTimes)
+                {
+                    if (time >= nowTime)
+                    {
+                        forceEarlistTime = time;
+                        break;
+                    }
+                }
+
+                if (forceEarlistTime.Year != 2000 && weekEarliestTime.Year != 2000)
+                {
+                    if (forceEarlistTime <= weekEarliestTime)
+                    {
+                        return forceEarlistTime;
+                    }
+                    else
+                    {
+                        return weekEarliestTime;
+                    }
+                }
+                else
+                {
+                    if (forceEarlistTime.Year == 2000) return weekEarliestTime;
+                    else return forceEarlistTime;
+                }
             }
             else
             {
                 return nullTime;
             }
         }
+
+        /// <summary>
+        /// 获取下一次SCHT运行的时间（G格式）。
+        /// </summary>
+        /// <returns></returns>
         public static string GetNextRunTimeStringFormat()
         {
             var a = GetNextRunTime();
@@ -363,5 +529,6 @@ namespace ArkHelper.Pages.OtherList
                 return a.ToString("g");
             }
         }
+        #endregion
     }
 }

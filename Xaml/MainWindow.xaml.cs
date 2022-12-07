@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using MaterialDesignThemes.Wpf;
 using System.Windows.Media.Animation;
+using ArkHelper.Pages;
 
 namespace ArkHelper.Xaml
 {
@@ -40,7 +41,7 @@ namespace ArkHelper.Xaml
                 new Menu("信息流终端","Message",PackIconKind.AndroidMessages,false),
                 new Menu("寻访记录查询","UserData_Gacha",PackIconKind.AccountCheck),
                 new Menu("SCHT控制台","SCHT",PackIconKind.ThermostatAuto,false),
-                //new Menu("材料计算器","MaterialCalc",PackIconKind.Material),
+                new Menu("材料计算器","MaterialCalc",PackIconKind.Material),
                 new Menu("SCHT","SCHTRunning",PackIconKind.ThermostatAuto,false),
             },
             new List<Menu>()

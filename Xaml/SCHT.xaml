@@ -527,12 +527,12 @@
                                    Margin="0,8,0,0"
                                    VerticalAlignment="Center"
                                    Orientation="Vertical">
-                            <WrapPanel Name="ctWeek" />
-                            <WrapPanel Name="ctTime" Orientation="Vertical" />
+                            <WrapPanel Name="ctWeek" Margin="0,0,0,0" />
+                            <WrapPanel Name="ctTime" Margin="0,10,0,0" Orientation="Vertical" />
                             <Button x:Name="addTime"
                                     Width="40"
                                     Height="40"
-                                    Margin="0,10,0,0"
+                                    Margin="0,0,0,0"
                                     HorizontalAlignment="Left"
                                     Click="TimeAdd"
                                     Style="{DynamicResource MaterialDesignIconButton}">

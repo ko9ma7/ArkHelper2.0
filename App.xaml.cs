@@ -25,7 +25,7 @@ namespace ArkHelper
         {
             App.Data = JsonSerializer.Deserialize<Data>(File.ReadAllText(Address.config));
 
-            App.Data.arkHelper.schtct.times.Sort();
+            App.Data.arkHelper.schtct.times.Sort(); App.Data.arkHelper.schtct.forceTimes.Sort();
         }
         public static void SaveData()
         {
@@ -89,7 +89,7 @@ namespace ArkHelper
         public static void ExitApp()
         {
             notifyIcon.Visible = false;
-            
+
             App.SaveData();
             Process.GetCurrentProcess().Kill();
             Current.Shutdown();
@@ -178,17 +178,25 @@ namespace ArkHelper
             {
                 for (; ; Thread.Sleep(1000))
                 {
-                    var nextTime = ArkHelper.Pages.OtherList.SCHT.GetNextRunTime();
-                    var dateTime = DateTime.Now;
-                    if (OKtoOpenSCHT 
-                    && Data.scht.status
-                    && nextTime.Year == dateTime.Year
-                    && nextTime.Month == dateTime.Month
-                    && nextTime.Day == dateTime.Day
-                    && nextTime.Hour == dateTime.Hour
-                    && nextTime.Minute == dateTime.Minute
-                    )
+                    bool isTimeEq(DateTime selTime)
                     {
+                        var dateTime = DateTime.Now;
+                        return (selTime.Year == dateTime.Year
+                        && selTime.Month == dateTime.Month
+                        && selTime.Day == dateTime.Day
+                        && selTime.Hour == dateTime.Hour
+                        && selTime.Minute == dateTime.Minute);
+                    }
+
+                    if (!OKtoOpenSCHT
+                    || !Data.scht.status
+                    //&& false
+                    ) goto end;
+
+                    if (isTimeEq(Pages.OtherList.SCHT.GetNextRunTime()))
+                    {
+                        Data.arkHelper.schtct.forceTimes.RemoveAll(dt => isTimeEq(dt));
+
                         OKtoOpenSCHT = false;
                         Application.Current.Dispatcher.Invoke(delegate
                         {
@@ -197,6 +205,8 @@ namespace ArkHelper
                             OpenMainWindow();
                         });
                     }
+
+                end:;
                 }
             });
             #endregion

@@ -5,6 +5,8 @@
       xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:thing="clr-namespace:ArkHelper.thing"
+      Loaded="Page_Loaded"
+      Unloaded="Page_Unloaded"
       Title="Message"
       d:Background="White"
       d:DesignHeight="450"
@@ -72,7 +74,7 @@
                                Foreground="Gray">
                         未启用
                     </TextBlock>
-                    <TextBlock xml:space="preserve" Foreground="Gray"><Hyperlink Click="Hyperlink_Click">启用</Hyperlink>该功能来获取消息</TextBlock>
+                    <TextBlock xml:space="preserve" Foreground="Gray"><Hyperlink Name="en" Click="Hyperlink_Click">启用</Hyperlink>该功能来获取消息</TextBlock>
                 </WrapPanel>
             </Grid>
 

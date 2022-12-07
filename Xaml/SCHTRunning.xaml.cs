@@ -103,9 +103,7 @@ namespace ArkHelper.Pages.OtherList
                     anntime = 1; //normal
                     if (schtData.ann.customTime)
                     {
-                        var _wek = (int)week - 1;
-                        if (_wek < 0) { _wek += 7; }
-                        anntime = schtData.ann.time[_wek];
+                        anntime = schtData.ann.time[GetWeekSubInChinese(week)];
                     }//custom
 
                     //模拟器未启动则启动
@@ -422,7 +420,7 @@ namespace ArkHelper.Pages.OtherList
                             }
                             using (var _screenshot = new ADB.Screenshot())
                             {
-                                var _point = _screenshot.PicToPoint(Address.res + "\\pic\\battle\\" + schtData.first.unit + ".png", opencv_errorCon: 0.9);
+                                var _point = _screenshot.PicToPoint(Address.res + "\\pic\\battle\\" + schtData.first.unit + ".png", opencv_errorCon: 0.95);
                                 if (_point.Count != 0)
                                 {
                                     ADB.Tap(_point[0]);
