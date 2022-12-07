@@ -41,13 +41,13 @@ namespace ArkHelper.Xaml
                 new Menu("信息流终端","Message",PackIconKind.AndroidMessages,false),
                 new Menu("寻访记录查询","UserData_Gacha",PackIconKind.AccountCheck),
                 new Menu("SCHT控制台","SCHT",PackIconKind.ThermostatAuto,false),
-                new Menu("材料计算器","MaterialCalc",PackIconKind.Material),
+                //new Menu("材料计算器","MaterialCalc",PackIconKind.Material),
                 new Menu("SCHT","SCHTRunning",PackIconKind.ThermostatAuto,false),
             },
             new List<Menu>()
             {
                 new Menu("设置","Setting",PackIconKind.Settings),
-                new Menu("Test","Test",PackIconKind.TestTube),
+                //new Menu("Test","Test",PackIconKind.TestTube),
             },
         };
         #endregion

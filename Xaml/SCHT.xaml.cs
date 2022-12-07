@@ -1,21 +1,11 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using System.Data;
 using System;
 using ArkHelper.Xaml;
-using ArkHelper.Xaml.NewUser;
 using System.IO;
 using MaterialDesignThemes.Wpf;
-using System.Diagnostics;
-using Windows.ApplicationModel.Wallet;
-using static System.Net.Mime.MediaTypeNames;
-using System.ComponentModel;
-using System.Runtime.InteropServices.WindowsRuntime;
-using System.Runtime.InteropServices;
-using System.CodeDom;
-using System.Linq;
 using ArkHelper.Style.Control;
-using OpenCvSharp.Detail;
+using Microsoft.Win32;
 
 namespace ArkHelper.Pages.OtherList
 {
@@ -365,7 +355,9 @@ namespace ArkHelper.Pages.OtherList
             }
             catch
             {
-                dialog.IsOpen = false;
+                /*RegistryKey registryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+                registryKey.SetValue("ArkHelper", Address.akh + "\\ArkHelper.exe");//申请开机启动
+                */dialog.IsOpen = false;
                 App.Data.arkHelper.showGuideInSCHT = false;
             }
             nowPage++;
