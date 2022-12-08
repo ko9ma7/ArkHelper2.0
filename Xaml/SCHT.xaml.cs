@@ -220,7 +220,7 @@ namespace ArkHelper.Pages.OtherList
         }
         private void TimeAdd(object sender, RoutedEventArgs e)
         {
-            CreateNewTime(ArkHelperDataStandard.GetDateTimeFromDateAndTime(DateTime.Now, new DateTime(2000, 1, 1, 0, 0, 0)));
+            CreateNewTime(DateTime.Now);
         }
         private void DatetimeDelete(object sender, RoutedEventArgs e)
         {
