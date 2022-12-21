@@ -18,6 +18,7 @@ namespace ArkHelper.Pages.OtherList
             InitializeComponent();
 
             nextRunTime.Text = GetNextRunTimeStringFormat();
+            if (App.Data.scht.showHelper) helper.Visibility = Visibility.Visible;
             if (File.Exists(Address.dataExternal + "\\simulator.lnk"))
             {
                 CSimuSelWrap();
@@ -359,6 +360,9 @@ namespace ArkHelper.Pages.OtherList
                 registryKey.SetValue("ArkHelper", Address.akh + "\\ArkHelper.exe");//申请开机启动
                 */dialog.IsOpen = false;
                 App.Data.scht.showGuide = false;
+                helper.Visibility = Visibility.Visible;
+                App.Data.scht.showHelper = true;
+
             }
             nowPage++;
         }

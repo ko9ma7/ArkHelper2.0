@@ -42,7 +42,10 @@ namespace ArkHelper
         public static void SaveData()
         {
             if (File.Exists(Address.config))
-                File.WriteAllText(Address.config, JsonSerializer.Serialize(App.Data));
+            {
+                File.Create(Address.config).Dispose();
+            }
+            File.WriteAllText(Address.config, JsonSerializer.Serialize(App.Data));
         }
         #endregion
 
@@ -89,6 +92,8 @@ namespace ArkHelper
                     if (window.GetType() == typeof(MainWindow))
                     {
                         windowIsOpen = true;
+                        window.WindowState = WindowState.Normal;
+                        window.Activate();
                     }
                 }
             });

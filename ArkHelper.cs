@@ -255,7 +255,7 @@ namespace ArkHelper
                         public string id { get; set; } = "CO";
                     }
                 }
-                public bool showHelper { get; set; } = true;
+                public bool showHelper { get; set; } = false;
                 public bool showGuide { get; set; } = true;
                 public Ct ct { get; set; } = new Ct();
                 public class Ct
