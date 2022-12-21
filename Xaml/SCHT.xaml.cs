@@ -25,32 +25,32 @@ namespace ArkHelper.Pages.OtherList
 
             //UI
             server_combobox.ItemsSource = PinnedData.Server.dataSheet.DefaultView;
-            ann_status_togglebutton.IsChecked = App.Data.scht.ann.status;
+            ann_status_togglebutton.IsChecked = App.Data.scht.data.ann.status;
             status_togglebutton.IsChecked = App.Data.scht.status;
-            server_combobox.SelectedValue = App.Data.scht.server.id;
-            if (!App.Data.scht.first.unit.Contains("custom"))
+            server_combobox.SelectedValue = App.Data.scht.data.server.id;
+            if (!App.Data.scht.data.first.unit.Contains("custom"))
             {
-                ((RadioButton)GetType().GetField(App.Data.scht.first.unit.Replace("PR-", "PR") + "First", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(this)).IsChecked = true;
+                ((RadioButton)GetType().GetField(App.Data.scht.data.first.unit.Replace("PR-", "PR") + "First", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(this)).IsChecked = true;
             }
             else
             {
                 customFirst.IsChecked = true;
             }
-            if (!App.Data.scht.second.unit.Contains("custom"))
+            if (!App.Data.scht.data.second.unit.Contains("custom"))
             {
-                ((RadioButton)GetType().GetField(App.Data.scht.second.unit + "Second", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(this)).IsChecked = true;
+                ((RadioButton)GetType().GetField(App.Data.scht.data.second.unit + "Second", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(this)).IsChecked = true;
             }
             else
             {
                 customSecond.IsChecked = true;
             }
-            ((RadioButton)GetType().GetField(App.Data.scht.ann.select, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(this)).IsChecked = true;
-            ann_custom_time_status_checkbox.IsChecked = App.Data.scht.ann.customTime;
+            ((RadioButton)GetType().GetField(App.Data.scht.data.ann.select, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(this)).IsChecked = true;
+            ann_custom_time_status_checkbox.IsChecked = App.Data.scht.data.ann.customTime;
 
             string[] strArr = { "一", "二", "三", "四", "五", "六", "日" };
 
             int _num = 0;
-            foreach (int num in App.Data.scht.ann.time)
+            foreach (int num in App.Data.scht.data.ann.time)
             {
                 WrapPanel wrapPanel = new WrapPanel();
                 TextBlock textBlock = new TextBlock()
@@ -73,7 +73,7 @@ namespace ArkHelper.Pages.OtherList
             }
             _num = 0;
 
-            foreach (bool num in App.Data.arkHelper.schtct.weekFliter)
+            foreach (bool num in App.Data.scht.ct.weekFliter)
             {
                 WrapPanel wrapPanel = new WrapPanel() { Margin = new Thickness(0, 0, 5, 0) };
                 CheckBox checkBox = new CheckBox()
@@ -92,11 +92,11 @@ namespace ArkHelper.Pages.OtherList
                 _num++;
             }
 
-            foreach (DateTime num in App.Data.arkHelper.schtct.times)
+            foreach (DateTime num in App.Data.scht.ct.times)
             {
                 CreateNewTime(num);
             }
-            foreach (DateTime num in App.Data.arkHelper.schtct.forceTimes)
+            foreach (DateTime num in App.Data.scht.ct.forceTimes)
             {
                 CreateNewTime(num, true);
             }
@@ -234,14 +234,14 @@ namespace ArkHelper.Pages.OtherList
             try
             {
                 var _sender = (TextBox)sender;
-                App.Data.scht.ann.time[(int)_sender.Tag] = Convert.ToInt32(_sender.Text);
+                App.Data.scht.data.ann.time[(int)_sender.Tag] = Convert.ToInt32(_sender.Text);
             }
             catch { }
         }
         private void status_togglebutton_Click(object sender, RoutedEventArgs e)
         {
             App.Data.scht.status = (bool)status_togglebutton.IsChecked;
-            if (App.Data.arkHelper.showGuideInSCHT)
+            if (App.Data.scht.showGuide)
             {
                 if (App.Data.scht.status) dialog.IsOpen = true;
             }
@@ -270,12 +270,12 @@ namespace ArkHelper.Pages.OtherList
                 }
                 else
                 {
-                    App.Data.scht.first.unit = unit + ":##" + cpiAddress + "##";
+                    App.Data.scht.data.first.unit = unit + ":##" + cpiAddress + "##";
                 }
             }
             else
             {
-                App.Data.scht.first.unit = unit;
+                App.Data.scht.data.first.unit = unit;
             }
         }
         private void Second_Unit_Selected(object sender, RoutedEventArgs e)
@@ -296,30 +296,30 @@ namespace ArkHelper.Pages.OtherList
                 }
                 else
                 {
-                    App.Data.scht.second.unit = unit + ":##" + cpiAddress + "##";
+                    App.Data.scht.data.second.unit = unit + ":##" + cpiAddress + "##";
                 }
             }
             else
             {
-                App.Data.scht.second.unit = unit;
+                App.Data.scht.data.second.unit = unit;
             }
         }
         private void ann_Selected(object sender, RoutedEventArgs e)
         {
             //检测是哪个button被激活
-            App.Data.scht.ann.select = (sender as RadioButton).Name;
+            App.Data.scht.data.ann.select = (sender as RadioButton).Name;
         }
         private void ann_custom_time_status_checkbox_Click(object sender, RoutedEventArgs e)
         {
-            App.Data.scht.ann.customTime = (bool)ann_custom_time_status_checkbox.IsChecked;
+            App.Data.scht.data.ann.customTime = (bool)ann_custom_time_status_checkbox.IsChecked;
         }
         private void server_combobox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            App.Data.scht.server.id = server_combobox.SelectedValue.ToString();
+            App.Data.scht.data.server.id = server_combobox.SelectedValue.ToString();
         }
         private void ann_status_togglebutton_Click(object sender, RoutedEventArgs e)
         {
-            App.Data.scht.ann.status = (bool)ann_status_togglebutton.IsChecked;
+            App.Data.scht.data.ann.status = (bool)ann_status_togglebutton.IsChecked;
         }
         #endregion
 
@@ -358,7 +358,7 @@ namespace ArkHelper.Pages.OtherList
                 /*RegistryKey registryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
                 registryKey.SetValue("ArkHelper", Address.akh + "\\ArkHelper.exe");//申请开机启动
                 */dialog.IsOpen = false;
-                App.Data.arkHelper.showGuideInSCHT = false;
+                App.Data.scht.showGuide = false;
             }
             nowPage++;
         }
@@ -380,7 +380,7 @@ namespace ArkHelper.Pages.OtherList
                 var weekEarliestTime = nullTime;
                 for (int i = 0; i < 14; i++)//不成就加一，代表次日
                 {
-                    foreach (DateTime ableToRunTimeInList in App.Data.arkHelper.schtct.times)
+                    foreach (DateTime ableToRunTimeInList in App.Data.scht.ct.times)
                     {
                         DateTime time = new DateTime(year: nowTime.Year,
                                                      month: nowTime.Month,
@@ -389,7 +389,7 @@ namespace ArkHelper.Pages.OtherList
                                                      minute: ableToRunTimeInList.Minute,
                                                      second: 59);
                         if (time >= nowTime
-                            && App.Data.arkHelper.schtct.weekFliter[ArkHelperDataStandard.GetWeekSubInChinese(time.DayOfWeek)])
+                            && App.Data.scht.ct.weekFliter[ArkHelperDataStandard.GetWeekSubInChinese(time.DayOfWeek)])
                         {
                             weekEarliestTime = time; goto end;//如果生成时间晚于或等于当前时间，且当日未被禁用，则返回这个
                         }
@@ -397,7 +397,7 @@ namespace ArkHelper.Pages.OtherList
                 }
             end:;
                 var forceEarlistTime = nullTime;
-                foreach (DateTime time in App.Data.arkHelper.schtct.forceTimes)
+                foreach (DateTime time in App.Data.scht.ct.forceTimes)
                 {
                     if (time >= nowTime)
                     {
@@ -450,8 +450,8 @@ namespace ArkHelper.Pages.OtherList
         private void Button_Click_2(object sender, RoutedEventArgs e)
         {
             if (!inited) return;
-            App.Data.arkHelper.schtct.times.Clear();
-            App.Data.arkHelper.schtct.forceTimes.Clear();
+            App.Data.scht.ct.times.Clear();
+            App.Data.scht.ct.forceTimes.Clear();
             foreach (var timebox in ctTime.Children)
             {
                 bool force = false;
@@ -475,15 +475,15 @@ namespace ArkHelper.Pages.OtherList
                 }
                 if (force)
                 {
-                    App.Data.arkHelper.schtct.forceTimes.Add(new DateTime(date.Year, date.Month, date.Day, time.Hour, time.Minute, 59));
+                    App.Data.scht.ct.forceTimes.Add(new DateTime(date.Year, date.Month, date.Day, time.Hour, time.Minute, 59));
                 }
                 else
                 {
-                    App.Data.arkHelper.schtct.times.Add(new DateTime(time.Year, time.Month, time.Day, time.Hour, time.Minute, 59));
+                    App.Data.scht.ct.times.Add(new DateTime(time.Year, time.Month, time.Day, time.Hour, time.Minute, 59));
                 }
             }
-            App.Data.arkHelper.schtct.times.Sort();
-            App.Data.arkHelper.schtct.forceTimes.Sort();
+            App.Data.scht.ct.times.Sort();
+            App.Data.scht.ct.forceTimes.Sort();
             int aa = 0;
             foreach(var item in ctWeek.Children)
             {
@@ -491,7 +491,7 @@ namespace ArkHelper.Pages.OtherList
                 {
                     if (item2.GetType() == typeof(CheckBox))
                     {
-                        App.Data.arkHelper.schtct.weekFliter[aa] = (bool)(item2 as CheckBox).IsChecked;
+                        App.Data.scht.ct.weekFliter[aa] = (bool)(item2 as CheckBox).IsChecked;
                     }
                 }
                 aa++;

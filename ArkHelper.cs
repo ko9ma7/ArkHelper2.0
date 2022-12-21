@@ -1,4 +1,5 @@
-﻿using MaterialDesignThemes.Wpf;
+﻿using ArkHelper.Pages.OtherList;
+using MaterialDesignThemes.Wpf;
 using Microsoft.Toolkit.Uwp.Notifications;
 using Microsoft.Win32;
 using OpenCvSharp;
@@ -13,6 +14,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Security.RightsManagement;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
@@ -200,11 +202,11 @@ namespace ArkHelper
 
             return _wek;
         }
-        
+
         /// <summary>
         /// 根据日期和时间获取datetime
         /// </summary>
-        public static DateTime GetDateTimeFromDateAndTime(DateTime date,DateTime time)
+        public static DateTime GetDateTimeFromDateAndTime(DateTime date, DateTime time)
         {
             return new DateTime(date.Year, date.Month, date.Day, time.Hour, time.Minute, time.Second);
         }
@@ -228,27 +230,44 @@ namespace ArkHelper
             public class SCHT
             {
                 public bool status { get; set; } = false;
-
-                public CpRefer first { get; set; } = new CpRefer();
-                public CpRefer second { get; set; } = new CpRefer();
-                public class CpRefer
+                public SCHTData data { get; set; } = new SCHTData();
+                public class SCHTData
                 {
-                    public string unit { get; set; } = "LS";
-                }
+                    public Cp first { get; set; } = new Cp();
+                    public Cp second { get; set; } = new Cp();
+                    public class Cp
+                    {
+                        public string unit { get; set; } = "LS";
+                    }
 
-                public Ann ann { get; set; } = new Ann();
-                public class Ann
+                    public Ann ann { get; set; } = new Ann();
+                    public class Ann
+                    {
+                        public bool status { get; set; } = false;
+                        public string select { get; set; } = "TT";
+                        public bool customTime { get; set; } = false;
+                        public int[] time { get; set; } = new int[7] { 0, 0, 0, 0, 0, 0, 0 }; //周一为每周的第一天
+                    }
+
+                    public Server server { get; set; } = new Server();
+                    public class Server
+                    {
+                        public string id { get; set; } = "CO";
+                    }
+                }
+                public bool showHelper { get; set; } = true;
+                public bool showGuide { get; set; } = true;
+                public Ct ct { get; set; } = new Ct();
+                public class Ct
                 {
                     public bool status { get; set; } = false;
-                    public string select { get; set; } = "TT";
-                    public bool customTime { get; set; } = false;
-                    public int[] time { get; set; } = new int[7] { 0, 0, 0, 0, 0, 0, 0 }; //周一为每周的第一天
-                }
-
-                public Server server { get; set; } = new Server();
-                public class Server
-                {
-                    public string id { get; set; } = "CO";
+                    public bool[] weekFliter { get; set; } = new bool[7] { true, true, true, true, true, true, true };
+                    public List<DateTime> times { get; set; } = new List<DateTime>()
+                    {
+                        new DateTime(2000, 1, 1, 7, 58, 0),
+                        new DateTime(2000, 1, 1, 19, 58, 0)
+                    };
+                    public List<DateTime> forceTimes { get; set; } = new List<DateTime>();
                 }
             }
 
@@ -262,21 +281,6 @@ namespace ArkHelper
             public class ArkHelper
             {
                 public bool pure { get; set; } = true;
-                public bool showHelperInSCHT { get; set; } = true;
-                public bool showGuideInSCHT { get; set; } = true;
-                public SCHTct schtct { get; set; } = new SCHTct();
-                public class SCHTct
-                {
-                    public bool status { get; set; } = false;
-                    public bool[] weekFliter { get; set; } = new bool[7] { true, true, true, true, true, true, true };
-                    public List<DateTime> times { get; set; } = new List<DateTime>()
-                    {
-                        new DateTime(2000, 1, 1, 7, 58, 0),
-                        new DateTime(2000, 1, 1, 19, 58, 0)
-                    };
-                    public List<DateTime> forceTimes { get; set; } = new List<DateTime>();
-                }
-
             }
         }
         #endregion
@@ -374,30 +378,33 @@ namespace ArkHelper
         /// <returns>adb的返回结果</returns>
         public static string CMD(string cmd)
         {
-            //未连接报错
-            while (!cmd.Contains("connect") && ConnectedInfo == null)
-            {
-                System.Windows.Application.Current.Dispatcher.Invoke(() =>
-                {
-                    WithSystem.Message("模拟器连接断开", "请启动或重启模拟器");
-                });
-                Thread.Sleep(2000);
-            }
-
             //cmd
             process.StartInfo.Arguments = cmd;
             if (true) Output.Log(cmd, "ADB");
 
             //启动命令并读取结果
-            process.Start();
-            var end = process.StandardOutput.ReadToEnd();
-
-            //log结果
-            if (true) Output.Log("=>" + end.Replace("\n", "[linebreak]").Replace("\r", ""), "ADB");
-            //等待退出
-            process.WaitForExit();
-            //log退出
-            if (true) Output.Log("=>" + "Exited", "ADB");
+            string end = "";
+            if (!cmd.Contains("connect") && ConnectedInfo == null)
+            {
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    //WithSystem.Message("模拟器连接断开", "请启动或重启模拟器");
+                });
+                end = "[Bad Connect]";
+                if (true) Output.Log("=>" + end, "ADB");
+                throw new BadConnectException();
+            }
+            else
+            {
+                process.Start();
+                end = process.StandardOutput.ReadToEnd();
+                //log结果
+                if (true) Output.Log("=>" + end.Replace("\n", "[linebreak]").Replace("\r", ""), "ADB");
+                //等待退出
+                process.WaitForExit();
+                //log退出
+                if (true) Output.Log("=>" + "Exited", "ADB");
+            }
 
             //返回结果
             return end;
@@ -530,8 +537,48 @@ namespace ArkHelper
             return PinnedData.Server.dataSheet.Select("id = '" + server + "'")[0][3].ToString();
         }
 
+        /// <summary>
+        /// 安装应用
+        /// </summary>
+        /// <param name="packAddress">apk包的地址</param>
+        public static void Install(string packAddress)
+        {
+            ADB.CMD("install " + packAddress);
+        }
+
+        /// <summary>
+        /// 从内存卡安装应用
+        /// </summary>
+        /// <param name="packAddress">apk包的地址</param>
+        public static void InstallFromLocal(string packAddress)
+        {
+            ADB.CMD("shell pm install -r " + packAddress);
+        }
+        
+        /// <summary>
+        /// 下载文件
+        /// </summary>
+        /// <param name="url">url</param>
+        /// <param name="address">绝对路径</param>
+        public static void DownloadFile(string url,string address)
+        {
+            ADB.CMD("shell wget "+url+" -O "+address);
+        }
+        
+        /// <summary>
+        /// 删除文件
+        /// </summary>
+        /// <param name="address">绝对路径</param>
+        public static void DeleteFile(string address)
+        {
+            ADB.CMD("shell rm "+address);
+        }
+
         public class Screenshot : IDisposable
         {
+            public class ScreenshotNotAvailableException : NullReferenceException
+            {
+            }
             private string Location { get; set; }
             private Bitmap ImgBitmap { get; set; }
             public Screenshot()
@@ -588,6 +635,11 @@ namespace ArkHelper
                     ImgBitmap = new Bitmap(Location);
                 else
                     return;
+            }
+
+            public void CheckIsAvailable()
+            {
+                if (File.Exists(Location)) { return; } else { throw new ScreenshotNotAvailableException(); }
             }
 
             #region dispose
@@ -649,6 +701,13 @@ namespace ArkHelper
             #endregion
 
         }
+
+        #region 报故
+        public class BadConnectException : Exception
+        {
+            public BadConnectException():base("丢失模拟器连接"){}
+        }
+        #endregion
     }
 
     /// <summary>

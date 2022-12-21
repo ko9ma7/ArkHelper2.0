@@ -47,7 +47,9 @@ namespace ArkHelper.Xaml
             new List<Menu>()
             {
                 new Menu("设置","Setting",PackIconKind.Settings),
-                //new Menu("Test","Test",PackIconKind.TestTube),
+#if DEBUG
+                new Menu("Test","Test",PackIconKind.TestTube),
+#endif
             },
         };
         #endregion
@@ -113,6 +115,7 @@ namespace ArkHelper.Xaml
                         {
                             rb.Visibility = Visibility.Visible;
                             rb.IsChecked = true;
+                            if (rb.Name == "SCHTRunning") FuncList.IsEnabled = false;
                             break;
                         }
                     }

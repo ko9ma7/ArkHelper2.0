@@ -93,7 +93,7 @@
                             </Run>
                             <LineBreak />
                             <LineBreak />
-                            <Run Foreground="IndianRed">在运行前，请确保电脑处在开启状态，且ArkHelper在前台或后台运行。</Run>
+                            <Run Foreground="IndianRed">在约定的运行时间前，请确保电脑处在开启状态，且ArkHelper在前台或后台运行。</Run>
 
                         </TextBlock>
                     </StackPanel>

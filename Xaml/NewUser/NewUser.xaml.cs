@@ -3,6 +3,7 @@ using System.Windows;
 using System.Diagnostics;
 using System.Collections.Generic;
 using ArkHelper.Xaml.NewUser;
+using System.IO;
 
 namespace ArkHelper
 {
@@ -13,7 +14,8 @@ namespace ArkHelper
         {
             @"\Xaml\NewUser\Welcome.xaml",
             @"\Xaml\NewUser\Check.xaml",
-            @"\Xaml\NewUser\Simulator.xaml",@"\Xaml\NewUser\OK.xaml",
+            @"\Xaml\NewUser\Simulator.xaml",
+            @"\Xaml\NewUser\OK.xaml",
         };
         int nowpage = -1;
         #endregion
@@ -43,7 +45,9 @@ namespace ArkHelper
 
         private void GuideEnd()
         {
-            Address.Create(); App.SaveData();
+            Address.Create();
+            File.Create(Address.config).Dispose();
+            App.SaveData();
             this.Close();
         }
 

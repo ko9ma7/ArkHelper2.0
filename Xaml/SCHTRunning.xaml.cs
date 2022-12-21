@@ -14,6 +14,10 @@ using System.Collections.Generic;
 using Windows.ApplicationModel.VoiceCommands;
 using ArkHelper.Xaml;
 using static ArkHelper.ArkHelperDataStandard;
+using RestSharp;
+using System.Security.Policy;
+using System.Net;
+using Windows.ApplicationModel;
 
 namespace ArkHelper.Pages.OtherList
 {
@@ -82,7 +86,7 @@ namespace ArkHelper.Pages.OtherList
             //开始工作
             Task SCHT = Task.Run(() =>
             {
-                void main(Data.SCHT schtData)
+                void main(Data.SCHT.SCHTData schtData)
                 {
                     //游戏
                     string packname = ADB.GetGamePackageName(schtData.server.id);
@@ -106,16 +110,32 @@ namespace ArkHelper.Pages.OtherList
                         anntime = schtData.ann.time[GetWeekSubInChinese(week)];
                     }//custom
 
-                    //模拟器未启动则启动
-                    if (ADB.ConnectedInfo == null)
+                    if (schtData.server.id == "CO")
                     {
-                        Info("正在启动神经网络依托平台...");
-                        Process.Start(Address.dataExternal + @"\simulator.lnk");
-                        Thread.Sleep(50000);
-                    }
-                    while (ADB.ConnectedInfo == null)
-                    {
-                        Thread.Sleep(4000);
+                        //获取最新版本链接
+                        HttpWebRequest req = (HttpWebRequest)WebRequest.Create("https://ak.hypergryph.com/downloads/android_lastest");
+                        req.AllowAutoRedirect = false;
+                        WebResponse response = req.GetResponse();
+                        string NewestLink = response.Headers["Location"];
+                        //获取游戏版本号
+                        string _infoText = ADB.CMD(@"shell pm dump com.hypergryph.arknights");
+                        string _verText = _infoText.Substring(_infoText.IndexOf("versionName") + "versionName=".Length, 100);
+                        string verNow = _verText.Substring(0, _verText.IndexOf("\r")).Replace(".", "");
+                        //检查版本是否匹配
+                        if (!NewestLink.Contains(verNow + ".apk"))
+                        {
+                            //不匹配就下载最新安装包并安装
+                            Info("游戏当前不是最新版本");
+                            Info("正在下载更新中...");
+                            /*string add = Address.Cache.main + "\\newApk.apk";
+                            Net.DownloadFile(NewestLink, add);*/
+                            string addre = "/sdcard/new.apk";
+                            ADB.DownloadFile(NewestLink.Replace("https","http"), addre);
+                            Info("正在安装更新中...");
+                            ADB.InstallFromLocal(addre);//安装
+                            ADB.DeleteFile(addre);
+                            Thread.Sleep(3000);
+                        }
                     }
 
                     void StartGame()
@@ -165,7 +185,7 @@ namespace ArkHelper.Pages.OtherList
                         Thread.Sleep(2000);
                         using (Screenshot sc = new Screenshot())
                         {
-                            var itemPosition = sc.PicToPoint(Address.res + @"\pic\UI\signItems.png",opencv_errorCon:0.5);
+                            var itemPosition = sc.PicToPoint(Address.res + @"\pic\UI\signItems.png", opencv_errorCon: 0.5);
                             if (itemPosition.Count != 0)
                             {
                                 Akhcmd("shell input tap 722 719", "收取");
@@ -475,15 +495,43 @@ namespace ArkHelper.Pages.OtherList
 
                 //开始
                 var starttime = DateTime.Now;//时间
-                //Thread.Sleep(300000);
 
-                main(App.Data.scht);
+                //模拟器未启动则启动
+                if (ADB.ConnectedInfo == null)
+                {
+                    Info("正在启动神经网络依托平台...");
+                    Process.Start(Address.dataExternal + @"\simulator.lnk");
+                    for(; ; )
+                    {
+                        Thread.Sleep(10000);
+                        try
+                        {
+                            using (var testOK = new ADB.Screenshot())
+                            {
+                                testOK.CheckIsAvailable();
+                            }
+                        }
+                        catch
+                        {
+                            continue;
+                        }
+                        Thread.Sleep(5000);
+                        break;
+                    }
+                }
+                else
+                {
+                    while (ADB.ConnectedInfo == null)
+                        Thread.Sleep(4000);
+                }
+
+                main(App.Data.scht.data);
                 if (File.Exists(Address.dataExternal + "\\moreSCHT.json"))
                 {
                     var schts = JsonSerializer.Deserialize<JsonElement>(File.ReadAllText(Address.dataExternal + "\\moreSCHT.json"));
                     foreach (var scht in schts.EnumerateArray())
                     {
-                        var schtdt = JsonSerializer.Deserialize<Data.SCHT>(scht.ToString());
+                        var schtdt = JsonSerializer.Deserialize<Data.SCHT.SCHTData>(scht.ToString());
                         main(schtdt);
                     }
                 }

@@ -20,20 +20,29 @@ namespace ArkHelper
     public partial class App : Application
     {
         #region 应用配置数据
-        public static Data Data = new Data();
+        private static Data _data = new Data();
+        public static Data Data {
+            get
+            {
+                return _data;
+            }
+            set
+            {
+                _data = value;
+            }
+        }
         public static void LoadData()
         {
             App.Data = JsonSerializer.Deserialize<Data>(File.ReadAllText(Address.config));
+            if (true) ;
 
-            App.Data.arkHelper.schtct.times.Sort(); App.Data.arkHelper.schtct.forceTimes.Sort();
+            App.Data.scht.ct.times.Sort();
+            App.Data.scht.ct.forceTimes.Sort();
         }
         public static void SaveData()
         {
-            if (!File.Exists(Address.config))
-            {
-                File.Create(Address.config).Dispose();
-            }
-            File.WriteAllText(Address.config, JsonSerializer.Serialize(App.Data));
+            if (File.Exists(Address.config))
+                File.WriteAllText(Address.config, JsonSerializer.Serialize(App.Data));
         }
         #endregion
 
@@ -170,7 +179,11 @@ namespace ArkHelper
             #region 启动ADB连接
             Task adbConnect = Task.Run(() =>
             {
-                for (; ; Thread.Sleep(3000)) ADB.Connect();
+                while (true)
+                {
+                    ADB.Connect();
+                    Thread.Sleep(3000);
+                }
             });
             #endregion
             #region SCHT等待
@@ -195,7 +208,7 @@ namespace ArkHelper
 
                     if (isTimeEq(Pages.OtherList.SCHT.GetNextRunTime()))
                     {
-                        Data.arkHelper.schtct.forceTimes.RemoveAll(dt => isTimeEq(dt));
+                        Data.scht.ct.forceTimes.RemoveAll(dt => isTimeEq(dt));
 
                         OKtoOpenSCHT = false;
                         Application.Current.Dispatcher.Invoke(delegate

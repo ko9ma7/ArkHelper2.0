@@ -51,7 +51,7 @@ namespace ArkHelper.Xaml.NewUser
                         .OpenSubKey("CurrentVersion")
                         .OpenSubKey("Policies")
                         .OpenSubKey("System")
-                        .GetValue("EnableLUA");
+                        .GetValue("ConsentPromptBehaviorAdmin");
             if ((int)obj == 0)
             {
                 return true;

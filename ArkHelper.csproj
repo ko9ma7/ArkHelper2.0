@@ -81,6 +81,9 @@
   <PropertyGroup>
     <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
   </PropertyGroup>
+  <PropertyGroup>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="PresentationFramework.Aero2" />
     <Reference Include="System" />
@@ -339,6 +342,7 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <Resource Include="Asset\Font\SourceHanSansCN-Medium.ttf" />
+    <None Include="app.config" />
     <None Include="Properties\app.manifest" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -419,10 +423,14 @@
     <PostBuildEvent>taskkill /f /t /im adb.exe
 rmdir /s /q $(TargetDir)\external
 md $(TargetDir)\external
-xcopy $(ProjectDir)\external $(TargetDir)\external /s /e</PostBuildEvent>
+xcopy $(ProjectDir)\external $(TargetDir)\external /s /e
+for /f "tokens=*" %25%25i in ('dir "$(TargetDir)\*.dll" /b') do copy "%25%25i" "$(TargetDir)\dll"
+for /f "tokens=*" %25%25i in ('dir "$(TargetDir)\*.dll" /b') do del "%25%25i" /q
+rmdir "$(TargetDir)\dll\x86" /s /q
+del "$(TargetDir)\dll\x64\opencv_videoio_ffmpeg455_64.dll" /q
+if $(ConfigurationName) == Release (for /f "tokens=*" %25%25i in ('dir "$(TargetDir)\*.pdb" /b') do del "%25%25i" /q)</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>
-    </PreBuildEvent>
+    <PreBuildEvent>rmdir /s /q $(TargetDir)\dll</PreBuildEvent>
   </PropertyGroup>
 </Project>

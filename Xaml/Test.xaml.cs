@@ -17,6 +17,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices.ComTypes;
 using MaterialDesignThemes.Wpf;
+using System.Net;
+using System.Security.Policy;
 
 namespace ArkHelper.Xaml
 {
@@ -54,5 +56,11 @@ namespace ArkHelper.Xaml
             Clipboard.SetText(result.Content.ToString());
         }
         #endregion
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            ADB.Screenshot screenshot = new ADB.Screenshot();
+            var aa = screenshot.PicToPoint(Address.res + "\\pic\\UI\\AutoDeployON.png",opencv_errorCon:0.95);
+        }
     }
 }

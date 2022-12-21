@@ -23,7 +23,7 @@
                 <akhc:SimuSupport />
                 <LineBreak />
                 <LineBreak />
-                <Run Foreground="Gray">请查看你的模拟器是否受支持。若否，你需要：</Run>
+                <Run>请查看你的模拟器是否受支持。若否，你需要：</Run>
             </TextBlock>
             <akhc:CustomSimulator Margin="0,0,0,0" />
         </StackPanel>
