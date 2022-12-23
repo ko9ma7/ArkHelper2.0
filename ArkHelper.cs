@@ -85,7 +85,8 @@ namespace ArkHelper
                     var NewVersionData = Net.GetFromApi("https://api.github.com/repos/ArkHelper/ArkHelper2.0/releases/latest");
                     var versionNum = NewVersionData.GetProperty("tag_name").GetString();
                     var assets = NewVersionData.GetProperty("assets").EnumerateArray();
-                    var necessary = NewVersionData.GetProperty("body").GetString().Contains("[NECESSARY]");
+                    var body = NewVersionData.GetProperty("body").GetString();
+                    var necessary = body.Contains("[NECESSARY]");
                     string search(string name, bool fuzzy)
                     {
                         foreach (var asset in assets)
@@ -108,16 +109,10 @@ namespace ArkHelper
 
                     var url = search("ArkHelper.zip", false);
 
-                    if (search("DownloaderComments", true) != "null")
+                    if (body.Contains("[MIRROR"))
                     {
-                        string add = Address.Cache.update + "\\config.json";
-                        Net.DownloadFile(search("DownloaderComments", true), add);
-                        var dc = JsonSerializer.Deserialize<JsonElement>(File.ReadAllText(Address.config));
-                        File.Delete(add);
-                        if (dc.TryGetProperty("redirectURL", out var red))
-                        {
-                            url = red.GetString();
-                        }
+                        string _verText = body.Substring(body.IndexOf("[MIRROR") + "[MIRROR=".Length);
+                        url = _verText.Substring(0, _verText.IndexOf("]"));
                     }
 
                     var ret = new Data(versionNum, "", necessary, Data.VersionType.realese);
