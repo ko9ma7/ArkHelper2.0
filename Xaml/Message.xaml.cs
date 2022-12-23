@@ -52,10 +52,16 @@ namespace ArkHelper.Pages
                         Name = _userinfo.GetProperty("screen_name").GetString();
                         break;
                     case ArkHelperDataStandard.MessageSource.official_communication:
-
                         Avatar = null;//
                         Name = "制作组通讯";
                         break;
+                }
+                if (Source == ArkHelperDataStandard.MessageSource.neteaseMusic)
+                {
+                    var res = Net.GetFromApi("http://music.163.com/api/artist/albums/" + uid);
+                    Avatar = res.GetProperty("artist").GetProperty("picUrl").GetString();
+                    Name = res.GetProperty("artist").GetProperty("name").GetString();
+
                 }
                 if (Avatar != null)
                 {
@@ -91,7 +97,6 @@ namespace ArkHelper.Pages
                                 if (card.GetProperty("profile_type_id").GetString().Contains("top")) { _top = true; }
                                 var json = card.GetProperty("mblog");
 
-
                                 //交给构造函数解析
                                 var message = new ArkHelperMessage(Source, json)
                                 {
@@ -117,7 +122,7 @@ namespace ArkHelper.Pages
                         {
                             goto start;
                         }
-                        
+
                         string _aaa = _ab.ToString();
                         var _aaaa = new ArkHelperMessage(Source, _aaa)
                         {
@@ -125,9 +130,18 @@ namespace ArkHelper.Pages
                         };
                         back.Add(_aaaa);
                         break;
-
-                    default:
-                        break;
+                }
+                if (Source == ArkHelperDataStandard.MessageSource.neteaseMusic)
+                {
+                    var res = Net.GetFromApi("http://music.163.com/api/artist/albums/32540734");
+                    foreach (var item in res.GetProperty("hotAlbums").EnumerateArray())
+                    {
+                        var _aaaa = new ArkHelperMessage(Source, item)
+                        {
+                            User = this
+                        };
+                        back.Add(_aaaa);
+                    }
                 }
                 GC.Collect();
                 return back;
@@ -331,16 +345,14 @@ namespace ArkHelper.Pages
                 }
                 if (source == ArkHelperDataStandard.MessageSource.official_communication)
                 {
-                    int num = 0;
-
-                    ID = source.ToString() + num;
                     IsTop = true;
 
                     string origin = (string)content;
 
                     int _txadd = origin.IndexOf("制作组通讯#");
 
-                    num = Convert.ToInt32(origin.Substring(_txadd + 6, 2));
+                    int num = Convert.ToInt32(origin.Substring(_txadd + 6, 2));
+                    ID = source.ToString() + num;
 
                     int _herfadd = origin.Substring(0, _txadd).LastIndexOf(@"href=""");
                     string _html = origin.Substring(_herfadd + 6, origin.IndexOf(@"""", _herfadd + 10) - _herfadd - 6);
@@ -351,9 +363,24 @@ namespace ArkHelper.Pages
                     int _classendadd = _timearea.IndexOf(@"</span>");
                     string _createat = _timearea.Substring(_classadd + 17, _classendadd - _classadd - 17);
                     var _dt = DateTime.ParseExact(_createat, "yyyy-MM-dd", CultureInfo.CreateSpecificCulture("en-US"));
-                    CreateAt = new DateTime(_dt.Year, _dt.Month, _dt.Day, 16, 0, 0);
+                    CreateAt = new DateTime(_dt.Year, _dt.Month, _dt.Day, (DateTime.Now.Hour > 16) ? 16 : 10, 0, 0);
 
                     Text = "第" + num + "期制作组通讯已经发布。";
+                }
+                if (source == ArkHelperDataStandard.MessageSource.neteaseMusic)
+                {
+
+                    JsonElement origin = (JsonElement)content;
+
+                    var id = origin.GetProperty("id").GetInt64();
+                    ID = source.ToString() + id;
+                    Links.Add(@"https://music.163.com/#/album?id=" + id);
+                    var name = origin.GetProperty("name").GetString();
+                    Text = "发布了新的专辑" + "《" + name + "》。";
+
+                    var time = origin.GetProperty("publishTime").GetInt64();
+                    System.DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
+                    CreateAt = dtDateTime.AddMilliseconds(time).ToLocalTime();
                 }
 
                 //处理图片确定缩略图
@@ -435,10 +462,11 @@ namespace ArkHelper.Pages
                 new User(ArkHelperDataStandard.MessageSource.weibo, "7753678921"),//GAW
                 new User(ArkHelperDataStandard.MessageSource.weibo, "2954409082"),//PLG
                 new User(ArkHelperDataStandard.MessageSource.official_communication,""), //COM
-                //new Pages.Message.User(UniData.MessageSource.weibo, "7404330062") //test
+                new User(ArkHelperDataStandard.MessageSource.neteaseMusic,"32540734"), //MSR
+                //new Pages.Message.User(ArkHelperDataStandard.MessageSource.weibo, "7784464307") //test
             };
 
-            for (; ; Thread.Sleep(40000))
+            for (; ; Thread.Sleep(20000))
             {
                 var createat = DateTime.Now;
                 if (!firstUpdate) createat = Messages[0].CreateAt;
@@ -447,87 +475,80 @@ namespace ArkHelper.Pages
                 {
                     foreach (ArkHelperMessage message in user.UpdateMessage())
                     {
-                        //更新通知
-                        if (message.CreateAt > createat && !firstUpdate)
-                        {
-                            ToastContentBuilder Toast = new ToastContentBuilder();
-                            Toast.AddArgument("kind", "Message");
-                            Toast.AddText(user.Name + "发布了新的动态");
-                            Toast.AddText(message.Text);
-                            Toast.AddCustomTimeStamp(message.CreateAt);
-
-                            if (message.Medias.Count > 0)
-                            {
-                                var me = message.Medias[0];
-                                switch (me.Type)
-                                {
-                                    case ArkHelperMessage.Media.MediaType.photo:
-                                        Toast.AddHeroImage(new Uri(me.Link));
-                                        break;
-                                    case ArkHelperMessage.Media.MediaType.video:
-                                        Toast.AddHeroImage(new Uri(me.Small));
-                                        break;
-                                }
-                            }
-
-                            Toast.Show(tag =>
-                            {
-                                tag.Tag = "Message";
-                            });
-                        }
-
                         //加入消息池
                         if (!Messages.Exists(mes => mes.ID == message.ID))
-                            Messages.Add(message);
+                            if (!message.Text.Contains("对本次抽奖进行监督，结果公正有效。公示链接："))
+                                if ((DateTime.Now - message.CreateAt) < new TimeSpan(60, 0, 0, 0, 0))
+                                {
+                                    Messages.Add(message);
+
+                                    //更新通知
+                                    if (!firstUpdate)
+                                    {
+                                        ToastContentBuilder Toast = new ToastContentBuilder();
+                                        Toast.AddArgument("kind", "Message");
+                                        Toast.AddText(user.Name + "发布了新的动态");
+                                        Toast.AddText(message.Text);
+                                        Toast.AddCustomTimeStamp(message.CreateAt);
+
+                                        if (message.Medias.Count > 0)
+                                        {
+                                            var me = message.Medias[0];
+                                            switch (me.Type)
+                                            {
+                                                case ArkHelperMessage.Media.MediaType.photo:
+                                                    Toast.AddHeroImage(new Uri(me.Link));
+                                                    break;
+                                                case ArkHelperMessage.Media.MediaType.video:
+                                                    Toast.AddHeroImage(new Uri(me.Small));
+                                                    break;
+                                            }
+                                        }
+
+                                        Toast.Show(tag =>
+                                        {
+                                            tag.Tag = "Message";
+                                        });
+                                    }
+                                }
                     }
                 }
                 Messages.Sort();
                 ////if (messages.Count > 20) { messages.RemoveRange(19, messages.Count - 19); }
 
+                try { MessageInited(); } catch { }
+
                 firstUpdate = false;
             }
         });
         static List<ArkHelperMessage> Messages = new List<ArkHelperMessage>();
+        public delegate void MessageInitPointer();
+        public static event MessageInitPointer MessageInited;
         #endregion
 
         #region 页面更新
+        private bool ableToInit = true;
+        public Message()
+        {
+            InitializeComponent();
+            ReadyToInitFromBlank();
+            if (!firstUpdate) InitFromList();
+        }
         public int AlreadyInitedCards = 0;
         public List<DateTime> DTList = new List<DateTime>();
-        private void InitFromBlank()
+        private void ReadyToInitFromBlank()
         {
             if (App.Data.message.status)
             {
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    pgb.Visibility = Visibility.Visible;
-                    off.Visibility = Visibility.Collapsed;
-                    cancel.Visibility = Visibility.Visible;
-                });
-
-                Task.Run(() =>
-                {
-                    while (firstUpdate)
-                        Thread.Sleep(2000);
-
-                    Thread.Sleep(100);
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        pgb.IsIndeterminate = false;
-                        InitCard(3);
-                        pgb.Visibility = Visibility.Collapsed;
-                    });
-
-                });
+                pgb.Visibility = Visibility.Visible;
+                off.Visibility = Visibility.Collapsed;
+                cancel.Visibility = Visibility.Visible;
             }
             else
             {
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    pgb.Visibility = Visibility.Collapsed;
-                    off.Visibility = Visibility.Visible;
-                    cancel.Visibility = Visibility.Collapsed;
-                });
-                return;
+                pgb.Visibility = Visibility.Collapsed;
+                off.Visibility = Visibility.Visible;
+                cancel.Visibility = Visibility.Collapsed;
             }
         }
         private void InitCard(int num = 3)
@@ -569,7 +590,6 @@ namespace ArkHelper.Pages
                 AlreadyInitedCards++;
             }
         }
-
         /// <summary>
         /// 构建卡片
         /// </summary>
@@ -765,13 +785,19 @@ namespace ArkHelper.Pages
 
             return endBorder;
         }
-        #endregion
-
-        public Message()
+        private void InitFromList()
         {
-            InitializeComponent();
-            InitFromBlank();
+            if (!App.Data.message.status || !ableToInit) return;
+            ableToInit = false;
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                MessageListDock.Children.Clear();
+                pgb.IsIndeterminate = false;
+                InitCard(3);
+                pgb.Visibility = Visibility.Collapsed;
+            });
         }
+        #endregion
 
         #region 图片
         private List<BitmapImage> UserAvatarList = new List<BitmapImage>();
@@ -824,7 +850,6 @@ namespace ArkHelper.Pages
 
             return bitImage;
         }
-
 
         #endregion
         #region 页面响应
@@ -889,8 +914,6 @@ namespace ArkHelper.Pages
             }
             if (isBottom) { InitCard(); }
         }
-        #endregion
-
         private void Hyperlink_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -899,13 +922,25 @@ namespace ArkHelper.Pages
             }
             catch { }
             App.Data.message.status = true;
-            InitFromBlank();
+            ReadyToInitFromBlank();
+            if (!firstUpdate) InitFromList();
         }
 
         private void cancel_Click(object sender, RoutedEventArgs e)
         {
             App.Data.message.status = false;
-            WithSystem.Message("功能已禁用                       ", "ArkHelper下次启动时生效");
+            WithSystem.Message("功能已禁用", "ArkHelper下次启动时生效");
         }
+
+        private void Page_Loaded(object sender, RoutedEventArgs e)
+        {
+            MessageInited += InitFromList;
+        }
+
+        private void Page_Unloaded(object sender, RoutedEventArgs e)
+        {
+            MessageInited -= InitFromList;
+        }
+        #endregion
     }
 }

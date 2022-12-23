@@ -20,14 +20,28 @@ namespace ArkHelper
     public partial class App : Application
     {
         #region 应用配置数据
-        public static Data Data = new Data();
+        private static Data _data = new Data();
+        public static Data Data {
+            get
+            {
+                return _data;
+            }
+            set
+            {
+                _data = value;
+            }
+        }
         public static void LoadData()
         {
             App.Data = JsonSerializer.Deserialize<Data>(File.ReadAllText(Address.config));
+            if (true) ;
+
+            App.Data.scht.ct.times.Sort();
+            App.Data.scht.ct.forceTimes.Sort();
         }
         public static void SaveData()
         {
-            if (!File.Exists(Address.config))
+            if (File.Exists(Address.config))
             {
                 File.Create(Address.config).Dispose();
             }
@@ -78,6 +92,8 @@ namespace ArkHelper
                     if (window.GetType() == typeof(MainWindow))
                     {
                         windowIsOpen = true;
+                        window.WindowState = WindowState.Normal;
+                        window.Activate();
                     }
                 }
             });
@@ -87,6 +103,7 @@ namespace ArkHelper
         public static void ExitApp()
         {
             notifyIcon.Visible = false;
+
             App.SaveData();
             Process.GetCurrentProcess().Kill();
             Current.Shutdown();
@@ -135,7 +152,7 @@ namespace ArkHelper
             #region 更新
             Task update = Task.Run(() =>
             {
-                Version.Update.Search();
+                //Version.Update.Search();
             });
             #endregion
 
@@ -145,7 +162,7 @@ namespace ArkHelper
             {
                 //if (Directory.Exists(Address.programData)) { Directory.Delete(Address.programData, true); } //删除残缺的数据文件
                 //new NewUser().ShowDialog(); //导航到新用户窗口
-                var win = new NewUserPolicyWindow();
+                var win = new NewUser();
                 win.ShowDialog();
             }
             try
@@ -167,7 +184,11 @@ namespace ArkHelper
             #region 启动ADB连接
             Task adbConnect = Task.Run(() =>
             {
-                for (; ; Thread.Sleep(3000)) ADB.Connect();
+                while (true)
+                {
+                    ADB.Connect();
+                    Thread.Sleep(3000);
+                }
             });
             #endregion
             #region SCHT等待
@@ -175,32 +196,50 @@ namespace ArkHelper
             {
                 for (; ; Thread.Sleep(1000))
                 {
-                    //
-                    if ((DateTime.Now.Hour == 7 || DateTime.Now.Hour == 19) && DateTime.Now.Minute == 58 && OKtoOpenSCHT && Data.scht.status)
+                    bool isTimeEq(DateTime selTime)
                     {
-                        if (Data.scht.fcm.status)
-                        {
-                            if (DateTime.Now.Hour == 7 || !(DateTime.Now.DayOfWeek == DayOfWeek.Friday || DateTime.Now.DayOfWeek == DayOfWeek.Saturday || DateTime.Now.DayOfWeek == DayOfWeek.Sunday))
-                                goto end;
-                        }
+                        var dateTime = DateTime.Now;
+                        return (selTime.Year == dateTime.Year
+                        && selTime.Month == dateTime.Month
+                        && selTime.Day == dateTime.Day
+                        && selTime.Hour == dateTime.Hour
+                        && selTime.Minute == dateTime.Minute);
+                    }
+
+                    if (!OKtoOpenSCHT
+                    || !Data.scht.status
+                    //&& false
+                    ) goto end;
+
+                    if (isTimeEq(Pages.OtherList.SCHT.GetNextRunTime()))
+                    {
+                        Data.scht.ct.forceTimes.RemoveAll(dt => isTimeEq(dt));
+
                         OKtoOpenSCHT = false;
                         Application.Current.Dispatcher.Invoke(delegate
                         {
-                            foreach (Window window in Application.Current.Windows)
-                            {
-                                if (window.GetType() == typeof(MainWindow))
-                                {
-                                    window.Close();
-                                    mainArg = new ArkHelperArg(ArkHelperDataStandard.ArkHelperArg.ArgKind.Navigate, "SCHTRunning", "MainWindow");
-                                    OpenMainWindow();
-                                }
-                            }
+                            CloseMainWindow();
+                            mainArg = new ArkHelperArg(ArkHelperDataStandard.ArkHelperArg.ArgKind.Navigate, "SCHTRunning", "MainWindow");
+                            OpenMainWindow();
                         });
                     }
+
                 end:;
                 }
             });
             #endregion
+        }
+
+        private static void CloseMainWindow()
+        {
+            foreach (Window window in Application.Current.Windows)
+            {
+                if (window.GetType() == typeof(MainWindow))
+                {
+                    window.Close();
+                    WithSystem.GarbageCollect();
+                }
+            }
         }
     }
 }

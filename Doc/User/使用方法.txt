@@ -1,0 +1,6 @@
+- 如果您第一次使用ArkHelper：
+	将此压缩包中“ArkHelper”文件夹解压出来，运行其中的“ArkHelper.exe”。
+
+- 如果您的计算机中已经安装了ArkHelper：
+	将此压缩包中“ArkHelper”文件夹解压出来，替换掉原来的ArkHelper文件夹。
+	注意不要修改文件夹或文件的名称。

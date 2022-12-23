@@ -10,7 +10,7 @@
 
     <Grid>
         <Grid>
-            <WrapPanel x:Name="wrap1"  Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,40">
+            <WrapPanel x:Name="wrap1"  Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,50">
                 <TextBlock HorizontalAlignment="Center" FontSize="48" Text="欢迎使用ArkHelper"/>
                 <WrapPanel HorizontalAlignment="Center">
                     <CheckBox 

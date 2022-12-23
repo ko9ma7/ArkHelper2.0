@@ -15,139 +15,250 @@
       mc:Ignorable="d">
 
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="auto" />
-            <ColumnDefinition />
-        </Grid.ColumnDefinitions>
 
-        <StackPanel Name="battle_setting_wrappanel"
-                    Margin="0,15,0,0"
-                    Orientation="Vertical">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto" />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
 
-            <Border Width="220"
-                    Height="50"
-                    Margin="0,0,0,10"
-                    Background="AliceBlue"
-                    Style="{DynamicResource card}">
-                <WrapPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <materialDesign:PackIcon Width="25"
-                                             Height="25"
-                                             VerticalAlignment="Center"
-                                             Kind="Fencing" />
-                    <TextBlock Margin="10,0,0,0"
-                               VerticalAlignment="Center"
-                               FontSize="18">
-                        作战类型
-                    </TextBlock>
-                </WrapPanel>
-            </Border>
+            <StackPanel Name="battle_setting_wrappanel"
+                        Margin="0,15,0,0"
+                        Orientation="Vertical">
 
-            <RadioButton Name="mode_san"
-                         Width="220"
-                         Height="55"
-                         ContentStringFormat="直到理智耗尽"
-                         GroupName="BtKind"
-                         IsChecked="True"
-                         Style="{StaticResource RadioButtonDock}"
-                         Tag="FlaskEmptyRemoveOutline" />
-            <Border Width="220"
-                    Margin="0,8,0,0"
-                    CornerRadius="16"
-                    Style="{StaticResource extendRBtn}">
-                <StackPanel>
-                    <RadioButton Name="mode_time"
-                                 Width="220"
-                                 Height="55"
-                                 Margin="0"
-                                 ContentStringFormat="直到达到设定次数"
-                                 GroupName="BtKind"
-                                 Style="{StaticResource RadioButtonDock}"
-                                 Tag="Clock" />
-                    <WrapPanel Margin="0,0,0,20" Visibility="{Binding ElementName=mode_time, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <!--<materialDesign:PackIcon Width="20"
+                <Border Width="220"
+                        Height="50"
+                        Margin="0,0,0,10"
+                        Background="AliceBlue"
+                        Style="{DynamicResource card}">
+                    <WrapPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <materialDesign:PackIcon Width="25"
+                                                 Height="25"
+                                                 VerticalAlignment="Center"
+                                                 Kind="Fencing" />
+                        <TextBlock Margin="10,0,0,0"
+                                   VerticalAlignment="Center"
+                                   FontSize="18">
+                            作战类型
+                        </TextBlock>
+                    </WrapPanel>
+                </Border>
+
+                <RadioButton Name="mode_san"
+                             Width="220"
+                             Height="55"
+                             ContentStringFormat="直到理智耗尽"
+                             GroupName="BtKind"
+                             IsChecked="True"
+                             Style="{StaticResource RadioButtonDock}"
+                             Tag="FlaskEmptyRemoveOutline" />
+                <Border Width="220"
+                        Margin="0,8,0,0"
+                        d:Background="White"
+                        CornerRadius="16"
+                        Style="{StaticResource extendRBtn}">
+                    <StackPanel>
+                        <RadioButton Name="mode_time"
+                                     Width="220"
+                                     Height="55"
+                                     Margin="0"
+                                     ContentStringFormat="直到达到设定次数"
+                                     GroupName="BtKind"
+                                     Style="{StaticResource RadioButtonDock}"
+                                     Tag="Clock" />
+                        <WrapPanel Margin="0,0,0,20" Visibility="{Binding ElementName=mode_time, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <!--<materialDesign:PackIcon Width="20"
                                                  Height="20"
                                                  VerticalAlignment="Center"
                                                  Foreground="#006493"
                                                  Kind="Clock" />-->
-                        <TextBox x:Name="times_setting"
-                                 Width="180"
-                                 Margin="14,-10,0,0"
-                                 HorizontalAlignment="Center"
-                                 VerticalAlignment="Center"
-                                 materialDesign:HintAssist.Hint="连续作战次数"
-                                 FontSize="15"
-                                 Foreground="#006493"
-                                 Style="{StaticResource MaterialDesignFloatingHintTextBox}"
-                                 Text="1" />
+                            <TextBox x:Name="times_setting"
+                                     Width="180"
+                                     Margin="14,-10,0,0"
+                                     HorizontalAlignment="Center"
+                                     VerticalAlignment="Center"
+                                     materialDesign:HintAssist.Hint="连续作战次数"
+                                     FontSize="15"
+                                     Foreground="#006493"
+                                     Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                                     Text="1" />
 
-                    </WrapPanel>
-
-                </StackPanel>
-            </Border>
-
-
-        </StackPanel>
-
-        <Grid Grid.Column="1">
-            <StackPanel Margin="15">
-                <Border Padding="20,12,20,12"
-                        Background="AliceBlue"
-                        CornerRadius="16">
-                    <StackPanel Orientation="Horizontal">
-                        <WrapPanel>
-                            <CheckBox x:Name="is_action" Margin="0,0,5,0" />
-                            <TextBlock FontSize="{StaticResource h1}">作战结束后</TextBlock>
                         </WrapPanel>
-                        <ComboBox x:Name="after_action_select"
-                                  MinWidth="160"
-                                  Margin="10,0,0,0"
-                                  HorizontalAlignment="Left"
-                                  VerticalAlignment="Center"
-                                  materialDesign:HintAssist.Hint="执行"
-                                  FontSize="15"
-                                  IsEnabled="{Binding ElementName=is_action, Path=IsChecked}">
-                            <ComboBoxItem IsSelected="True">返回游戏首页</ComboBoxItem>
-                            <ComboBoxItem>关闭游戏</ComboBoxItem>
-                            <ComboBoxItem>关闭模拟器</ComboBoxItem>
-                            <ComboBoxItem>锁定</ComboBoxItem>
-                            <ComboBoxItem ToolTip="* 若系统休眠功能未关闭，此功能在执行时会转为休眠。">睡眠</ComboBoxItem>
-                            <ComboBoxItem>关机</ComboBoxItem>
-                        </ComboBox>
+
                     </StackPanel>
                 </Border>
+
+
             </StackPanel>
 
-            <Button x:Name="start_button"
-                    Width="48"
-                    Height="48"
-                    Margin="0,0,50,50"
+            <Grid Grid.Column="1">
+                <Grid.Resources>
+                    <Style TargetType="Border">
+                        <Setter Property="Padding" Value="20,12,20,12" />
+                        <Setter Property="Background" Value="AliceBlue" />
+                        <Setter Property="CornerRadius" Value="16" />
+                        <Setter Property="Margin" Value="0,0,0,15" />
+                    </Style>
+                </Grid.Resources>
+                <StackPanel Margin="15">
+                    <Border>
+                        <StackPanel Orientation="Vertical">
+                            <akhc:ChapterTitle Icon="CogStop" Text="作战结束后" />
+                            <ComboBox x:Name="after_action_select"
+                                      MinWidth="200"
+                                      Margin="0,8"
+                                      HorizontalAlignment="Left"
+                                      VerticalAlignment="Center"
+                                      materialDesign:HintAssist.Hint="执行："
+                                      Style="{StaticResource MaterialDesignFilledComboBox}">
+                                <ComboBox.Resources>
+                                    <Style TargetType="WrapPanel">
+                                        <Setter Property="HorizontalAlignment" Value="Left" />
+                                        <Setter Property="Orientation" Value="Horizontal" />
+                                    </Style>
+                                    <Style TargetType="materialDesign:PackIcon">
+                                        <Setter Property="Width" Value="20" />
+                                        <Setter Property="Height" Value="20" />
+                                        <Setter Property="VerticalAlignment" Value="Center" />
+                                        <Setter Property="Margin" Value="0,0,10,0" />
+                                    </Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="FontSize" Value="15" />
+                                        <Setter Property="FontFamily" Value="{StaticResource SourceHan}" />
+                                    </Style>
+                                </ComboBox.Resources>
+
+                                <ComboBoxItem IsSelected="True" Tag="none">
+                                    <WrapPanel>
+                                        <materialDesign:PackIcon Kind="NullOff" />
+                                        <TextBlock>无动作</TextBlock>
+                                    </WrapPanel>
+                                </ComboBoxItem>
+
+                                <ComboBoxItem Tag="backToHome">
+                                    <WrapPanel>
+                                        <materialDesign:PackIcon Kind="Home" />
+                                        <TextBlock>返回游戏首页</TextBlock>
+                                    </WrapPanel>
+                                </ComboBoxItem>
+
+                                <ComboBoxItem Tag="closeGame">
+                                    <WrapPanel>
+                                        <materialDesign:PackIcon Kind="Power" />
+                                        <TextBlock>关闭游戏</TextBlock>
+                                    </WrapPanel>
+                                </ComboBoxItem>
+
+                                <ComboBoxItem Tag="closeSimulator">
+                                    <WrapPanel>
+                                        <materialDesign:PackIcon Kind="Power" />
+                                        <TextBlock>关闭模拟器</TextBlock>
+                                    </WrapPanel>
+                                </ComboBoxItem>
+                                <ComboBoxItem Tag="lock">
+                                    <WrapPanel>
+                                        <materialDesign:PackIcon Kind="Lock" />
+                                        <TextBlock>锁定</TextBlock>
+                                    </WrapPanel>
+                                </ComboBoxItem>
+                                <ComboBoxItem Tag="sleep" ToolTip="* 若系统休眠功能未关闭，此功能会按休眠执行。">
+                                    <WrapPanel>
+                                        <materialDesign:PackIcon Kind="WeatherNight" />
+                                        <TextBlock>睡眠</TextBlock>
+                                    </WrapPanel>
+                                </ComboBoxItem>
+                                <ComboBoxItem Tag="shutdown">
+                                    <WrapPanel>
+                                        <materialDesign:PackIcon Kind="Power" />
+                                        <TextBlock>关机</TextBlock>
+                                    </WrapPanel>
+                                </ComboBoxItem>
+                            </ComboBox>
+                        </StackPanel>
+                    </Border>
+
+                    <Border d:Visibility="Visible" Visibility="{Binding ElementName=waiting_processbar, Path=Visibility}">
+                        <StackPanel Name="monitor">
+                            <akhc:ChapterTitle Icon="ChartDonut" Text="实时作战监测系统：回传报告" />
+                            <WrapPanel Margin="2.5" Orientation="Vertical">
+
+                                <WrapPanel Name="data_begin">
+                                    <materialDesign:PackIcon Kind="TimerPlayOutline" />
+                                    <TextBlock Name="data_begin_text" FontSize="{StaticResource p}">--</TextBlock>
+                                </WrapPanel>
+
+                                <WrapPanel Name="data_progress">
+                                    <materialDesign:PackIcon Kind="ProgressCheck" />
+                                    <TextBlock FontSize="{StaticResource p}">
+                                        <Run Name="data_progress_alreadyT" />
+                                        /<Run Name="data_progress_T" />
+                                    </TextBlock>
+                                </WrapPanel>
+
+                                <WrapPanel Name="data_speed">
+                                    <materialDesign:PackIcon Kind="Speedometer" />
+                                    <TextBlock FontSize="{StaticResource p}">
+                                        <Run Name="data_speed_text" />
+                                        秒/次</TextBlock>
+                                </WrapPanel>
+
+                                <WrapPanel Name="data_end">
+                                    <materialDesign:PackIcon Kind="TimerStopOutline" />
+                                    <TextBlock FontSize="{StaticResource p}">
+                                        预计<Run Name="data_end_text" /></TextBlock>
+                                </WrapPanel>
+                            </WrapPanel>
+                            <StackPanel.Resources>
+                                <Style TargetType="materialDesign:PackIcon">
+                                    <Setter Property="Width" Value="20" />
+                                    <Setter Property="Height" Value="20" />
+                                    <Setter Property="VerticalAlignment" Value="Center" />
+                                    <Setter Property="Margin" Value="0,0,10,0" />
+                                </Style>
+                                <Style TargetType="WrapPanel">
+                                    <Setter Property="Orientation" Value="Horizontal" />
+                                    <Setter Property="Margin" Value="0,4" />
+                                </Style>
+                            </StackPanel.Resources>
+
+                        </StackPanel>
+
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </Grid>
+        <Button x:Name="start_button"
+                Width="48"
+                Height="48"
+                Margin="0,0,50,50"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Bottom"
+                Background="{DynamicResource MaterialDesignTextFieldBoxBackground}"
+                Click="start"
+                Cursor="Hand"
+                Style="{StaticResource MaterialDesignIconButton}"
+                ToolTip="开始作战指挥">
+            <materialDesign:PackIcon Kind="Fencing" />
+        </Button>
+        <StackPanel x:Name="logreport_wrappanel"
+                    Margin="0,0,64,64"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Bottom"
-                    Background="{DynamicResource MaterialDesignTextFieldBoxBackground}"
-                    Click="start"
-                    Cursor="Hand"
-                    Style="{StaticResource MaterialDesignIconButton}"
-                    ToolTip="开始作战指挥">
-                <materialDesign:PackIcon Kind="Fencing" />
-            </Button>
-            <StackPanel x:Name="logreport_wrappanel"
-                        Margin="0,0,64,64"
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Bottom"
-                        Orientation="Horizontal"
-                        Visibility="Collapsed">
-                <TextBlock Margin="0,0,20,0"
-                           VerticalAlignment="Bottom"
-                           FontSize="15">
-                    <Run x:Name="times_textblock" Text=" " />
-                    <Run x:Name="log_textblock" />
-                </TextBlock>
-                <ProgressBar x:Name="waiting_processbar"
-                             VerticalAlignment="Bottom"
-                             IsIndeterminate="True"
-                             Style="{StaticResource MaterialDesignCircularProgressBar}"
-                             Value="0" />
-            </StackPanel>
-        </Grid>
+                    Orientation="Horizontal"
+                    Visibility="Collapsed">
+            <TextBlock Margin="0,0,20,0"
+                       VerticalAlignment="Bottom"
+                       FontSize="15">
+                <Run x:Name="times_textblock" Text=" " />
+                <Run x:Name="log_textblock" />
+            </TextBlock>
+            <ProgressBar x:Name="waiting_processbar"
+                         VerticalAlignment="Bottom"
+                         IsIndeterminate="True"
+                         Style="{StaticResource MaterialDesignCircularProgressBar}"
+                         Visibility="Collapsed"
+                         Value="0" />
+        </StackPanel>
     </Grid>
+
 </Page>

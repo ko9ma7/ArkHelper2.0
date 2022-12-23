@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using MaterialDesignThemes.Wpf;
 using System.Windows.Media.Animation;
+using ArkHelper.Pages;
 
 namespace ArkHelper.Xaml
 {
@@ -46,7 +47,9 @@ namespace ArkHelper.Xaml
             new List<Menu>()
             {
                 new Menu("设置","Setting",PackIconKind.Settings),
-                //new Menu("Test","Test",PackIconKind.TestTube),
+#if DEBUG
+                new Menu("Test","Test",PackIconKind.TestTube),
+#endif
             },
         };
         #endregion
@@ -112,6 +115,7 @@ namespace ArkHelper.Xaml
                         {
                             rb.Visibility = Visibility.Visible;
                             rb.IsChecked = true;
+                            if (rb.Name == "SCHTRunning") FuncList.IsEnabled = false;
                             break;
                         }
                     }
@@ -236,13 +240,24 @@ namespace ArkHelper.Xaml
 
         private void Window_Closing(object sender, CancelEventArgs e)
         {
-            App.SaveData();
-            if (App.Data.arkHelper.pure && !App.Data.scht.status)
+            WithSystem.GarbageCollect();
+            if (App.Data.arkHelper.pure && App.OKtoOpenSCHT)
             {
-                App.ExitApp();
+                if (App.Data.scht.status)
+                {
+                    if (System.Windows.Forms.MessageBox.Show("【后台纯净】开启时，关闭ArkHelper将会导致SCHT无法在指定时间运行。仍要关闭ArkHelper吗？\n注：【后台纯净】可在设置中关闭", "ArkHelper", System.Windows.Forms.MessageBoxButtons.OKCancel, System.Windows.Forms.MessageBoxIcon.Question) == System.Windows.Forms.DialogResult.OK)
+                        App.ExitApp();
+                    else
+                        e.Cancel = true;
+                }
+                else
+                {
+                    App.ExitApp();
+                }
             }
             else
             {
+                App.SaveData();
                 new ToastContentBuilder().AddArgument("kind", "Background").AddText("提示").AddText("ArkHelper已进入后台运行").Show();
             }
         }

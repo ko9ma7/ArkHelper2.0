@@ -13,16 +13,22 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace ArkHelper.Xaml.NewUser
+namespace ArkHelper.Style.Control
 {
     /// <summary>
-    /// Simulator.xaml 的交互逻辑
+    /// ChapterTitle.xaml 的交互逻辑
     /// </summary>
-    public partial class Simulator : Page
+    public partial class ChapterTitle : UserControl
     {
-        public Simulator()
+        public ChapterTitle()
         {
             InitializeComponent();
+            this.DataContext = this;
         }
+
+        public string Text { get; set; }
+
+        public MaterialDesignThemes.Wpf.PackIconKind Icon { get; set; } = MaterialDesignThemes.Wpf.PackIconKind.About;
+
     }
 }

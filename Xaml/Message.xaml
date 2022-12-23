@@ -9,6 +9,8 @@
       d:Background="White"
       d:DesignHeight="450"
       d:DesignWidth="652"
+      Loaded="Page_Loaded"
+      Unloaded="Page_Unloaded"
       mc:Ignorable="d">
     <Grid>
         <Grid.ColumnDefinitions>
@@ -72,7 +74,7 @@
                                Foreground="Gray">
                         未启用
                     </TextBlock>
-                    <TextBlock xml:space="preserve" Foreground="Gray"><Hyperlink Click="Hyperlink_Click">启用</Hyperlink>该功能来获取消息</TextBlock>
+                    <TextBlock TextAlignment="Center" HorizontalAlignment="Center" xml:space="preserve" Foreground="Gray"><Hyperlink Name="en" Click="Hyperlink_Click">启用</Hyperlink>该功能来获取消息<LineBreak /><Run>*初次启用加载时间较长，请稍作等待。</Run></TextBlock>
                 </WrapPanel>
             </Grid>
 

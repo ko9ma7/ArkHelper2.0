@@ -9,8 +9,10 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       Title="SCHT"
       d:Background="White"
-      d:DesignHeight="900"
+      d:DesignHeight="1000"
       d:DesignWidth="652"
+      Loaded="Page_Loaded"
+      Unloaded="Page_Unloaded"
       mc:Ignorable="d">
     <Page.Resources>
         <!--  作战单元样式  -->
@@ -56,427 +58,504 @@
             </Setter>
         </Style>
     </Page.Resources>
-
-    <ScrollViewer>
-        <StackPanel>
-            <akhc:Title DockPanel.Dock="Top"
-                        Icon="ThermostatAuto"
-                        Text="RHODES ISLAND™ 定时事项处理指挥器控制台" />
-
-            <StackPanel Margin="0,0,40,20" DockPanel.Dock="Top">
-                <Border Background="#BBEFEFEF" CornerRadius="12">
-                    <Expander Background="Transparent" IsExpanded="True">
-                        <Expander.Header>
-                            <WrapPanel HorizontalAlignment="Center">
-                                <materialDesign:PackIcon Width="20"
-                                                         Height="20"
-                                                         VerticalAlignment="Center"
-                                                         Kind="HelpCircleOutline" />
-                                <TextBlock Margin="10,0,0,0"
-                                           VerticalAlignment="Center"
-                                           FontSize="20">
-                                    说明
-                                </TextBlock>
-                            </WrapPanel>
-                        </Expander.Header>
-                        <WrapPanel Margin="20,0,20,20" Orientation="Vertical">
-                            <WrapPanel Name="SimuSel"
-                                       Margin="5"
-                                       Orientation="Vertical">
-                                <TextBlock FontSize="{StaticResource h2}" Foreground="Red">
-                                    警告
-                                </TextBlock>
-                                <Button BorderBrush="Red"
-                                        Click="Button_Click_1"
-                                        Foreground="Red"
-                                        Style="{StaticResource MaterialDesignOutlinedButton}">
-                                    未选择模拟器快捷方式
-                                </Button>
-
-                            </WrapPanel>
-                            <WrapPanel Margin="5" Orientation="Vertical">
-                                <TextBlock FontSize="{StaticResource h2}">运行时间</TextBlock>
-                                <TextBlock>星期一至星期日每天7:58、19:58</TextBlock>
-                                <TextBlock>星期五至星期日每天19:58（防沉迷模式）</TextBlock>
-                                <TextBlock>
-                                    下次运行：<Run Name="nextRunTime" /></TextBlock>
-                            </WrapPanel>
-
-                            <WrapPanel Margin="5" Orientation="Vertical">
-                                <TextBlock FontSize="{StaticResource h2}">注意</TextBlock>
-                                <TextBlock>任务执行前需确保电脑开启、ArkHelper在后台运行、电脑UAC已关闭（UAC会阻断任务运行）</TextBlock>
-                            </WrapPanel>
-                            <WrapPanel Margin="5" Orientation="Vertical">
-                                <TextBlock FontSize="{StaticResource h2}">运行范围</TextBlock>
-                                <TextBlock>启动模拟器；指定关卡作战；邮件附件收取；线索交流；信用商店消费；剿灭作战；任务奖励收取等</TextBlock>
-                            </WrapPanel>
-                            <WrapPanel Margin="5" Orientation="Vertical">
-                                <TextBlock FontSize="{StaticResource h2}">目前支持的模拟器</TextBlock>
-                                <TextBlock Name="SimuSupport" />
-                                <TextBlock>（设置中可以自定义模拟器连接）</TextBlock>
-                            </WrapPanel>
-
-                        </WrapPanel>
-                    </Expander>
-                </Border>
-            </StackPanel>
-
-            <Grid Margin="0,0,20,0" DockPanel.Dock="Top">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="130" />
-                    <ColumnDefinition Width="1*" />
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition />
-                    <RowDefinition />
-                    <RowDefinition />
-                    <RowDefinition />
-                    <RowDefinition />
-                    <RowDefinition />
-                    <RowDefinition />
-                    <RowDefinition />
-                    <RowDefinition />
-                </Grid.RowDefinitions>
-
-                <StackPanel Name="mainstatus"
-                            Grid.Row="0"
-                            Grid.Column="0"
-                            Style="{StaticResource title}">
-                    <TextBlock Grid.Row="0"
-                               Grid.Column="0"
-                               FontSize="{StaticResource h1}">
-                        总开关
-                    </TextBlock>
-                </StackPanel>
-                <WrapPanel Grid.Row="0"
-                           Grid.Column="1"
-                           VerticalAlignment="Center"
-                           Style="{StaticResource object}"
-                           Visibility="{Binding ElementName=mainstatus, Path=Visibility}">
-                    <ToggleButton x:Name="status_togglebutton"
-                                  d:IsChecked="True"
-                                  Click="status_togglebutton_Click"
-                                  Style="{StaticResource MaterialDesignSwitchToggleButton}" />
-
-                </WrapPanel>
-
-                <StackPanel Name="first_unit"
-                            Grid.Row="1"
-                            Grid.Column="0">
-                    <akhc:Break />
-                    <TextBlock DockPanel.Dock="Right" FontSize="{StaticResource h1}">
-                        作战单元
-                    </TextBlock>
-                </StackPanel>
-                <StackPanel Grid.Row="1"
-                            Grid.Column="1"
-                            Style="{StaticResource title}"
-                            Visibility="{Binding ElementName=first_unit, Path=Visibility}">
-                    <akhc:Break />
-                    <WrapPanel Margin="0,7,0,-10">
-                        <RadioButton x:Name="LSFirst"
-                                     Checked="First_Unit_Selected"
-                                     Style="{DynamicResource cpbtn}"
-                                     ToolTip="关卡编号：LS&#x0a;掉落物：作战记录">
-                            <RadioButton.Background>
-                                <ImageBrush ImageSource="/Asset/SCHT/LS.png" />
-                            </RadioButton.Background>
-                            <RadioButton.ContentStringFormat>战术演习</RadioButton.ContentStringFormat>
-                        </RadioButton>
-                        <RadioButton x:Name="CEFirst"
-                                     Checked="First_Unit_Selected"
-                                     Style="{DynamicResource cpbtn}"
-                                     ToolTip="关卡编号：CE&#x0a;掉落物：龙门币">
-                            <RadioButton.Background>
-                                <ImageBrush ImageSource="/Asset/SCHT/CE.png" />
-                            </RadioButton.Background>
-                            <RadioButton.ContentStringFormat>
-                                货物运送
-                            </RadioButton.ContentStringFormat>
-                        </RadioButton>
-                        <RadioButton x:Name="APFirst"
-                                     Checked="First_Unit_Selected"
-                                     Style="{DynamicResource cpbtn}"
-                                     ToolTip="关卡编号：AP&#x0a;掉落物：采购凭证">
-                            <RadioButton.Background>
-                                <ImageBrush ImageSource="/Asset/SCHT/AP.png" />
-                            </RadioButton.Background>
-                            <RadioButton.ContentStringFormat>
-                                粉碎防御
-                            </RadioButton.ContentStringFormat>
-                        </RadioButton>
-                        <RadioButton x:Name="SKFirst"
-                                     Checked="First_Unit_Selected"
-                                     Style="{DynamicResource cpbtn}"
-                                     ToolTip="关卡编号：SK&#x0a;掉落物：碳、家具零件">
-                            <RadioButton.Background>
-                                <ImageBrush ImageSource="/Asset/SCHT/SK.png" />
-                            </RadioButton.Background>
-                            <RadioButton.ContentStringFormat>
-                                资源保障
-                            </RadioButton.ContentStringFormat>
-                        </RadioButton>
-                        <RadioButton x:Name="CAFirst"
-                                     Checked="First_Unit_Selected"
-                                     Style="{DynamicResource cpbtn}"
-                                     ToolTip="关卡编号：CA&#x0a;掉落物：技巧概要">
-                            <RadioButton.Background>
-                                <ImageBrush ImageSource="/Asset/SCHT/CA.png" />
-                            </RadioButton.Background>
-                            <RadioButton.ContentStringFormat>
-                                空中威胁
-                            </RadioButton.ContentStringFormat>
-                        </RadioButton>
-                        <RadioButton x:Name="PRAFirst"
-                                     Checked="First_Unit_Selected"
-                                     Style="{DynamicResource cpbtn}"
-                                     ToolTip="关卡编号：PR-A&#x0a;掉落物：医疗、重装芯片">
-                            <RadioButton.Background>
-                                <ImageBrush ImageSource="/Asset/SCHT/chips.png" />
-                            </RadioButton.Background>
-                            <RadioButton.ContentStringFormat>
-                                固若金汤
-                            </RadioButton.ContentStringFormat>
-                        </RadioButton>
-                        <RadioButton x:Name="PRBFirst"
-                                     Checked="First_Unit_Selected"
-                                     Style="{DynamicResource cpbtn}"
-                                     ToolTip="关卡编号：PR-B&#x0a;掉落物：术师、狙击芯片">
-                            <RadioButton.Background>
-                                <ImageBrush ImageSource="/Asset/SCHT/chips.png" />
-                            </RadioButton.Background>
-                            <RadioButton.ContentStringFormat>
-                                摧枯拉朽
-                            </RadioButton.ContentStringFormat>
-                        </RadioButton>
-                        <RadioButton x:Name="PRCFirst"
-                                     Checked="First_Unit_Selected"
-                                     Style="{DynamicResource cpbtn}"
-                                     ToolTip="关卡编号：PR-C&#x0a;掉落物：辅助、先锋芯片">
-                            <RadioButton.Background>
-                                <ImageBrush ImageSource="/Asset/SCHT/chips.png" />
-                            </RadioButton.Background>
-                            <RadioButton.ContentStringFormat>
-                                势不可当
-                            </RadioButton.ContentStringFormat>
-                        </RadioButton>
-                        <RadioButton x:Name="PRDFirst"
-                                     Checked="First_Unit_Selected"
-                                     Style="{DynamicResource cpbtn}"
-                                     ToolTip="关卡编号：PR-D&#x0a;掉落物：特种、近卫芯片">
-                            <RadioButton.Background>
-                                <ImageBrush ImageSource="/Asset/SCHT/chips.png" />
-                            </RadioButton.Background>
-                            <RadioButton.ContentStringFormat>
-                                身先士卒
-                            </RadioButton.ContentStringFormat>
-                        </RadioButton>
-                        <RadioButton x:Name="customFirst"
-                                     Checked="First_Unit_Selected"
-                                     Style="{DynamicResource cpbtn}">
-                            <RadioButton.Background>
-                                <SolidColorBrush Color="#DDDDDD" />
-                            </RadioButton.Background>
-                            <RadioButton.ContentStringFormat>
-                                自定义
-                            </RadioButton.ContentStringFormat>
-                        </RadioButton>
+    <materialDesign:DialogHost Name="dialog">
+        <materialDesign:DialogHost.DialogContent>
+            <Grid Width="600" Height="400">
+                <Grid Name="GuidePage1" Visibility="Visible">
+                    <WrapPanel Margin="0,0,0,20"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               Orientation="Vertical">
+                        <materialDesign:PackIcon Width="100"
+                                                 Height="100"
+                                                 HorizontalAlignment="Center"
+                                                 Kind="ThermostatAuto" />
+                        <TextBlock HorizontalAlignment="Center" FontSize="{StaticResource h1}">欢迎使用SCHT</TextBlock>
+                        <TextBlock HorizontalAlignment="Center" FontSize="{StaticResource p}">SCHT是一个自动化指令执行系统，能够在特定时间运行一些基本的任务</TextBlock>
                     </WrapPanel>
+                </Grid>
+                <Grid Name="GuidePage2" Visibility="Collapsed">
+                    <StackPanel>
+                        <akhc:Title Icon="Text" Text="模拟器" />
+
+                        <akhc:SimuSelect HorizontalAlignment="Center" />
+
+                    </StackPanel>
+
+                </Grid>
+                <Grid Name="GuidePage3" Visibility="Collapsed">
+                    <StackPanel>
+                        <akhc:Title Icon="Note" Text="提示" />
+                        <TextBlock Margin="40,0,40,0" FontSize="{StaticResource h3}">
+                            SCHT默认会在每天7:58和19:58开始自动运行。<LineBreak />
+                            <Run Foreground="Gray">
+                                对于防沉迷用户或想自定义时间的用户，可以在该向导结束后的设置界面手动调整运行时间。
+                            </Run>
+                            <LineBreak />
+                            <LineBreak />
+                            <Run Foreground="IndianRed">在约定的运行时间前，请确保电脑处在开启状态，且ArkHelper在前台或后台运行。</Run>
+
+                        </TextBlock>
+                    </StackPanel>
+                </Grid>
+                <Grid Name="GuidePage4" Visibility="Collapsed">
+                    <akhc:OK Margin="0,0,0,30"
+                             HorizontalAlignment="Center"
+                             VerticalAlignment="Center"
+                             Text="SCHT" />
+                </Grid>
+
+                <Button x:Name="next"
+                        Margin="0,0,50,50"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Bottom"
+                        Background="{DynamicResource MaterialDesignTextFieldBoxBackground}"
+                        Click="next_Click"
+                        Cursor="Hand"
+                        Style="{DynamicResource MaterialDesignIconButton}"
+                        ToolTip="下一步">
+                    <materialDesign:PackIcon x:Name="next_icon" Kind="ChevronRight" />
+                </Button>
+            </Grid>
+        </materialDesign:DialogHost.DialogContent>
+        <ScrollViewer>
+            <StackPanel>
+                <akhc:Title DockPanel.Dock="Top"
+                            Icon="ThermostatAuto"
+                            Text="RHODES ISLAND™ 定时事项处理指挥器控制台" />
+
+                <StackPanel Name="helper"
+                            Margin="0,0,40,20"
+                            DockPanel.Dock="Top"
+                            Visibility="Collapsed">
+                    <Border Background="#BBEFEFEF" CornerRadius="12">
+                        <Expander Background="Transparent" IsExpanded="False">
+                            <Expander.Header>
+                                <WrapPanel HorizontalAlignment="Center">
+                                    <materialDesign:PackIcon Width="20"
+                                                             Height="20"
+                                                             VerticalAlignment="Center"
+                                                             Kind="HelpCircleOutline" />
+                                    <TextBlock Margin="10,0,0,0"
+                                               VerticalAlignment="Center"
+                                               FontSize="{StaticResource h2}">
+                                        说明
+                                    </TextBlock>
+                                </WrapPanel>
+                            </Expander.Header>
+                            <WrapPanel Margin="20,0,20,20" Orientation="Vertical">
+                                <WrapPanel Name="SimuSel"
+                                           Margin="5"
+                                           Orientation="Vertical">
+                                    <TextBlock FontSize="{StaticResource h2}" Foreground="Red">
+                                        警告
+                                    </TextBlock>
+                                    <akhc:SimuSelect />
+
+                                </WrapPanel>
+                                <WrapPanel Margin="5" Orientation="Vertical">
+                                    <TextBlock FontSize="{StaticResource h2}">
+                                        下次运行：<Run Name="nextRunTime" /></TextBlock>
+                                </WrapPanel>
+
+                                <WrapPanel Margin="5" Orientation="Vertical">
+                                    <TextBlock FontSize="{StaticResource h2}">注意</TextBlock>
+                                    <TextBlock>任务执行前需确保电脑开启、ArkHelper在后台运行、电脑UAC已关闭（UAC会阻断任务运行）</TextBlock>
+                                </WrapPanel>
+                                <WrapPanel Margin="5" Orientation="Vertical">
+                                    <TextBlock FontSize="{StaticResource h2}">运行范围</TextBlock>
+                                    <TextBlock>启动模拟器；指定关卡作战；邮件附件收取；线索交流；信用商店消费；剿灭作战；任务奖励收取等</TextBlock>
+                                </WrapPanel>
+
+                            </WrapPanel>
+                        </Expander>
+                    </Border>
                 </StackPanel>
 
-                <StackPanel x:Name="second_unit"
-                            Grid.Row="3"
-                            Grid.Column="0"
-                            Orientation="Vertical"
-                            Style="{StaticResource title}">
+                <Grid Margin="0,0,20,0" DockPanel.Dock="Top">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="130" />
+                        <ColumnDefinition Width="1*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
 
-                    <TextBlock FontSize="{StaticResource h1}" Text="备选单元" />
-                    <materialDesign:PackIcon Style="{DynamicResource help}" ToolTip="[作战单元]中指定的单元不总是开放。在这里指定的关卡会成为其不开放时的备选方案。" />
-                </StackPanel>
-                <StackPanel Grid.Row="3"
-                            Grid.Column="1"
-                            HorizontalAlignment="Stretch"
-                            Orientation="Vertical"
-                            Style="{StaticResource title}"
-                            Visibility="{Binding ElementName=second_unit, Path=Visibility}">
+                    <StackPanel Name="mainstatus"
+                                Grid.Row="0"
+                                Grid.Column="0"
+                                Style="{StaticResource title}">
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="0"
+                                   FontSize="{StaticResource h1}">
+                            总开关
+                        </TextBlock>
+                    </StackPanel>
+                    <WrapPanel Grid.Row="0"
+                               Grid.Column="1"
+                               VerticalAlignment="Center"
+                               Style="{StaticResource object}"
+                               Visibility="{Binding ElementName=mainstatus, Path=Visibility}">
+                        <ToggleButton x:Name="status_togglebutton"
+                                      d:IsChecked="True"
+                                      Click="status_togglebutton_Click"
+                                      Style="{StaticResource MaterialDesignSwitchToggleButton}" />
 
-                    <WrapPanel Margin="0,7,0,-10">
-                        <RadioButton x:Name="LSSecond"
-                                     Checked="Second_Unit_Selected"
-                                     Style="{DynamicResource cpbtn}"
-                                     ToolTip="关卡编号：LS&#x0a;掉落物：作战记录">
-                            <RadioButton.Background>
-                                <ImageBrush ImageSource="/Asset/SCHT/LS.png" />
-                            </RadioButton.Background>
-                            <RadioButton.ContentStringFormat>战术演习</RadioButton.ContentStringFormat>
-                        </RadioButton>
-                        <RadioButton x:Name="customSecond"
-                                     Checked="Second_Unit_Selected"
-                                     Style="{DynamicResource cpbtn}">
-                            <RadioButton.Background>
-                                <SolidColorBrush Color="#DDDDDD" />
-                            </RadioButton.Background>
-                            <RadioButton.ContentStringFormat>
-                                自定义
-                            </RadioButton.ContentStringFormat>
-                        </RadioButton>
                     </WrapPanel>
-                </StackPanel>
 
-                <StackPanel x:Name="ann_stack"
-                            Grid.Row="5"
-                            Grid.Column="0"
-                            Orientation="Vertical"
-                            Style="{StaticResource title}">
-                    <akhc:Break />
-                    <TextBlock FontSize="{StaticResource h1}">剿灭作战</TextBlock>
-                </StackPanel>
-                <StackPanel Grid.Row="5"
-                            Grid.Column="1"
-                            Style="{StaticResource title}"
-                            Visibility="{Binding ElementName=ann_stack, Path=Visibility}">
-                    <akhc:Break />
-                    <ToggleButton x:Name="ann_status_togglebutton"
-                                  Margin="0,7,0,0"
-                                  HorizontalAlignment="Left"
-                                  Click="ann_status_togglebutton_Click"
-                                  Style="{StaticResource MaterialDesignSwitchToggleButton}" />
-                    <WrapPanel Margin="0,10,0,0"
-                               Orientation="Vertical"
-                               Visibility="{Binding ElementName=ann_status_togglebutton, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <WrapPanel>
-                            <RadioButton x:Name="CHNB"
-                                         Checked="ann_Selected"
+                    <StackPanel Name="first_unit"
+                                Grid.Row="1"
+                                Grid.Column="0">
+                        <akhc:Break />
+                        <TextBlock DockPanel.Dock="Right" FontSize="{StaticResource h1}">
+                            作战单元
+                        </TextBlock>
+                    </StackPanel>
+                    <StackPanel Grid.Row="1"
+                                Grid.Column="1"
+                                Style="{StaticResource title}"
+                                Visibility="{Binding ElementName=first_unit, Path=Visibility}">
+                        <akhc:Break />
+                        <WrapPanel Margin="0,7,0,-10">
+                            <RadioButton x:Name="LSFirst"
+                                         Checked="First_Unit_Selected"
                                          Style="{DynamicResource cpbtn}"
-                                         ToolTip="类型：长期剿灭委托&#x0a;区域：乌萨斯">
+                                         ToolTip="关卡编号：LS&#x0a;掉落物：作战记录">
                                 <RadioButton.Background>
-                                    <ImageBrush ImageSource="/Asset/SCHT/CHNB.png" />
+                                    <ImageBrush ImageSource="/Asset/SCHT/LS.png" />
                                 </RadioButton.Background>
-                                <RadioButton.ContentStringFormat>切尔诺伯格</RadioButton.ContentStringFormat>
+                                <RadioButton.ContentStringFormat>战术演习</RadioButton.ContentStringFormat>
                             </RadioButton>
-                            <RadioButton x:Name="LMOB"
-                                         Checked="ann_Selected"
+                            <RadioButton x:Name="CEFirst"
+                                         Checked="First_Unit_Selected"
                                          Style="{DynamicResource cpbtn}"
-                                         ToolTip="类型：长期剿灭委托&#x0a;区域：炎国龙门">
+                                         ToolTip="关卡编号：CE&#x0a;掉落物：龙门币">
                                 <RadioButton.Background>
-                                    <ImageBrush ImageSource="/Asset/SCHT/LMOB.png" />
+                                    <ImageBrush ImageSource="/Asset/SCHT/CE.png" />
                                 </RadioButton.Background>
                                 <RadioButton.ContentStringFormat>
-                                    龙门外环
+                                    货物运送
                                 </RadioButton.ContentStringFormat>
                             </RadioButton>
-                            <RadioButton x:Name="LMDT"
-                                         Checked="ann_Selected"
+                            <RadioButton x:Name="APFirst"
+                                         Checked="First_Unit_Selected"
                                          Style="{DynamicResource cpbtn}"
-                                         ToolTip="类型：长期剿灭委托&#x0a;区域：炎国龙门">
+                                         ToolTip="关卡编号：AP&#x0a;掉落物：采购凭证">
                                 <RadioButton.Background>
-                                    <ImageBrush ImageSource="/Asset/SCHT/LMDT.png" />
+                                    <ImageBrush ImageSource="/Asset/SCHT/AP.png" />
                                 </RadioButton.Background>
                                 <RadioButton.ContentStringFormat>
-                                    龙门市区
+                                    粉碎防御
                                 </RadioButton.ContentStringFormat>
                             </RadioButton>
-                            <RadioButton x:Name="TT"
-                                         Checked="ann_Selected"
+                            <RadioButton x:Name="SKFirst"
+                                         Checked="First_Unit_Selected"
+                                         Style="{DynamicResource cpbtn}"
+                                         ToolTip="关卡编号：SK&#x0a;掉落物：碳、家具零件">
+                                <RadioButton.Background>
+                                    <ImageBrush ImageSource="/Asset/SCHT/SK.png" />
+                                </RadioButton.Background>
+                                <RadioButton.ContentStringFormat>
+                                    资源保障
+                                </RadioButton.ContentStringFormat>
+                            </RadioButton>
+                            <RadioButton x:Name="CAFirst"
+                                         Checked="First_Unit_Selected"
+                                         Style="{DynamicResource cpbtn}"
+                                         ToolTip="关卡编号：CA&#x0a;掉落物：技巧概要">
+                                <RadioButton.Background>
+                                    <ImageBrush ImageSource="/Asset/SCHT/CA.png" />
+                                </RadioButton.Background>
+                                <RadioButton.ContentStringFormat>
+                                    空中威胁
+                                </RadioButton.ContentStringFormat>
+                            </RadioButton>
+                            <RadioButton x:Name="PRAFirst"
+                                         Checked="First_Unit_Selected"
+                                         Style="{DynamicResource cpbtn}"
+                                         ToolTip="关卡编号：PR-A&#x0a;掉落物：医疗、重装芯片">
+                                <RadioButton.Background>
+                                    <ImageBrush ImageSource="/Asset/SCHT/chips.png" />
+                                </RadioButton.Background>
+                                <RadioButton.ContentStringFormat>
+                                    固若金汤
+                                </RadioButton.ContentStringFormat>
+                            </RadioButton>
+                            <RadioButton x:Name="PRBFirst"
+                                         Checked="First_Unit_Selected"
+                                         Style="{DynamicResource cpbtn}"
+                                         ToolTip="关卡编号：PR-B&#x0a;掉落物：术师、狙击芯片">
+                                <RadioButton.Background>
+                                    <ImageBrush ImageSource="/Asset/SCHT/chips.png" />
+                                </RadioButton.Background>
+                                <RadioButton.ContentStringFormat>
+                                    摧枯拉朽
+                                </RadioButton.ContentStringFormat>
+                            </RadioButton>
+                            <RadioButton x:Name="PRCFirst"
+                                         Checked="First_Unit_Selected"
+                                         Style="{DynamicResource cpbtn}"
+                                         ToolTip="关卡编号：PR-C&#x0a;掉落物：辅助、先锋芯片">
+                                <RadioButton.Background>
+                                    <ImageBrush ImageSource="/Asset/SCHT/chips.png" />
+                                </RadioButton.Background>
+                                <RadioButton.ContentStringFormat>
+                                    势不可当
+                                </RadioButton.ContentStringFormat>
+                            </RadioButton>
+                            <RadioButton x:Name="PRDFirst"
+                                         Checked="First_Unit_Selected"
+                                         Style="{DynamicResource cpbtn}"
+                                         ToolTip="关卡编号：PR-D&#x0a;掉落物：特种、近卫芯片">
+                                <RadioButton.Background>
+                                    <ImageBrush ImageSource="/Asset/SCHT/chips.png" />
+                                </RadioButton.Background>
+                                <RadioButton.ContentStringFormat>
+                                    身先士卒
+                                </RadioButton.ContentStringFormat>
+                            </RadioButton>
+                            <RadioButton x:Name="customFirst"
+                                         Checked="First_Unit_Selected"
                                          Style="{DynamicResource cpbtn}">
                                 <RadioButton.Background>
                                     <SolidColorBrush Color="#DDDDDD" />
                                 </RadioButton.Background>
                                 <RadioButton.ContentStringFormat>
-                                    当期委托
+                                    自定义
                                 </RadioButton.ContentStringFormat>
                             </RadioButton>
                         </WrapPanel>
-                        <WrapPanel Orientation="Vertical">
-                            <WrapPanel>
-                                <CheckBox x:Name="ann_custom_time_status_checkbox"
-                                          Margin="0,0,10,0"
-                                          VerticalAlignment="Center"
-                                          Click="ann_custom_time_status_checkbox_Click" />
-                                <TextBlock Margin="0,0,20,0"
-                                           VerticalAlignment="Center"
-                                           FontSize="{StaticResource h2}"
-                                           Text="自定义执行次数" />
-                            </WrapPanel>
-                            <WrapPanel Name="WeekBox"
-                                       VerticalAlignment="Center"
-                                       Orientation="Vertical"
-                                       Visibility="{Binding ElementName=ann_custom_time_status_checkbox, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    </StackPanel>
 
+                    <StackPanel x:Name="second_unit"
+                                Grid.Row="3"
+                                Grid.Column="0"
+                                Orientation="Vertical"
+                                Style="{StaticResource title}">
+
+                        <TextBlock FontSize="{StaticResource h1}" Text="备选单元" />
+                        <materialDesign:PackIcon Style="{DynamicResource help}" ToolTip="[作战单元]中指定的单元不总是开放。在这里指定的关卡会成为其不开放时的备选方案。" />
+                    </StackPanel>
+                    <StackPanel Grid.Row="3"
+                                Grid.Column="1"
+                                HorizontalAlignment="Stretch"
+                                Orientation="Vertical"
+                                Style="{StaticResource title}"
+                                Visibility="{Binding ElementName=second_unit, Path=Visibility}">
+
+                        <WrapPanel Margin="0,7,0,-10">
+                            <RadioButton x:Name="LSSecond"
+                                         Checked="Second_Unit_Selected"
+                                         Style="{DynamicResource cpbtn}"
+                                         ToolTip="关卡编号：LS&#x0a;掉落物：作战记录">
+                                <RadioButton.Background>
+                                    <ImageBrush ImageSource="/Asset/SCHT/LS.png" />
+                                </RadioButton.Background>
+                                <RadioButton.ContentStringFormat>战术演习</RadioButton.ContentStringFormat>
+                            </RadioButton>
+                            <RadioButton x:Name="customSecond"
+                                         Checked="Second_Unit_Selected"
+                                         Style="{DynamicResource cpbtn}">
+                                <RadioButton.Background>
+                                    <SolidColorBrush Color="#DDDDDD" />
+                                </RadioButton.Background>
+                                <RadioButton.ContentStringFormat>
+                                    自定义
+                                </RadioButton.ContentStringFormat>
+                            </RadioButton>
                         </WrapPanel>
-                    </WrapPanel>
-                </StackPanel>
+                    </StackPanel>
 
-                <StackPanel x:Name="server_stack"
-                            Grid.Row="6"
-                            Grid.Column="0"
-                            Orientation="Vertical"
-                            Style="{StaticResource title}">
-                    <akhc:Break />
-                    <TextBlock FontSize="{StaticResource h1}">
-                        游戏区服
-                    </TextBlock>
-                </StackPanel>
-                <StackPanel Grid.Row="6"
-                            Grid.Column="1"
-                            Style="{StaticResource title}"
-                            Visibility="{Binding ElementName=server_stack, Path=Visibility}">
-                    <akhc:Break />
-                    <ComboBox x:Name="server_combobox"
-                              HorizontalAlignment="Left"
-                              VerticalAlignment="Top"
-                              DisplayMemberPath="name"
-                              FontSize="15"
-                              SelectedValuePath="id"
-                              SelectionChanged="server_combobox_SelectionChanged" />
-                </StackPanel>
+                    <StackPanel x:Name="ann_stack"
+                                Grid.Row="5"
+                                Grid.Column="0"
+                                Orientation="Vertical"
+                                Style="{StaticResource title}">
+                        <akhc:Break />
+                        <TextBlock FontSize="{StaticResource h1}">剿灭作战</TextBlock>
+                    </StackPanel>
+                    <StackPanel Grid.Row="5"
+                                Grid.Column="1"
+                                Style="{StaticResource title}"
+                                Visibility="{Binding ElementName=ann_stack, Path=Visibility}">
+                        <akhc:Break />
+                        <ToggleButton x:Name="ann_status_togglebutton"
+                                      Margin="0,7,0,0"
+                                      HorizontalAlignment="Left"
+                                      Click="ann_status_togglebutton_Click"
+                                      Style="{StaticResource MaterialDesignSwitchToggleButton}" />
+                        <WrapPanel Margin="0,10,0,0"
+                                   Orientation="Vertical"
+                                   Visibility="{Binding ElementName=ann_status_togglebutton, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <WrapPanel>
+                                <RadioButton x:Name="CHNB"
+                                             Checked="ann_Selected"
+                                             Style="{DynamicResource cpbtn}"
+                                             ToolTip="类型：长期剿灭委托&#x0a;区域：乌萨斯">
+                                    <RadioButton.Background>
+                                        <ImageBrush ImageSource="/Asset/SCHT/CHNB.png" />
+                                    </RadioButton.Background>
+                                    <RadioButton.ContentStringFormat>切尔诺伯格</RadioButton.ContentStringFormat>
+                                </RadioButton>
+                                <RadioButton x:Name="LMOB"
+                                             Checked="ann_Selected"
+                                             Style="{DynamicResource cpbtn}"
+                                             ToolTip="类型：长期剿灭委托&#x0a;区域：炎国龙门">
+                                    <RadioButton.Background>
+                                        <ImageBrush ImageSource="/Asset/SCHT/LMOB.png" />
+                                    </RadioButton.Background>
+                                    <RadioButton.ContentStringFormat>
+                                        龙门外环
+                                    </RadioButton.ContentStringFormat>
+                                </RadioButton>
+                                <RadioButton x:Name="LMDT"
+                                             Checked="ann_Selected"
+                                             Style="{DynamicResource cpbtn}"
+                                             ToolTip="类型：长期剿灭委托&#x0a;区域：炎国龙门">
+                                    <RadioButton.Background>
+                                        <ImageBrush ImageSource="/Asset/SCHT/LMDT.png" />
+                                    </RadioButton.Background>
+                                    <RadioButton.ContentStringFormat>
+                                        龙门市区
+                                    </RadioButton.ContentStringFormat>
+                                </RadioButton>
+                                <RadioButton x:Name="TT"
+                                             Checked="ann_Selected"
+                                             Style="{DynamicResource cpbtn}">
+                                    <RadioButton.Background>
+                                        <SolidColorBrush Color="#DDDDDD" />
+                                    </RadioButton.Background>
+                                    <RadioButton.ContentStringFormat>
+                                        当期委托
+                                    </RadioButton.ContentStringFormat>
+                                </RadioButton>
+                            </WrapPanel>
+                            <WrapPanel Orientation="Vertical">
+                                <WrapPanel>
+                                    <CheckBox x:Name="ann_custom_time_status_checkbox"
+                                              Margin="0,0,10,0"
+                                              VerticalAlignment="Center"
+                                              Click="ann_custom_time_status_checkbox_Click" />
+                                    <TextBlock Margin="0,0,20,0"
+                                               VerticalAlignment="Center"
+                                               FontSize="{StaticResource h2}"
+                                               Text="自定义执行次数" />
+                                </WrapPanel>
+                                <WrapPanel Name="WeekBox"
+                                           VerticalAlignment="Center"
+                                           Orientation="Vertical"
+                                           Visibility="{Binding ElementName=ann_custom_time_status_checkbox, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
-                <StackPanel x:Name="fcm_stack"
-                            Grid.Row="7"
-                            Grid.Column="0"
-                            Orientation="Vertical"
-                            Style="{StaticResource title}">
-                    <akhc:Break />
-                    <TextBlock FontSize="{StaticResource h1}">防沉迷模式</TextBlock>
-                    <materialDesign:PackIcon Style="{DynamicResource help}" ToolTip="在该模式下，以下效果将生效：&#x0a;1.SCHT系统只在固定时间（周五至周日下午8:00至9:00）运行&#x0a;2.剿灭作战机制变化&#x0a;3.执行任务变化" />
-                </StackPanel>
-                <StackPanel Grid.Row="7"
-                            Grid.Column="1"
-                            VerticalAlignment="Top"
-                            Style="{StaticResource title}"
-                            Visibility="{Binding ElementName=fcm_stack, Path=Visibility}">
-                    <akhc:Break />
-                    <ToggleButton x:Name="fcm_status_togglebutton"
-                                  Margin="0,8,0,0"
+                            </WrapPanel>
+                        </WrapPanel>
+                    </StackPanel>
+
+                    <StackPanel x:Name="server_stack"
+                                Grid.Row="7"
+                                Grid.Column="0"
+                                Orientation="Vertical"
+                                Style="{StaticResource title}">
+                        <akhc:Break />
+                        <TextBlock FontSize="{StaticResource h1}">
+                            客户端区服
+                        </TextBlock>
+                    </StackPanel>
+                    <StackPanel Grid.Row="7"
+                                Grid.Column="1"
+                                Style="{StaticResource title}"
+                                Visibility="{Binding ElementName=server_stack, Path=Visibility}">
+                        <akhc:Break />
+                        <ComboBox x:Name="server_combobox"
                                   HorizontalAlignment="Left"
-                                  Click="fcm_status_togglebutton_Click"
-                                  Style="{StaticResource MaterialDesignSwitchToggleButton}" />
-                </StackPanel>
+                                  VerticalAlignment="Top"
+                                  DisplayMemberPath="name"
+                                  FontSize="15"
+                                  SelectedValuePath="id"
+                                  SelectionChanged="server_combobox_SelectionChanged" />
+                    </StackPanel>
 
-                <StackPanel Grid.Row="8"
-                            Grid.Column="0"
-                            Orientation="Vertical"
-                            Style="{StaticResource title}">
-                    <akhc:Break />
-                    <TextBlock FontSize="{StaticResource h1}">自定义</TextBlock>
-                </StackPanel>
-                <StackPanel Grid.Row="8"
-                            Grid.Column="1"
-                            Style="{StaticResource title}">
-                    <akhc:Break />
-                    <Button Width="172"
-                            Margin="0,3,0,0"
-                            HorizontalAlignment="Left"
-                            Click="Button_Click"
-                            Style="{StaticResource MaterialDesignOutlinedButton}">
-                        自定义作战方案生成器
-                    </Button>
-                </StackPanel>
+                    <StackPanel x:Name="ct_stack"
+                                Grid.Row="6"
+                                Grid.Column="0"
+                                Orientation="Vertical"
+                                Style="{StaticResource title}">
+                        <akhc:Break />
+                        <TextBlock FontSize="{StaticResource h1}">运行时间</TextBlock>
+                        <!--<materialDesign:PackIcon Style="{DynamicResource help}" ToolTip="在该模式下，以下效果将生效：&#x0a;1.SCHT系统只在固定时间（周五至周日下午8:00至9:00）运行&#x0a;2.剿灭作战机制变化&#x0a;3.执行任务变化" />-->
+                    </StackPanel>
+                    <StackPanel Grid.Row="6"
+                                Grid.Column="1"
+                                VerticalAlignment="Top"
+                                Style="{StaticResource title}"
+                                Visibility="{Binding ElementName=ct_stack, Path=Visibility}">
+                        <akhc:Break />
+                        <WrapPanel Name="ctBox"
+                                   Margin="0,8,0,0"
+                                   VerticalAlignment="Center"
+                                   Orientation="Vertical">
+                            <WrapPanel Name="ctWeek" Margin="0,0,0,0" />
+                            <WrapPanel Name="ctTime"
+                                       Margin="0,10,0,0"
+                                       Orientation="Vertical" />
+                            <WrapPanel>
+                                <Button x:Name="addTime"
+                                        Width="40"
+                                        Height="40"
+                                        Margin="0,0,0,0"
+                                        HorizontalAlignment="Left"
+                                        Click="TimeAdd"
+                                        Style="{DynamicResource MaterialDesignIconButton}">
+                                    <materialDesign:PackIcon Kind="Add" />
+                                </Button>
+                                <Button Width="40"
+                                        Height="40"
+                                        Margin="5,0,0,0"
+                                        HorizontalAlignment="Left"
+                                        Click="Button_Click_2"
+                                        Style="{DynamicResource MaterialDesignIconButton}">
+                                    <materialDesign:PackIcon Kind="ContentSave" />
+                                </Button>
+                            </WrapPanel>
+                        </WrapPanel>
 
-            </Grid>
 
-            <Grid Height="80" />
+                    </StackPanel>
 
-        </StackPanel>
-    </ScrollViewer>
+                    <StackPanel Name="cuscpi"
+                                Grid.Row="8"
+                                Grid.Column="0"
+                                Orientation="Vertical"
+                                Style="{StaticResource title}">
+                        <akhc:Break />
+                        <TextBlock FontSize="{StaticResource h1}">自定义方案</TextBlock>
+                    </StackPanel>
+                    <StackPanel Grid.Row="8"
+                                Grid.Column="1"
+                                Style="{StaticResource title}"
+                                Visibility="{Binding ElementName=cuscpi, Path=Visibility}">
+                        <akhc:Break />
+                        <Button Width="172"
+                                Margin="0,3,0,0"
+                                HorizontalAlignment="Left"
+                                Click="Button_Click"
+                                Style="{StaticResource MaterialDesignOutlinedButton}">
+                            自定义作战方案生成器
+                        </Button>
+                    </StackPanel>
+
+                </Grid>
+
+                <Grid Height="80" />
+
+            </StackPanel>
+        </ScrollViewer>
+    </materialDesign:DialogHost>
 </Page>

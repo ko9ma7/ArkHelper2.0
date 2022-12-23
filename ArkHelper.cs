@@ -1,4 +1,5 @@
-﻿using MaterialDesignThemes.Wpf;
+﻿using ArkHelper.Pages.OtherList;
+using MaterialDesignThemes.Wpf;
 using Microsoft.Toolkit.Uwp.Notifications;
 using Microsoft.Win32;
 using OpenCvSharp;
@@ -13,13 +14,18 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Security.Policy;
+using System.Security.RightsManagement;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.UI.WebControls;
 using System.Windows;
 using System.Windows.Markup;
+using Windows.ApplicationModel.Activation;
 using Windows.ApplicationModel.Appointments;
+using Windows.Security.Cryptography.Core;
 using Windows.Storage.Streams;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 using Point = System.Drawing.Point;
@@ -31,72 +37,102 @@ namespace ArkHelper
     /// </summary>
     public static class Version
     {
-        /// <summary>
-        /// 版本号
-        /// </summary>
-        public readonly static string tag = "v2.0.0.0";
-        /// <summary>
-        /// 版本种类
-        /// </summary>
-        public readonly static Kind kind = Kind.realese;
-        public enum Kind
+        public class Data
         {
-            realese,
-            beta,
+            public enum VersionType
+            {
+                realese,
+                beta,
+            }
+            public string Version { get; }
+            public int VersionNumber { get; }
+            public string URL { get; set; }
+            public bool Necessary { get; }
+            public VersionType Type { get; }
+            public Data(string ver, string url, bool necessary, VersionType type)
+            {
+                Version = ver;
+                URL = url;
+                Necessary = necessary;
+                Type = type;
+
+                string[] strings = ver.Split('.');
+                int getInt(int n)
+                {
+                    return Convert.ToInt16(strings[n]);
+                }
+
+                VersionNumber = 1000 * getInt(0) + 100 * getInt(1) + 10 * getInt(2) + 1 * getInt(3);
+            }
         }
+
+        public static Data Current = new Data("2.0.0.0", "local", false, Data.VersionType.realese);
+
         /// <summary>
         /// 更新
         /// </summary>
-        public static class Update
+        public class Update
         {
-            public static void Search()
+            /// <summary>
+            /// 查找最新的发行版
+            /// </summary>
+            /// <returns></returns>
+            public static Data SearchNewestRelease()
             {
-                //调用API 查找版本信息
-                var client = new RestClient("https://api.github.com/repos/ArkHelper/ArkHelper2.0/releases/latest");
-                var request = new RestRequest { Method = Method.Get };
-                var response = client.Execute(request);
-                var _result = JsonDocument.Parse(response.Content).RootElement;
-
-                //在json中取得最新版本号
-                string ver = _result.GetProperty("tag_name").GetString();
-                int tag = Convert.ToInt32(ver.Replace("v", "").Replace(".", ""));
-                var body = _result.GetProperty("body").GetString();
-                bool necessary = body.Contains("[NECESSARY]");
-
-                if (tag > Convert.ToInt32(Version.tag.Replace("v", "").Replace(".", "")))
+                try
                 {
-                    var assets = _result.GetProperty("assets").EnumerateArray();
-                    string url = "";
-                    foreach (var asset in assets)
+                    //API
+                    var NewVersionData = Net.GetFromApi("https://api.github.com/repos/ArkHelper/ArkHelper2.0/releases/latest");
+                    var versionNum = NewVersionData.GetProperty("tag_name").GetString();
+                    var assets = NewVersionData.GetProperty("assets").EnumerateArray();
+                    var body = NewVersionData.GetProperty("body").GetString();
+                    var necessary = body.Contains("[NECESSARY]");
+                    string search(string name, bool fuzzy)
                     {
-                        if (asset.GetProperty("name").GetString() == "ArkHelper.zip")
+                        foreach (var asset in assets)
                         {
-                            url = asset.GetProperty("browser_download_url").GetString();
-                        }
-                    }
-                    /*
-                    if (body.Contains("[URL]"))
-                    {
+                            string assetName = asset.GetProperty("name").GetString();
+                            string assetURL = asset.GetProperty("browser_download_url").GetString();
 
-                    }*/
-                    /*new ToastContentBuilder()
-                        .AddArgument("kind", "Update")
-                        .AddArgument("UpdateIsNecessary", necessary.ToString())
-                        .AddArgument("url", url)
-                        .AddText("提示：ArkHelper有更新")
-                        .AddText("版本：" + ver)
-                        //.AddText(necessary ? "正在更新中" : "点击本消息下载更新")
-                        .AddText("点击获取更新")
-                        .Show(); //通知*/
-                    MessageBox.Show("ArkHelper有更新。", "ArkHelper");
-                    Process.Start("https://github.com/ArkHelper/ArkHelper2.0/releases");
-                    if (necessary)
-                    {
-                        //Apply(url);
-                        MessageBox.Show("本次更新为必要更新，更新后才能使用ArkHelper。");
-                        App.ExitApp();
+                            if (assetName == name && !fuzzy)
+                            {
+                                return assetURL;
+                            }
+                            if (assetName.Contains("DownloaderComments") && fuzzy)
+                            {
+
+                                return assetURL;
+                            }
+                        }
+                        return "null";
                     }
+
+                    var url = search("ArkHelper.zip", false);
+
+                    if (body.Contains("[MIRROR"))
+                    {
+                        string _verText = body.Substring(body.IndexOf("[MIRROR") + "[MIRROR=".Length);
+                        url = _verText.Substring(0, _verText.IndexOf("]"));
+                    }
+
+                    var ret = new Data(versionNum, "", necessary, Data.VersionType.realese);
+                    ret.URL = url;
+                    return ret;
                 }
+                catch
+                {
+                    return null;
+                }
+
+                /*new ToastContentBuilder()
+                    .AddArgument("kind", "Update")
+                    .AddArgument("UpdateIsNecessary", necessary.ToString())
+                    .AddArgument("url", url)
+                    .AddText("提示：ArkHelper有更新")
+                    .AddText("版本：" + ver)
+                    //.AddText(necessary ? "正在更新中" : "点击本消息下载更新")
+                    .AddText("点击获取更新")
+                    .Show(); //通知*/
             }
 
             public static void Apply(string url)
@@ -142,7 +178,8 @@ namespace ArkHelper
             twitter,
             facebook,
             web,
-            official_communication
+            official_communication,
+            neteaseMusic
         }
 
         /// <summary>
@@ -186,6 +223,26 @@ namespace ArkHelper
             }
         }
 
+        /// <summary>
+        /// 获取星期在中文中对应的下标
+        /// </summary>
+        /// <param name="week"></param>
+        /// <returns>对于星期日，返回6；否则返回x（其中x为“星期”后的数字）</returns>
+        public static int GetWeekSubInChinese(System.DayOfWeek week)
+        {
+            var _wek = (int)week - 1;
+            if (_wek < 0) { _wek += 7; }
+
+            return _wek;
+        }
+
+        /// <summary>
+        /// 根据日期和时间获取datetime
+        /// </summary>
+        public static DateTime GetDateTimeFromDateAndTime(DateTime date, DateTime time)
+        {
+            return new DateTime(date.Year, date.Month, date.Day, time.Hour, time.Minute, time.Second);
+        }
 
         #region 配置数据
         public class Data
@@ -206,36 +263,45 @@ namespace ArkHelper
             public class SCHT
             {
                 public bool status { get; set; } = false;
-
-                public CpRefer first { get; set; } = new CpRefer();
-                public CpRefer second { get; set; } = new CpRefer();
-                public class CpRefer
+                public SCHTData data { get; set; } = new SCHTData();
+                public class SCHTData
                 {
-                    public string unit { get; set; } = "LS";
-                }
+                    public Cp first { get; set; } = new Cp();
+                    public Cp second { get; set; } = new Cp();
+                    public class Cp
+                    {
+                        public string unit { get; set; } = "LS";
+                    }
 
-                public Ann ann { get; set; } = new Ann();
-                public class Ann
+                    public Ann ann { get; set; } = new Ann();
+                    public class Ann
+                    {
+                        public bool status { get; set; } = false;
+                        public string select { get; set; } = "TT";
+                        public bool customTime { get; set; } = false;
+                        public int[] time { get; set; } = new int[7] { 0, 0, 0, 0, 0, 0, 0 }; //周一为每周的第一天
+                    }
+
+                    public Server server { get; set; } = new Server();
+                    public class Server
+                    {
+                        public string id { get; set; } = "CO";
+                    }
+                }
+                public bool showHelper { get; set; } = false;
+                public bool showGuide { get; set; } = true;
+                public Ct ct { get; set; } = new Ct();
+                public class Ct
                 {
                     public bool status { get; set; } = false;
-                    public string select { get; set; } = "TT";
-                    public bool customTime { get; set; } = false;
-                    public int[] time { get; set; } = new int[7] { 0, 0, 0, 0, 0, 0, 0 }; //周一为每周的第一天
+                    public bool[] weekFliter { get; set; } = new bool[7] { true, true, true, true, true, true, true };
+                    public List<DateTime> times { get; set; } = new List<DateTime>()
+                    {
+                        new DateTime(2000, 1, 1, 7, 58, 0),
+                        new DateTime(2000, 1, 1, 19, 58, 0)
+                    };
+                    public List<DateTime> forceTimes { get; set; } = new List<DateTime>();
                 }
-
-                public Server server { get; set; } = new Server();
-                public class Server
-                {
-                    public string id { get; set; } = "CO";
-                }
-
-                public Fcm fcm { get; set; } = new Fcm();
-                public class Fcm
-                {
-                    public bool status { get; set; } = false;
-                }
-
-                public bool showHelperInSCHT { get; set; } = true;
             }
 
             public Message message { get; set; } = new Message();
@@ -247,7 +313,8 @@ namespace ArkHelper
             public ArkHelper arkHelper { get; set; } = new ArkHelper();
             public class ArkHelper
             {
-                public bool pure { get; set; } = true;
+                public bool pure { get; set; } = false;
+                public bool debug { get; set; } = false;
             }
         }
         #endregion
@@ -345,30 +412,33 @@ namespace ArkHelper
         /// <returns>adb的返回结果</returns>
         public static string CMD(string cmd)
         {
-            //未连接报错
-            while (!cmd.Contains("connect") && ConnectedInfo == null)
-            {
-                System.Windows.Application.Current.Dispatcher.Invoke(() =>
-                {
-                    WithSystem.Message("模拟器连接断开", "请启动或重启模拟器");
-                });
-                Thread.Sleep(2000);
-            }
-
             //cmd
             process.StartInfo.Arguments = cmd;
             if (true) Output.Log(cmd, "ADB");
 
             //启动命令并读取结果
-            process.Start();
-            var end = process.StandardOutput.ReadToEnd();
-
-            //log结果
-            if (true) Output.Log("=>" + end.Replace("\n", "[linebreak]").Replace("\r", ""), "ADB");
-            //等待退出
-            process.WaitForExit();
-            //log退出
-            if (true) Output.Log("=>" + "Exited", "ADB");
+            string end = "";
+            if (!cmd.Contains("connect") && ConnectedInfo == null)
+            {
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    //WithSystem.Message("模拟器连接断开", "请启动或重启模拟器");
+                });
+                end = "[Bad Connect]";
+                if (true) Output.Log("=>" + end, "ADB");
+                throw new BadConnectException();
+            }
+            else
+            {
+                process.Start();
+                end = process.StandardOutput.ReadToEnd();
+                //log结果
+                if (true) Output.Log("=>" + end.Replace("\n", "[linebreak]").Replace("\r", ""), "ADB");
+                //等待退出
+                process.WaitForExit();
+                //log退出
+                if (true) Output.Log("=>" + "Exited", "ADB");
+            }
 
             //返回结果
             return end;
@@ -501,8 +571,73 @@ namespace ArkHelper
             return PinnedData.Server.dataSheet.Select("id = '" + server + "'")[0][3].ToString();
         }
 
+        /// <summary>
+        /// 安装应用
+        /// </summary>
+        /// <param name="packAddress">apk包的地址</param>
+        public static void Install(string packAddress)
+        {
+            ADB.CMD("install " + packAddress);
+        }
+
+        /// <summary>
+        /// 从内存卡安装应用
+        /// </summary>
+        /// <param name="packAddress">apk包的地址</param>
+        public static void InstallFromLocal(string packAddress)
+        {
+            ADB.CMD("shell pm install -r " + packAddress);
+        }
+
+        /// <summary>
+        /// 下载文件
+        /// </summary>
+        /// <param name="url">url</param>
+        /// <param name="address">绝对路径</param>
+        public static void DownloadFile(string url, string address)
+        {
+            ADB.CMD("shell wget " + url + " -O " + address);
+        }
+
+        /// <summary>
+        /// 删除文件
+        /// </summary>
+        /// <param name="address">绝对路径</param>
+        public static void DeleteFile(string address)
+        {
+            ADB.CMD("shell rm " + address);
+        }
+
+        /// <summary>
+        /// 等待模拟器运行
+        /// </summary>
+        public static void WaitingSimulator()
+        {
+            for (; ; )
+            {
+                while (ADB.ConnectedInfo == null)
+                    Thread.Sleep(4000);
+                try
+                {
+                    using (var testOK = new ADB.Screenshot())
+                    {
+                        testOK.CheckIsAvailable();
+                    }
+                }
+                catch
+                {
+                    continue;
+                }
+                Thread.Sleep(1000);
+                break;
+            }
+        }
+
         public class Screenshot : IDisposable
         {
+            public class ScreenshotNotAvailableException : NullReferenceException
+            {
+            }
             private string Location { get; set; }
             private Bitmap ImgBitmap { get; set; }
             public Screenshot()
@@ -543,7 +678,7 @@ namespace ArkHelper
             }
             #endregion
 
-            public List<Point> PicToPoint(string smallimg, double errorCon = 0.7, int errorRange = 16, int num = 50)
+            public List<Point> PicToPoint(string smallimg, double errorCon = 0.7, int errorRange = 16, int num = 50, double opencv_errorCon = 0.8)
             {
                 if (!File.Exists(smallimg)) { return new List<Point>(); }
 
@@ -551,7 +686,7 @@ namespace ArkHelper
                 InitBitmap();
                 var smallBM = new Bitmap(smallimg);
                 return PictureProcess.PicToPoint.GetPointUsingNative(this.ImgBitmap, smallBM, errorCon, errorRange, num);*/
-                return PictureProcess.PicToPoint.GetPointUsingOpenCV(this.Location, smallimg);
+                return PictureProcess.PicToPoint.GetPointUsingOpenCV(this.Location, smallimg, errorCon: opencv_errorCon);
             }
             private void InitBitmap()
             {
@@ -559,6 +694,11 @@ namespace ArkHelper
                     ImgBitmap = new Bitmap(Location);
                 else
                     return;
+            }
+
+            public void CheckIsAvailable()
+            {
+                if (File.Exists(Location)) { return; } else { throw new ScreenshotNotAvailableException(); }
             }
 
             #region dispose
@@ -620,6 +760,13 @@ namespace ArkHelper
             #endregion
 
         }
+
+        #region 报故
+        public class BadConnectException : Exception
+        {
+            public BadConnectException() : base("丢失模拟器连接") { }
+        }
+        #endregion
     }
 
     /// <summary>
@@ -849,7 +996,7 @@ namespace ArkHelper
             /// <param name="bigPicLocation">大图地址</param>
             /// <param name="smallPicLocation">小图地址</param>
             /// <returns></returns>
-            public static List<Point> GetPointUsingOpenCV(string bigPicLocation, string smallPicLocation)
+            public static List<Point> GetPointUsingOpenCV(string bigPicLocation, string smallPicLocation, double errorCon = 0.8)
             {
                 List<Point> @return = new List<Point>();
 
@@ -866,7 +1013,7 @@ namespace ArkHelper
 
                     while (true)
                     {
-                        double minval, maxval, threshold = 0.8;
+                        double minval, maxval, threshold = errorCon;
                         OpenCvSharp.Point minloc, maxloc;
                         Cv2.MinMaxLoc(res, out minval, out maxval, out minloc, out maxloc);
 
@@ -1030,6 +1177,7 @@ namespace ArkHelper
         // 参数：输出内容，操作模块，日志级别
         public static void Log(string content, string module = "ArkHelper", InfoKind infokind = InfoKind.Infomational)
         {
+            if (!App.Data.arkHelper.debug) return;
             Text(DateTime.Now.ToString("s")
                 + " "
                 + "[" + module + "]"
@@ -1227,7 +1375,7 @@ namespace ArkHelper
         /// </summary>
         /// <param name="url">下载地址</param>
         /// <param name="address">下载位置（绝对路径）</param>
-        public static void DownloadFile(string url, string address)
+        public static FileInfo DownloadFile(string url, string address)
         {
             string cache = address + @".cache";
             if (!File.Exists(address))
@@ -1240,7 +1388,7 @@ namespace ArkHelper
 
                 if (File.Exists(cache)) { File.Delete(cache); }
             }
-            else { return; }
+            return new FileInfo(address);
         }
 
         /// <summary>
