@@ -241,12 +241,14 @@ namespace ArkHelper.Xaml
         private void Window_Closing(object sender, CancelEventArgs e)
         {
             WithSystem.GarbageCollect();
-            if (App.Data.arkHelper.pure)
+            if (App.Data.arkHelper.pure && App.OKtoOpenSCHT)
             {
                 if (App.Data.scht.status)
                 {
                     if (System.Windows.Forms.MessageBox.Show("【后台纯净】开启时，关闭ArkHelper将会导致SCHT无法在指定时间运行。仍要关闭ArkHelper吗？\n注：【后台纯净】可在设置中关闭", "ArkHelper", System.Windows.Forms.MessageBoxButtons.OKCancel, System.Windows.Forms.MessageBoxIcon.Question) == System.Windows.Forms.DialogResult.OK)
                         App.ExitApp();
+                    else
+                        e.Cancel = true;
                 }
                 else
                 {

@@ -14,6 +14,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Security.Policy;
 using System.Security.RightsManagement;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -22,7 +23,9 @@ using System.Threading.Tasks;
 using System.Web.UI.WebControls;
 using System.Windows;
 using System.Windows.Markup;
+using Windows.ApplicationModel.Activation;
 using Windows.ApplicationModel.Appointments;
+using Windows.Security.Cryptography.Core;
 using Windows.Storage.Streams;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 using Point = System.Drawing.Point;
@@ -34,72 +37,107 @@ namespace ArkHelper
     /// </summary>
     public static class Version
     {
-        /// <summary>
-        /// 版本号
-        /// </summary>
-        public readonly static string tag = "v2.0.0.0";
-        /// <summary>
-        /// 版本种类
-        /// </summary>
-        public readonly static Kind kind = Kind.realese;
-        public enum Kind
+        public class Data
         {
-            realese,
-            beta,
+            public enum VersionType
+            {
+                realese,
+                beta,
+            }
+            public string Version { get; }
+            public int VersionNumber { get; }
+            public string URL { get; set; }
+            public bool Necessary { get; }
+            public VersionType Type { get; }
+            public Data(string ver, string url, bool necessary, VersionType type)
+            {
+                Version = ver;
+                URL = url;
+                Necessary = necessary;
+                Type = type;
+
+                string[] strings = ver.Split('.');
+                int getInt(int n)
+                {
+                    return Convert.ToInt16(strings[n]);
+                }
+
+                VersionNumber = 1000 * getInt(0) + 100 * getInt(1) + 10 * getInt(2) + 1 * getInt(3);
+            }
         }
+
+        public static Data Current = new Data("2.0.0.0", "local", false, Data.VersionType.realese);
+
         /// <summary>
         /// 更新
         /// </summary>
-        public static class Update
+        public class Update
         {
-            public static void Search()
+            /// <summary>
+            /// 查找最新的发行版
+            /// </summary>
+            /// <returns></returns>
+            public static Data SearchNewestRelease()
             {
-                //调用API 查找版本信息
-                var client = new RestClient("https://api.github.com/repos/ArkHelper/ArkHelper2.0/releases/latest");
-                var request = new RestRequest { Method = Method.Get };
-                var response = client.Execute(request);
-                var _result = JsonDocument.Parse(response.Content).RootElement;
-
-                //在json中取得最新版本号
-                string ver = _result.GetProperty("tag_name").GetString();
-                int tag = Convert.ToInt32(ver.Replace("v", "").Replace(".", ""));
-                var body = _result.GetProperty("body").GetString();
-                bool necessary = body.Contains("[NECESSARY]");
-
-                if (tag > Convert.ToInt32(Version.tag.Replace("v", "").Replace(".", "")))
+                try
                 {
-                    var assets = _result.GetProperty("assets").EnumerateArray();
-                    string url = "";
-                    foreach (var asset in assets)
+                    //API
+                    var NewVersionData = Net.GetFromApi("https://api.github.com/repos/ArkHelper/ArkHelper2.0/releases/latest");
+                    var versionNum = NewVersionData.GetProperty("tag_name").GetString();
+                    var assets = NewVersionData.GetProperty("assets").EnumerateArray();
+                    var necessary = NewVersionData.GetProperty("body").GetString().Contains("[NECESSARY]");
+                    string search(string name, bool fuzzy)
                     {
-                        if (asset.GetProperty("name").GetString() == "ArkHelper.zip")
+                        foreach (var asset in assets)
                         {
-                            url = asset.GetProperty("browser_download_url").GetString();
+                            string assetName = asset.GetProperty("name").GetString();
+                            string assetURL = asset.GetProperty("browser_download_url").GetString();
+
+                            if (assetName == name && !fuzzy)
+                            {
+                                return assetURL;
+                            }
+                            if (assetName.Contains("DownloaderComments") && fuzzy)
+                            {
+
+                                return assetURL;
+                            }
+                        }
+                        return "null";
+                    }
+
+                    var url = search("ArkHelper.zip", false);
+
+                    if (search("DownloaderComments", true) != "null")
+                    {
+                        string add = Address.Cache.update + "\\config.json";
+                        Net.DownloadFile(search("DownloaderComments", true), add);
+                        var dc = JsonSerializer.Deserialize<JsonElement>(File.ReadAllText(Address.config));
+                        File.Delete(add);
+                        if (dc.TryGetProperty("redirectURL", out var red))
+                        {
+                            url = red.GetString();
                         }
                     }
-                    /*
-                    if (body.Contains("[URL]"))
-                    {
 
-                    }*/
-                    /*new ToastContentBuilder()
-                        .AddArgument("kind", "Update")
-                        .AddArgument("UpdateIsNecessary", necessary.ToString())
-                        .AddArgument("url", url)
-                        .AddText("提示：ArkHelper有更新")
-                        .AddText("版本：" + ver)
-                        //.AddText(necessary ? "正在更新中" : "点击本消息下载更新")
-                        .AddText("点击获取更新")
-                        .Show(); //通知*/
-                    MessageBox.Show("ArkHelper有更新。", "ArkHelper");
-                    Process.Start("https://github.com/ArkHelper/ArkHelper2.0/releases");
-                    if (necessary)
-                    {
-                        //Apply(url);
-                        MessageBox.Show("本次更新为必要更新，更新后才能使用ArkHelper。");
-                        App.ExitApp();
-                    }
+                    var ret = new Data(versionNum, "", necessary, Data.VersionType.realese);
+                    ret.URL = url;
+                    return ret;
                 }
+                catch
+                {
+                    return null;
+                }
+
+                /*new ToastContentBuilder()
+                    .AddArgument("kind", "Update")
+                    .AddArgument("UpdateIsNecessary", necessary.ToString())
+                    .AddArgument("url", url)
+                    .AddText("提示：ArkHelper有更新")
+                    .AddText("版本：" + ver)
+                    //.AddText(necessary ? "正在更新中" : "点击本消息下载更新")
+                    .AddText("点击获取更新")
+                    .Show(); //通知*/
             }
 
             public static void Apply(string url)
@@ -280,7 +318,8 @@ namespace ArkHelper
             public ArkHelper arkHelper { get; set; } = new ArkHelper();
             public class ArkHelper
             {
-                public bool pure { get; set; } = true;
+                public bool pure { get; set; } = false;
+                public bool debug { get; set; } = false;
             }
         }
         #endregion
@@ -554,24 +593,49 @@ namespace ArkHelper
         {
             ADB.CMD("shell pm install -r " + packAddress);
         }
-        
+
         /// <summary>
         /// 下载文件
         /// </summary>
         /// <param name="url">url</param>
         /// <param name="address">绝对路径</param>
-        public static void DownloadFile(string url,string address)
+        public static void DownloadFile(string url, string address)
         {
-            ADB.CMD("shell wget "+url+" -O "+address);
+            ADB.CMD("shell wget " + url + " -O " + address);
         }
-        
+
         /// <summary>
         /// 删除文件
         /// </summary>
         /// <param name="address">绝对路径</param>
         public static void DeleteFile(string address)
         {
-            ADB.CMD("shell rm "+address);
+            ADB.CMD("shell rm " + address);
+        }
+
+        /// <summary>
+        /// 等待模拟器运行
+        /// </summary>
+        public static void WaitingSimulator()
+        {
+            for (; ; )
+            {
+                while (ADB.ConnectedInfo == null)
+                    Thread.Sleep(4000);
+                try
+                {
+                    using (var testOK = new ADB.Screenshot())
+                    {
+                        testOK.CheckIsAvailable();
+                    }
+                }
+                catch
+                {
+                    continue;
+                }
+                Thread.Sleep(1000);
+                break;
+            }
         }
 
         public class Screenshot : IDisposable
@@ -705,7 +769,7 @@ namespace ArkHelper
         #region 报故
         public class BadConnectException : Exception
         {
-            public BadConnectException():base("丢失模拟器连接"){}
+            public BadConnectException() : base("丢失模拟器连接") { }
         }
         #endregion
     }
@@ -1118,6 +1182,7 @@ namespace ArkHelper
         // 参数：输出内容，操作模块，日志级别
         public static void Log(string content, string module = "ArkHelper", InfoKind infokind = InfoKind.Infomational)
         {
+            if (!App.Data.arkHelper.debug) return;
             Text(DateTime.Now.ToString("s")
                 + " "
                 + "[" + module + "]"
@@ -1315,7 +1380,7 @@ namespace ArkHelper
         /// </summary>
         /// <param name="url">下载地址</param>
         /// <param name="address">下载位置（绝对路径）</param>
-        public static void DownloadFile(string url, string address)
+        public static FileInfo DownloadFile(string url, string address)
         {
             string cache = address + @".cache";
             if (!File.Exists(address))
@@ -1328,7 +1393,7 @@ namespace ArkHelper
 
                 if (File.Exists(cache)) { File.Delete(cache); }
             }
-            else { return; }
+            return new FileInfo(address);
         }
 
         /// <summary>

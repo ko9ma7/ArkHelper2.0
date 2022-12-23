@@ -8,6 +8,10 @@ using System.Windows.Media;
 using static ArkHelper.Output;
 using System.Web.UI.WebControls;
 using System.Runtime.CompilerServices;
+using System.Windows.Threading;
+using System.Globalization;
+using System.ComponentModel;
+using Windows.Services.Maps;
 
 namespace ArkHelper
 {
@@ -17,15 +21,6 @@ namespace ArkHelper
         private static void UILogger(string content, Output.InfoKind infoKind = Output.InfoKind.Infomational)
         {
             Output.Log(content, "MB", infoKind);
-        }
-
-        private void Page_Loaded(object sender, RoutedEventArgs e)
-        {
-            Info += Show;
-        }
-        private void Page_Unloaded(object sender, RoutedEventArgs e)
-        {
-            Info -= Show;
         }
         //方法 表达 + Output
         private void Show(string content, Output.InfoKind infokind = Output.InfoKind.Infomational)
@@ -57,29 +52,95 @@ namespace ArkHelper
             }
         }
 
+        //数据
+        DateTime _DStartTime = DateTime.Now;
+        DateTime DStartTime
+        {
+            get { return _DStartTime; }
+            set
+            {
+                _DStartTime = value;
+                Application.Current.Dispatcher.Invoke(() => data_begin_text.Text = value.ToString("g"));
+            }
+        }
+        int _Dtime = 0;
+        int Dtime
+        {
+            get { return _Dtime; }
+            set { _Dtime = value; Application.Current.Dispatcher.Invoke(() => data_progress_alreadyT.Text = value.ToString("g")); }
+        }
+        int _DT = 0;
+        int DT
+        {
+            get { return _DT; }
+            set { _DT = value; data_progress_T.Text = value + ""; }
+        }
+        private void reactNext()
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                Dtime += 1;
+                if (data_speed_text.Text == "--" && Dtime == 1)
+                {
+                    TimeSpan UsingTime = DateTime.Now - DStartTime;
+                    data_speed_text.Text = UsingTime.TotalSeconds.ToString("0.00");
+                    if ((bool)mode_time.IsChecked)
+                    {
+                        var endtime = DStartTime + new TimeSpan(UsingTime.Ticks * DT);
+                        data_end_text.Text = endtime.ToString("g");
+                    }
+                }
+            });
+        }
+        private void Page_Loaded(object sender, RoutedEventArgs e)
+        {
+            Info += Show;
+            Next += reactNext;
+        }
+        private void Page_Unloaded(object sender, RoutedEventArgs e)
+        {
+            Info -= Show;
+            Next -= reactNext;
+
+        }
+
+
         public MB()
         {
             InitializeComponent();
         }
-        private void start(object sender, RoutedEventArgs e)
+        private async void start(object sender, RoutedEventArgs e)
         {
             Mode mode = Mode.san;
             int time = -1;
 
             //判断模式
-            if ((bool)mode_san.IsChecked) { mode = Mode.san; }
+            if ((bool)mode_san.IsChecked)
+            {
+                mode = Mode.san;
+                data_end.Visibility = Visibility.Collapsed;
+                data_progress_T.Text = "--";
+            }
             if ((bool)mode_time.IsChecked)
             {
                 mode = Mode.time;
                 time = Convert.ToInt32(times_setting.Text);
+                DT = time;
+                data_end.Visibility = Visibility.Visible;
             }
 
             //UI
             start_button.Visibility = Visibility.Collapsed;
             logreport_wrappanel.Visibility = Visibility.Visible;
             battle_setting_wrappanel.IsEnabled = false;
+            waiting_processbar.Visibility = Visibility.Visible;
 
-            Task.Run(() =>
+            DStartTime = DateTime.Now;
+            data_speed_text.Text = "--";
+            data_end_text.Text = "--";
+            Dtime = 0;
+
+            Task run = new Task(() =>
             {
                 var startTime = DateTime.Now;//启动时间
 
@@ -101,20 +162,15 @@ namespace ArkHelper
                     toast.Show();
 
                     //读取action
-                    string after_action;
-                    if ((bool)Application.Current.Dispatcher.Invoke(() => is_action.IsChecked))
-                    {
-                        after_action = Application.Current.Dispatcher.Invoke(() =>
-                        after_action_select.SelectedValue.ToString()).Replace("System.Windows.Controls.ComboBoxItem: ", "");
-                    }
-                    else
-                    {
-                        after_action = "null";
-                    }
+                    string after_action = "null";
+
+                    after_action = Application.Current.Dispatcher.Invoke(() =>
+                    (after_action_select.SelectedValue as ComboBoxItem).Tag.ToString());
+
                     UILogger("action=" + after_action);
 
                     //判定行动
-                    if (after_action == "返回游戏首页")
+                    if (after_action == "backToHome")
                     {
                         ADB.Tap(301, 45);//呼出菜单
                         Show("呼出菜单");
@@ -123,50 +179,52 @@ namespace ArkHelper
                         ADB.Tap(102, 192);//返回主页
                         Show("正在返回游戏首页...");
                     }
-                    if (after_action == "关闭游戏")
+                    if (after_action == "closeGame")
                     {
                         string package = ADB.GetGamePackageName(ADB.GetCurrentGameKind());
                         ADB.CMD("shell am force-stop " + package);//结束进程
                         Show("正在结束" + package + "进程...");
                     }
-                    if (after_action == "关闭模拟器")
+                    if (after_action == "closeSimulator")
                     {
                         WithSystem.KillSimulator();
                         Show("正在关闭模拟器...");
                     }
-                    if (after_action == "关机") { WithSystem.Shutdown(); }
-                    if (after_action == "锁定") { WithSystem.LockWorkStation(); }
-                    if (after_action == "睡眠") { WithSystem.Sleep(); }
+                    if (after_action == "shutdown") { WithSystem.Shutdown(); }
+                    if (after_action == "lock") { WithSystem.LockWorkStation(); }
+                    if (after_action == "sleep") { WithSystem.Sleep(); }
                 }
                 else
                 {
                     if (result.Type == MBResult.ResultType.Error_NotDetectACheckpoint)
                     {
-                        Info("未检测到关卡信息界面 /请切换至关卡信息界面", Output.InfoKind.Warning);
+                        Show("未检测到关卡信息界面 /请切换至关卡信息界面", Output.InfoKind.Warning);
                         Thread.Sleep(3000);
                     }
                     if (result.Type == MBResult.ResultType.Error_AutoDeployNotAvailable)
                     {
-                        Info("代理指挥不可用 /请换一个关卡", Output.InfoKind.Warning);
+                        Show("代理指挥不可用 /请换一个关卡", Output.InfoKind.Warning);
                         Thread.Sleep(3000);
                     }
                     if (result.Type == MBResult.ResultType.Error_UndefinedError)
                     {
-                        Info("发生未知错误 /请重启ArkHelper重试", Output.InfoKind.Error);
+                        Show("发生未知错误 /请重启ArkHelper重试", Output.InfoKind.Error);
                         Thread.Sleep(3000);
                     }
                 }
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    logreport_wrappanel.Visibility = Visibility.Collapsed;
-                    start_button.Visibility = Visibility.Visible;
-                    battle_setting_wrappanel.IsEnabled = true;
-                });
-
             });
+
+            run.Start();
+            await run;
+
+            logreport_wrappanel.Visibility = Visibility.Collapsed;
+            start_button.Visibility = Visibility.Visible;
+            battle_setting_wrappanel.IsEnabled = true;
+            waiting_processbar.Visibility = Visibility.Collapsed;
         }
         #endregion
 
+        #region core
         /// <summary>
         /// MB的模式
         /// </summary>
@@ -243,6 +301,12 @@ namespace ArkHelper
         /// </summary>
         public static event MBMessage Info;
 
+        public delegate void MBNextTime();
+        /// <summary>
+        /// MB进程更新事件
+        /// </summary>
+        public static event MBNextTime Next;
+
         /// <summary>
         /// MB的核心作战单元
         /// </summary>
@@ -263,6 +327,9 @@ namespace ArkHelper
             //准备运行
             Logger("--- MB START ---");
             Info("连续作战指挥系统启动");
+            //等待连接
+            ADB.WaitingSimulator();
+
             //读服
             string server = ADB.GetCurrentGameKind();
             //log记录，初始化
@@ -307,12 +374,14 @@ namespace ArkHelper
                 //检查是否有回理智界面
                 if (screenshot.PicToPoint(Address.res + "\\pic\\UI\\RecoverSanitySymbol.png").Count != 0)
                 {
+                    //理智模式直接退出
                     if (mode == Mode.san)
                     {
                         Info("剩余理智不足以指挥本次作战");
                         ADB.Tap(871, 651); //点叉
                         goto MBend;
                     }
+                    //次数模式恢复理智
                     if (mode == Mode.time)
                     {
                         Info("剩余理智不足以指挥本次作战 /正在使用理智恢复物恢复理智...");
@@ -354,6 +423,7 @@ namespace ArkHelper
 
             //回到入口等待下一轮检测
             alreadyTime += 1;
+            Next();
             goto battle;
         #endregion
 
@@ -363,5 +433,6 @@ namespace ArkHelper
             Info("连续作战指挥系统运行结束");
             return new MBResult(MBResult.ResultType.Succeed, time: alreadyTime);
         }
+        #endregion
     }
 }

@@ -59,8 +59,7 @@ namespace ArkHelper.Xaml
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            ADB.Screenshot screenshot = new ADB.Screenshot();
-            var aa = screenshot.PicToPoint(Address.res + "\\pic\\UI\\AutoDeployON.png",opencv_errorCon:0.95);
+            File.WriteAllText(@"C:\Users\evative7\Desktop\DownloaderComments.json", JsonSerializer.Serialize(Version.Current));
         }
     }
 }

@@ -115,6 +115,9 @@
     <Compile Include="Style\Control\Break.xaml.cs">
       <DependentUpon>Break.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Style\Control\ChapterTitle.xaml.cs">
+      <DependentUpon>ChapterTitle.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Style\Control\CustomSimulator.xaml.cs">
       <DependentUpon>CustomSimulator.xaml</DependentUpon>
     </Compile>
@@ -188,6 +191,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Style\Control\Break.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Style\Control\ChapterTitle.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

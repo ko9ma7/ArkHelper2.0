@@ -501,29 +501,8 @@ namespace ArkHelper.Pages.OtherList
                 {
                     Info("正在启动神经网络依托平台...");
                     Process.Start(Address.dataExternal + @"\simulator.lnk");
-                    for(; ; )
-                    {
-                        Thread.Sleep(10000);
-                        try
-                        {
-                            using (var testOK = new ADB.Screenshot())
-                            {
-                                testOK.CheckIsAvailable();
-                            }
-                        }
-                        catch
-                        {
-                            continue;
-                        }
-                        Thread.Sleep(5000);
-                        break;
-                    }
                 }
-                else
-                {
-                    while (ADB.ConnectedInfo == null)
-                        Thread.Sleep(4000);
-                }
+                WaitingSimulator();
 
                 main(App.Data.scht.data);
                 if (File.Exists(Address.dataExternal + "\\moreSCHT.json"))
@@ -545,8 +524,8 @@ namespace ArkHelper.Pages.OtherList
                 .AddText("提示：定时事项处理指挥器任务已结束")
                 .AddText("开始时间：" + starttime.ToString("g") + "\n" + "结束时间：" + DateTime.Now.ToString("g"))
                 .Show(); //结束通知
-                App.OKtoOpenSCHT = true;
                 Application.Current.Dispatcher.Invoke(() => (Window.GetWindow(this)).Close());
+                App.OKtoOpenSCHT = true;
             });
         }
     }

@@ -96,5 +96,10 @@ namespace ArkHelper.Pages.OtherList
             }
             return _name;
         }
+
+        private void ToggleButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }
