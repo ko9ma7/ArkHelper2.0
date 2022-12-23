@@ -79,6 +79,11 @@ namespace ArkHelper.Xaml
                 return result;
             }
 
+            if (App.Data.scht.showGuide)
+            {
+                PushNewMessage("开始使用SCHT系统","Message", null, "点击左侧“SCHT控制台”，了解更多信息。");
+            }
+
             new Task(() =>
             {
                 var a = Version.Update.SearchNewestRelease();
@@ -107,7 +112,7 @@ namespace ArkHelper.Xaml
                 time_notify.Text = DateTime.Now.ToString("tt h:mm");
             }
         }
-        public void PushNewMessage(string content, string icon_kind = "Message", MouseButtonEventHandler funcA = null)
+        public void PushNewMessage(string content, string icon_kind = "Message", MouseButtonEventHandler funcA = null,string Tooltip = "")
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
@@ -116,6 +121,7 @@ namespace ArkHelper.Xaml
                     ContentStringFormat = content,
                     Style = (System.Windows.Style)FindResource("message_listbox_item"),
                     Tag = icon_kind,
+                    ToolTip = Tooltip
                 };
                 if (funcA != null)
                 {

@@ -113,7 +113,7 @@ namespace ArkHelper.Pages.OtherList
 
         private void VisChange()
         {
-            first_unit.Visibility = second_unit.Visibility = ann_stack.Visibility = ct_stack.Visibility = server_stack.Visibility = (bool)(status_togglebutton.IsChecked) ? Visibility.Visible : Visibility.Collapsed;
+            cuscpi.Visibility= first_unit.Visibility = second_unit.Visibility = ann_stack.Visibility = ct_stack.Visibility = server_stack.Visibility = (bool)(status_togglebutton.IsChecked) ? Visibility.Visible : Visibility.Collapsed;
             if ((bool)status_togglebutton.IsChecked && ((bool)LSFirst.IsChecked || (bool)customFirst.IsChecked)) { second_unit.Visibility = Visibility.Collapsed; }
         }
         private void CreateNewTime(DateTime num, bool isForce = false)

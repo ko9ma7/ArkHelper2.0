@@ -99,7 +99,10 @@
                     </StackPanel>
                 </Grid>
                 <Grid Name="GuidePage4" Visibility="Collapsed">
-                    <akhc:OK Margin="0,0,0,30" Text="SCHT" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    <akhc:OK Margin="0,0,0,30"
+                             HorizontalAlignment="Center"
+                             VerticalAlignment="Center"
+                             Text="SCHT" />
                 </Grid>
 
                 <Button x:Name="next"
@@ -121,7 +124,10 @@
                             Icon="ThermostatAuto"
                             Text="RHODES ISLAND™ 定时事项处理指挥器控制台" />
 
-                <StackPanel Visibility="Collapsed" Margin="0,0,40,20" DockPanel.Dock="Top" Name="helper">
+                <StackPanel Name="helper"
+                            Margin="0,0,40,20"
+                            DockPanel.Dock="Top"
+                            Visibility="Collapsed">
                     <Border Background="#BBEFEFEF" CornerRadius="12">
                         <Expander Background="Transparent" IsExpanded="False">
                             <Expander.Header>
@@ -523,7 +529,8 @@
 
                     </StackPanel>
 
-                    <StackPanel Grid.Row="8"
+                    <StackPanel Name="cuscpi"
+                                Grid.Row="8"
                                 Grid.Column="0"
                                 Orientation="Vertical"
                                 Style="{StaticResource title}">
@@ -532,7 +539,8 @@
                     </StackPanel>
                     <StackPanel Grid.Row="8"
                                 Grid.Column="1"
-                                Style="{StaticResource title}">
+                                Style="{StaticResource title}"
+                                Visibility="{Binding ElementName=cuscpi, Path=Visibility}">
                         <akhc:Break />
                         <Button Width="172"
                                 Margin="0,3,0,0"
