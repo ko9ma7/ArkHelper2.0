@@ -446,14 +446,23 @@
                                               Click="ann_custom_time_status_checkbox_Click" />
                                     <TextBlock Margin="0,0,20,0"
                                                VerticalAlignment="Center"
-                                               FontSize="{StaticResource h2}"
+                                               FontSize="{StaticResource h3}"
                                                Text="自定义执行次数" />
                                 </WrapPanel>
                                 <WrapPanel Name="WeekBox"
                                            VerticalAlignment="Center"
                                            Orientation="Vertical"
                                            Visibility="{Binding ElementName=ann_custom_time_status_checkbox, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}" />
-
+                                <WrapPanel>
+                                    <CheckBox x:Name="ann_useCard_checkbox"
+                                              Margin="0,0,10,0"
+                                              VerticalAlignment="Center"
+                                              Click="ann_useCard_checkbox_Click" />
+                                    <TextBlock Margin="0,0,20,0"
+                                               VerticalAlignment="Center"
+                                               FontSize="{StaticResource h3}"
+                                               Text="允许使用全权委托" />
+                                </WrapPanel>
                             </WrapPanel>
                         </WrapPanel>
                     </StackPanel>

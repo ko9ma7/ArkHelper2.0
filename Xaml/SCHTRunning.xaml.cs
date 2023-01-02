@@ -119,7 +119,7 @@ namespace ArkHelper.Pages.OtherList
                         WebResponse response = req.GetResponse();
                         string NewestLink = response.Headers["Location"];
                         //获取游戏版本号
-                        string _infoText = ADB.CMD(@"shell pm dump com.hypergryph.arknights");
+                        string _infoText = ADB.CMD(@"shell ""pm dump com.hypergryph.arknights | grep versionName""");
                         string _verText = _infoText.Substring(_infoText.IndexOf("versionName") + "versionName=".Length, 100);
                         string verNow = _verText.Substring(0, _verText.IndexOf("\r")).Replace(".", "");
                         //检查版本是否匹配
@@ -333,7 +333,7 @@ namespace ArkHelper.Pages.OtherList
                         if (PictureProcess.ColorCheck(431, 770, "#FFFFFF", 432, 770, "#FFFFFF")) { }
                         else
                         {
-                            MB.MBCore(MB.Mode.time, anntime, 10);
+                            MB.MBCore(MB.Mode.time, anntime,ann_cardToUse:schtData.ann.allowToUseCard?10:0);
                         }
 
                         Akhcmd("shell input tap 299 46", "菜单", 1);
@@ -426,7 +426,6 @@ namespace ArkHelper.Pages.OtherList
                     TouchCp();
                 UnitInited:;
                     MB.MBCore(mode: MB.Mode.san);
-                emptysan:;
                     Akhcmd("shell input tap 299 46", "菜单", 1);
                     Akhcmd("shell input tap 103 305", "首页", 3);
                     Akhcmd("shell input tap 908 676", "任务", 2);

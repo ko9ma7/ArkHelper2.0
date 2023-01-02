@@ -29,6 +29,7 @@ namespace ArkHelper.Pages.OtherList
             ann_status_togglebutton.IsChecked = App.Data.scht.data.ann.status;
             status_togglebutton.IsChecked = App.Data.scht.status;
             server_combobox.SelectedValue = App.Data.scht.data.server.id;
+            ann_useCard_checkbox.IsChecked = App.Data.scht.data.ann.allowToUseCard;
             if (!App.Data.scht.data.first.unit.Contains("custom"))
             {
                 ((RadioButton)GetType().GetField(App.Data.scht.data.first.unit.Replace("PR-", "PR") + "First", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(this)).IsChecked = true;
@@ -511,6 +512,11 @@ namespace ArkHelper.Pages.OtherList
         {
             SimuSelect.SSelected -= CSimuSelWrap;
 
+        }
+
+        private void ann_useCard_checkbox_Click(object sender, RoutedEventArgs e)
+        {
+            App.Data.scht.data.ann.allowToUseCard = (bool)ann_useCard_checkbox.IsChecked;
         }
     }
 }

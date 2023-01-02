@@ -280,6 +280,7 @@ namespace ArkHelper
                         public string select { get; set; } = "TT";
                         public bool customTime { get; set; } = false;
                         public int[] time { get; set; } = new int[7] { 0, 0, 0, 0, 0, 0, 0 }; //周一为每周的第一天
+                        public bool allowToUseCard { get; set; } = false;
                     }
 
                     public Server server { get; set; } = new Server();
