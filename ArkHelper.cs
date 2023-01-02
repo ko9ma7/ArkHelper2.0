@@ -627,6 +627,7 @@ namespace ArkHelper
                 }
                 catch
                 {
+                    Thread.Sleep(2000);
                     continue;
                 }
                 Thread.Sleep(1000);
