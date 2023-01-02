@@ -455,7 +455,7 @@ namespace ArkHelper
                 if (Process.GetProcessesByName(ConnectedInfo.IM).Length == 0)
                 {
                     ConnectedInfo = null;
-                    Output.Log("Simulator Lost Connection");
+                    Output.Log("Simulator Lost Connection","ADB");
                 }
                 else
                     return;
