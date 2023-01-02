@@ -120,8 +120,7 @@ namespace ArkHelper.Pages.OtherList
                         string NewestLink = response.Headers["Location"];
                         //获取游戏版本号
                         string _infoText = ADB.CMD(@"shell ""pm dump com.hypergryph.arknights | grep versionName""");
-                        string _verText = _infoText.Substring(_infoText.IndexOf("versionName") + "versionName=".Length, 100);
-                        string verNow = _verText.Substring(0, _verText.IndexOf("\r")).Replace(".", "");
+                        string verNow = _infoText.Substring(_infoText.IndexOf("=")+1, _infoText.IndexOf("\r") - _infoText.IndexOf("=")-"=".Length).Replace(".", "");
                         //检查版本是否匹配
                         if (!NewestLink.Contains(verNow + ".apk"))
                         {
