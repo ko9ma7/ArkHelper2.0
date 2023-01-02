@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 
 namespace ArkHelper.Pages.OtherList
 {
@@ -19,6 +20,7 @@ namespace ArkHelper.Pages.OtherList
             address.Text = Address.programData;
 
             pure.IsChecked = App.Data.arkHelper.pure;
+            debug.IsChecked = App.Data.arkHelper.debug;
             /*if (Data.SCHT.status)
             {
                 pure.IsChecked = true;
@@ -99,7 +101,7 @@ namespace ArkHelper.Pages.OtherList
 
         private void ToggleButton_Click(object sender, RoutedEventArgs e)
         {
-
+            App.Data.arkHelper.debug = (bool)(sender as ToggleButton).IsChecked;
         }
     }
 }

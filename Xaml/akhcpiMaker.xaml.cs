@@ -15,6 +15,7 @@ using Newtonsoft.Json;
 using static ArkHelper.ArkHelperDataStandard;
 using Windows.Media.Protection.PlayReady;
 using ArkHelper.Style.Control;
+using System.Threading;
 
 namespace ArkHelper.Xaml
 {
@@ -41,12 +42,14 @@ namespace ArkHelper.Xaml
                 file.Visibility = Visibility.Collapsed;
                 editArea.Visibility = Visibility.Visible;
                 savebtn.Visibility = Visibility.Visible;
+                exebtn.Visibility = Visibility.Visible;
             }
             else
             {
                 file.Visibility = Visibility.Visible;
                 editArea.Visibility = Visibility.Collapsed;
                 savebtn.Visibility = Visibility.Collapsed;
+                exebtn.Visibility = Visibility.Collapsed;
             }
         }
         private class MessageFromADB
@@ -147,12 +150,7 @@ namespace ArkHelper.Xaml
         private void save(object sender, RoutedEventArgs e)
         {
             JObject Jo = new JObject();
-            List<string> list = new List<string>();
-
-            foreach (var item in cardList.Children)
-            {
-                list.Add(item.ToString());
-            }
+            List<string> list = getString();
 
             var liststring = Newtonsoft.Json.JsonConvert.SerializeObject(list);
             Jo.Add("content", JsonConvert.DeserializeObject<JArray>(liststring));
@@ -185,13 +183,28 @@ namespace ArkHelper.Xaml
             this.Close();
         }
 
+        private List<string> getString()
+        {
+            List<string> list = new List<string>();
+
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                foreach (var item in cardList.Children)
+                {
+                    list.Add(item.ToString());
+                }
+            });
+
+            return list;
+        }
+
         private void del(int num)
         {
             var target = cardList.Children[num - 1];
             //删除
             cardList.Children.Remove(target);
             int a = 1;
-            foreach(var item in cardList.Children)
+            foreach (var item in cardList.Children)
             {
                 (item as AKHcpiCard).Num = a;
                 a++;
@@ -207,7 +220,7 @@ namespace ArkHelper.Xaml
             //var targetDown = cardList.Children[num];
 
             cardList.Children.Remove(target);
-            if (up) cardList.Children.Insert(num-2, (target as AKHcpiCard));
+            if (up) cardList.Children.Insert(num - 2, (target as AKHcpiCard));
             if (!up) cardList.Children.Insert(num, target);
 
             int a = 1;
@@ -228,6 +241,22 @@ namespace ArkHelper.Xaml
         {
             AKHcpiCard.delEvent -= del;
             AKHcpiCard.moveEvent -= move;
+        }
+
+        public static void Exe(List<string> strings)
+        {
+            foreach (var akhcmd in strings)
+            {
+                new AKHcmd(akhcmd).RunCmd();
+            }
+        }
+
+        private void exebtn_Click(object sender, RoutedEventArgs e)
+        {
+            new Thread(() =>
+            {
+                Exe(getString());
+            }).Start();
         }
     }
 }

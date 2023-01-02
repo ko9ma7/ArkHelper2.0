@@ -66,7 +66,7 @@ namespace ArkHelper
             }
         }
 
-        public static Data Current = new Data("2.0.0.0", "local", false, Data.VersionType.realese);
+        public static Data Current = new Data("2.0.0.1", "local", false, Data.VersionType.beta);
 
         /// <summary>
         /// 更新
@@ -680,13 +680,27 @@ namespace ArkHelper
 
             public List<Point> PicToPoint(string smallimg, double errorCon = 0.7, int errorRange = 16, int num = 50, double opencv_errorCon = 0.8)
             {
-                if (!File.Exists(smallimg)) { return new List<Point>(); }
+                Output.Log("=>from " + smallimg, "PicToPoint");
+
+                if (!File.Exists(smallimg))
+                {
+                    Output.Log("=>[null image]", "PicToPoint");
+                    return new List<Point>();
+                }
 
                 /*//初始化图像类
                 InitBitmap();
                 var smallBM = new Bitmap(smallimg);
                 return PictureProcess.PicToPoint.GetPointUsingNative(this.ImgBitmap, smallBM, errorCon, errorRange, num);*/
-                return PictureProcess.PicToPoint.GetPointUsingOpenCV(this.Location, smallimg, errorCon: opencv_errorCon);
+
+                var a = PictureProcess.PicToPoint.GetPointUsingOpenCV(this.Location, smallimg, errorCon: opencv_errorCon);
+                string end = "";
+                foreach (var p in a)
+                {
+                    end = end + p.ToString();
+                }
+                Output.Log("=>" + a, "PicToPoint");
+                return a;
             }
             private void InitBitmap()
             {

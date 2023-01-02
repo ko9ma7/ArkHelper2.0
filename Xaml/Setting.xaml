@@ -56,9 +56,9 @@
                     </WrapPanel>
 
                     <StackPanel Grid.Row="1"
-                                Visibility="Collapsed"
                                 Grid.Column="0"
-                                Style="{StaticResource title}">
+                                Style="{StaticResource title}"
+                                Visibility="Collapsed">
                         <akhc:Break />
                         <TextBlock FontSize="{StaticResource h1}">
                             后台纯净
@@ -66,8 +66,8 @@
                     </StackPanel>
                     <StackPanel Grid.Row="1"
                                 Grid.Column="1"
-                                Visibility="Collapsed"
-                                Style="{StaticResource title}">
+                                Style="{StaticResource title}"
+                                Visibility="Collapsed">
                         <akhc:Break />
                         <ToggleButton x:Name="pure"
                                       Margin="0,8,0,0"
@@ -133,13 +133,20 @@
 
                         <WrapPanel HorizontalAlignment="Left">
                             <TextBlock FontSize="{StaticResource p}" Foreground="Gray">
-                            <Run>数据保存位置：</Run>
-                            <Run Name="address">测试地址</Run>
+                                <Run>数据保存位置：</Run>
+                                <Run Name="address">测试地址</Run>
                             </TextBlock>
-                            <TextBlock Margin="8,0,0,0" FontSize="{StaticResource p}" Foreground="Gray">Debug模式</TextBlock>
-                            <ToggleButton Height="15" Margin="5,0,0,0" Click="ToggleButton_Click"/>
+                            <TextBlock Margin="8,0,0,0"
+                                       FontSize="{StaticResource p}"
+                                       Foreground="Gray">
+                                Debug模式
+                            </TextBlock>
+                            <ToggleButton Name="debug"
+                                          Height="15"
+                                          Margin="5,0,0,0"
+                                          Click="ToggleButton_Click" />
                         </WrapPanel>
-                        
+
                     </StackPanel>
 
                 </Grid>

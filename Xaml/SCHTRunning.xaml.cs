@@ -410,10 +410,7 @@ namespace ArkHelper.Pages.OtherList
                     void GetCustomCp(string _unit)
                     {
                         var akhcpiaddress = _unit.Replace("custom:##", "").Replace("##", "");
-                        foreach (var akhcmd in akhcpiMaker.ReadFromAKHcpi(akhcpiaddress))
-                        {
-                            Akhcmd(akhcmd);
-                        }
+                        akhcpiMaker.Exe(akhcpiMaker.ReadFromAKHcpi(akhcpiaddress));
                     }
                     //first
                     if (!schtData.first.unit.Contains("custom"))
