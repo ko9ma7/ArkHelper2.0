@@ -18,6 +18,7 @@ using RestSharp;
 using System.Security.Policy;
 using System.Net;
 using Windows.ApplicationModel;
+using Windows.Media.Playback;
 
 namespace ArkHelper.Pages.OtherList
 {
@@ -130,7 +131,7 @@ namespace ArkHelper.Pages.OtherList
                             /*string add = Address.Cache.main + "\\newApk.apk";
                             Net.DownloadFile(NewestLink, add);*/
                             string addre = "/sdcard/new.apk";
-                            ADB.DownloadFile(NewestLink.Replace("https","http"), addre);
+                            ADB.DownloadFile(NewestLink.Replace("https", "http"), addre);
                             Info("正在安装更新中...");
                             ADB.InstallFromLocal(addre);//安装
                             ADB.DeleteFile(addre);
@@ -273,12 +274,6 @@ namespace ArkHelper.Pages.OtherList
                     Akhcmd("shell input tap 962 555", "确认", 5);
                     if (AMmode == true)
                     {
-                        void Buy(int x, int y)
-                        {
-                            Akhcmd("shell input tap " + x + " " + y, "商品", 2);
-                            Akhcmd("shell input tap 1042 655", "购买物品", 3);
-                            Akhcmd("shell input tap 756 59", "收取", 2);
-                        }
                         //线索交流
                         Akhcmd("shell input tap 407 646", "好友", 2);
                         Akhcmd("shell input tap 132 254", "好友列表", 2);
@@ -294,17 +289,26 @@ namespace ArkHelper.Pages.OtherList
                         Akhcmd("shell input tap 722 719", "收取", 2);
                         Akhcmd("shell input tap 746 51", "", 2);
 
-                        Buy(146, 309);
-                        Buy(426, 290);
-                        Buy(716, 298);
-                        Buy(1010, 300);
-                        Buy(1290, 305);
-
-                        Buy(160, 592);
-                        Buy(443, 578);
-                        Buy(733, 608);
-                        Buy(997, 592);
-                        Buy(1290, 583);
+                        for (int i = 1; i <= 2; i++)
+                        {
+                            for (int j = 1; j <= 5; j++)
+                            {
+                                if (i == 1 && j == 1) { continue; }
+                                Akhcmd("shell input tap " + (j * 280 + 150) + " " + (300 * i), "商品", 2);
+                                Akhcmd("shell input tap 1042 655", "购买物品", 3);
+                                using (var sc = new ADB.Screenshot())
+                                {
+                                    if (sc.PicToPoint(Address.res + @"\pic\UI\shopBuyIcon.png").Count != 0)
+                                    {
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        Akhcmd("shell input tap 756 59", "收取", 2);
+                                    }
+                                }
+                            }
+                        }
 
                         Akhcmd("shell input tap 299 46", "菜单", 1);
                         Akhcmd("shell input tap 103 305", "首页", 3);
@@ -326,64 +330,12 @@ namespace ArkHelper.Pages.OtherList
                             if (schtData.ann.select == "LMDT") { Akhcmd("shell input tap 1086 417", "龙门市区", 3); }
                         }
 
-                        for (int i = 0; i < anntime; i++)
+                        if (PictureProcess.ColorCheck(431, 770, "#FFFFFF", 432, 770, "#FFFFFF")) { }
+                        else
                         {
-                            if (PictureProcess.ColorCheck(431, 770, "#FFFFFF", 432, 770, "#FFFFFF")) { break; }
-                            else
-                            {
-                                int a = 0;
-                                if (PictureProcess.ColorCheck(1263, 765, "#232323", 1263, 764, "#232323")) { }
-                                else
-                                {
-                                    Akhcmd("shell input tap 1090 666", "激活全权委托", 1);
-                                    if (PictureProcess.ColorCheck(1263, 765, "#232323", 1263, 764, "#232323")) { /*成功激活*/} else { a = 1; }
-                                }
-
-                                if (a == 0)
-                                {
-                                    //使用剿灭卡
-                                    Akhcmd("shell input tap 1295 745", "开始行动", 2);
-                                    if (PictureProcess.ColorCheck(1241, 449, "#313131", 859, 646, "#313131"))
-                                    {
-                                        //没有理智
-                                        Akhcmd("shell input tap 871 651", wait: 1);
-                                        goto emptysan;//走了走了
-                                    }
-                                    Akhcmd("shell input tap 1281 740", "确认使用", 2);
-                                    Thread.Sleep(10000);
-                                }
-                                else
-                                {
-                                    //不用剿灭卡
-                                    if (PictureProcess.ColorCheck(1200, 670, "#FFFFFF", 1200, 671, "#FFFFFF")) { }
-                                    else
-                                    {
-                                        Akhcmd("shell input tap 1200 680", "激活代理指挥", 1);
-                                    }
-                                    Akhcmd("shell input tap 1295 745", "开始行动", 2);
-                                    if (PictureProcess.ColorCheck(1241, 449, "#313131", 859, 646, "#313131"))
-                                    {
-                                        //没有理智
-                                        Akhcmd("shell input tap 871 651", wait: 1);
-                                        goto emptysan;//走了走了
-                                    }
-                                    Akhcmd("shell input tap 1240 559", "开始行动", 720);
-                                    for (; ; )
-                                    {
-                                        Thread.Sleep(4000);
-                                        //检查是否在本里
-                                        if (PictureProcess.ColorCheck(77, 70, "#8C8C8C", 1341, 62, "#FFFFFF") == false)
-                                        {
-                                            Thread.Sleep(4500);
-                                            break;
-                                        }
-                                    }
-                                    Akhcmd("shell input tap 1390 140", "", 4);
-                                }
-                                Akhcmd("shell input tap 1204 290", "", 1);
-                                Akhcmd("shell input tap 1204 290", "", 4);
-                            }
+                            MB.MBCore(MB.Mode.time, anntime, 10);
                         }
+
                         Akhcmd("shell input tap 299 46", "菜单", 1);
                         Akhcmd("shell input tap 103 305", "首页", 3);
                     }
