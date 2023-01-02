@@ -314,8 +314,9 @@ namespace ArkHelper
         /// <param name="time">次数（仅当mode=Mode.time时可用）</param>
         /// <param name="ann_cardToUse">可用剿灭代理卡数量（仅当作战类型为剿灭时可用）</param>
         /// <returns></returns>
-        public static MBResult MBCore(Mode mode, int time = -1, int ann_cardToUse = -1)
+        public static MBResult MBCore(Mode mode, int time = -1, int ann_cardToUse = 0)
         {
+            //ann_cardToUse = 1;//debug
             int battleKind = 0;//0：普通，1：剿灭
 
             int firstSleepTime = 35000;//进入作战到开始检测等待时间
@@ -333,15 +334,27 @@ namespace ArkHelper
             //读服
             string server = ADB.GetCurrentGameKind();
             //log记录，初始化
-            Logger("mode=" + mode + "," + "time=" + time);
+            Logger("mode=" + mode + "," + "time=" + time + "," + "ann_cardToUse=" + ann_cardToUse);
             //进本前检查和准备
             using (ADB.Screenshot screenshot = new ADB.Screenshot())
             {
-                //作战状态：不在本前：
-                if (screenshot.PicToPoint(Address.res + "\\pic\\UI\\BigStar.png").Count == 0)
+                //检测作战类型
+                if (screenshot.PicToPoint(Address.res + "\\pic\\UI\\BigStar.png").Count != 0)
                 {
-                    return new MBResult(MBResult.ResultType.Error_NotDetectACheckpoint);
+                    battleKind = 0;
                 }
+                else
+                {
+                    if (screenshot.PicToPoint(Address.res + "\\pic\\UI\\jade.png").Count != 0)
+                    {
+                        battleKind = 1;
+                    }
+                    else
+                    {
+                        return new MBResult(MBResult.ResultType.Error_NotDetectACheckpoint);
+                    }
+                }
+                Logger("battleKind=" + battleKind);
 
                 //检测代理指挥是否可用
                 if (screenshot.PicToPoint(Address.res + "\\pic\\UI\\AutoDeployLocked.png").Count != 0)
@@ -350,17 +363,95 @@ namespace ArkHelper
                 }
 
                 //检测代理指挥是否已经勾选，否则勾选
-                if (screenshot.PicToPoint(Address.res + "\\pic\\UI\\AutoDeployON.png", opencv_errorCon: 0.95).Count == 0)
+                if (battleKind == 0)
                 {
-                    Info("代理指挥模块未激活 /正在激活代理指挥模块...");
-                    ADB.Tap(1200, 680); //激活代理指挥
-                    Thread.Sleep(500);
+                    if (screenshot.PicToPoint(Address.res + "\\pic\\UI\\AutoDeployON.png", opencv_errorCon: 0.95).Count == 0)
+                    {
+                        Info("代理指挥模块未激活 /正在激活代理指挥模块...");
+                        ADB.Tap(1200, 680); //激活代理指挥
+                        Thread.Sleep(500);
+                    }
                 }
             }
         //刷本入口点
         battle:;
-            //检查次数
-            if (mode == Mode.time && alreadyTime >= time) { goto MBend; }
+            if (mode == Mode.time && alreadyTime >= time) { goto MBend; } //检查次数
+            if (battleKind == 1)
+            {
+                Logger("ann_cardAlreadyUsed=" + ann_cardAlreadyUsed);
+
+                /* result
+                 * 0:可以使用委托卡，但是没有激活
+                 * 1:可以使用委托卡，并且已经激活
+                 * 2:不可以使用委托卡
+                 */
+                int result;
+
+                //给result赋值
+                using (ADB.Screenshot screenshot = new ADB.Screenshot())
+                {
+                    if (screenshot.PicToPoint(Address.res + "\\pic\\UI\\annEntrustAbleToUseAndNotActivated.png", opencv_errorCon: 0.95).Count != 0)
+                        result = 0;
+                    else
+                        if (screenshot.PicToPoint(Address.res + "\\pic\\UI\\annEntrustAbleToUseAndActivated.png", opencv_errorCon: 0.95).Count != 0)
+                        result = 1;
+                    else
+                        result = 2;
+                }
+
+                void NotUseCard()
+                {
+                    using (var screenshot = new ADB.Screenshot())
+                    {
+                        if (screenshot.PicToPoint(Address.res + "\\pic\\UI\\AutoDeployON.png", opencv_errorCon: 0.95).Count == 0)
+                        {
+                            Info("代理指挥模块未激活 /正在激活代理指挥模块...");
+                            ADB.Tap(1200, 680); //激活代理指挥
+                            Thread.Sleep(500);
+                        }
+                    }
+                    Logger("usingCard=false");
+                    firstSleepTime = 600000;
+                }
+                void UseCard()
+                {
+                    firstSleepTime = 15000;
+                    Logger("usingCard=true");
+                    ann_cardAlreadyUsed++;
+                }
+                switch (result)
+                {
+                    case 0:
+                        if (ann_cardAlreadyUsed < ann_cardToUse)
+                        {
+                            ADB.Tap(1146, 666);
+                            Info("指令：启用全权委托");
+                            Thread.Sleep(500);
+                            UseCard();
+                        }
+                        else
+                        {
+                            NotUseCard();
+                        }
+                        break;
+                    case 1:
+                        if (ann_cardAlreadyUsed >= ann_cardToUse)
+                        {
+                            ADB.Tap(1146, 666);
+                            Info("指令：禁用全权委托");
+                            Thread.Sleep(500);
+                            NotUseCard();
+                        }
+                        else
+                        {
+                            UseCard();
+                        }
+                        break;
+                    case 2:
+                        NotUseCard();
+                        break;
+                }
+            }
             Logger("(" + (alreadyTime + 1) + "/" + time + ")");
 
         //开始行动
@@ -392,7 +483,7 @@ namespace ArkHelper
                     }
                 }
             }
-            ADB.Tap(1240, 559);//开始行动（红）
+            ADB.Tap(1258, 717);//开始行动（红）
             Info("指令：开始行动");
 
             //已进本，等待出本
@@ -401,7 +492,7 @@ namespace ArkHelper
             //循环检查是否在本里
             for (; ; )
             {
-                Thread.Sleep(4000);
+                Thread.Sleep(5000);
                 if (!PictureProcess.ColorCheck(77, 70, "#8C8C8C", 1341, 62, "#FFFFFF"))
                 {
                     Thread.Sleep(4500);
@@ -409,17 +500,31 @@ namespace ArkHelper
                 }
             }
 
-            //截图
-            ADB.GetScreenshot(Address.Screenshot.MB, ArkHelperDataStandard.Screenshot);
-
             //退出作战
-            for (int i = 1; i <= 2; i++)
+            Thread.Sleep(2000);
+            for (; ; )
             {
-                ADB.Tap(1204, 290); //点击空白
-                Info("指令：退出作战");
-                Thread.Sleep(1000);
+                using (var screenshot = new ADB.Screenshot())
+                {
+                    if (screenshot.PicToPoint(Address.res + "\\pic\\UI\\missionEndSymbol.png").Count != 0)
+                    {
+                        Thread.Sleep(2000);
+                        screenshot.Save(Address.Screenshot.MB, ArkHelperDataStandard.Screenshot);
+                        Touch(3000);
+                        break;
+                    }
+                    else
+                    {
+                        Touch();
+                    }
+                }
+                void Touch(int waitTime = 4000)
+                {
+                    ADB.Tap(1204, 290); //点击空白
+                    Info("指令：退出作战");
+                    Thread.Sleep(waitTime);
+                }
             }
-            Thread.Sleep(1500);
 
             //回到入口等待下一轮检测
             alreadyTime += 1;
