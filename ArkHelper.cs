@@ -694,12 +694,15 @@ namespace ArkHelper
                 return PictureProcess.PicToPoint.GetPointUsingNative(this.ImgBitmap, smallBM, errorCon, errorRange, num);*/
 
                 var a = PictureProcess.PicToPoint.GetPointUsingOpenCV(this.Location, smallimg, errorCon: opencv_errorCon);
-                string end = "";
-                foreach (var p in a)
+               
+                //log
+                string _end = "";
+                foreach (var _pot in a)
                 {
-                    end = end + p.ToString();
+                    _end = _end + _pot.ToString();
                 }
-                Output.Log("=>" + a, "PicToPoint");
+                Output.Log("=>" + _end, "PicToPoint");
+
                 return a;
             }
             private void InitBitmap()
