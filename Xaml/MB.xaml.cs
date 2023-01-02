@@ -423,7 +423,15 @@ namespace ArkHelper
 
             //回到入口等待下一轮检测
             alreadyTime += 1;
-            Next();
+            try
+            {
+                Next();
+            }
+            catch
+            {
+
+            }
+
             goto battle;
         #endregion
 
