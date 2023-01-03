@@ -293,12 +293,13 @@ namespace ArkHelper.Pages.OtherList
                             for (int j = 1; j <= 5; j++)
                             {
                                 if (i == 1 && j == 1) { continue; }
-                                Akhcmd("shell input tap " + (j * 280 + 150) + " " + (300 * i), "商品", 2);
+                                Akhcmd("shell input tap " + ((j-1) * 280 + 150) + " " + (300 * i), "商品", 2);
                                 Akhcmd("shell input tap 1042 655", "购买物品", 3);
                                 using (var sc = new ADB.Screenshot())
                                 {
                                     if (sc.PicToPoint(Address.res + @"\pic\UI\shopBuyIcon.png").Count != 0)
                                     {
+                                        i = 2;
                                         break;
                                     }
                                     else
