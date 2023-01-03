@@ -160,7 +160,22 @@ namespace ArkHelper.Pages.OtherList
                                         var point = sc.PicToPoint(Address.res + "\\pic\\UI\\loginButton" + schtData.server.id + ".png");
                                         if (point.Count != 0)
                                         {
-                                            Akhcmd("shell input tap 721 574", "开始唤醒", 0);
+                                            if(schtData.server.id == "CO" && schtData.server.login.status)
+                                            {
+                                                Akhcmd("shell input tap 1039 769", "账号管理", 2);
+                                                Akhcmd("shell input tap 593 573", "账号登录", 3);
+                                                Akhcmd("shell input tap 695 483", "账号输入", 2);
+                                                Akhcmd("shell input text "+ schtData.server.login.account, "账号：" + schtData.server.login.account, 2);
+                                                Akhcmd("shell input tap 729 341", "", 2);
+                                                Akhcmd("shell input tap 695 542", "密码输入", 2);
+                                                Akhcmd("shell input text " + schtData.server.login.password, "密码：********", 2);
+                                                Akhcmd("shell input tap 729 341", "", 2);
+                                                Akhcmd("shell input tap 718 654", "登录", 0);
+                                            }
+                                            else
+                                            {
+                                                Akhcmd("shell input tap 721 574", "开始唤醒", 0);
+                                            }
                                             break;
                                         }
                                     }

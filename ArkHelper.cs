@@ -287,6 +287,13 @@ namespace ArkHelper
                     public class Server
                     {
                         public string id { get; set; } = "CO";
+                        public Login login { get; set; } = new Login();
+                        public class Login
+                        {
+                            public bool status { get; set; } = false;
+                            public string account { get; set; } = "";
+                            public string password { get; set; } = "";
+                        }
                     }
                 }
                 public bool showHelper { get; set; } = false;
