@@ -411,7 +411,7 @@ namespace ArkHelper
                         }
                     }
                     Logger("usingCard=false");
-                    firstSleepTime = 600000;
+                    firstSleepTime = 35000;
                 }
                 void UseCard()
                 {
@@ -506,11 +506,11 @@ namespace ArkHelper
             {
                 using (var screenshot = new ADB.Screenshot())
                 {
-                    if (screenshot.PicToPoint(Address.res + "\\pic\\UI\\missionEndSymbol.png").Count != 0)
+                    if (screenshot.PicToPoint(Address.res + "\\pic\\UI\\missionEndSymbol.png",opencv_errorCon:0.95).Count != 0)
                     {
                         Thread.Sleep(2000);
                         screenshot.Save(Address.Screenshot.MB, ArkHelperDataStandard.Screenshot);
-                        Touch(3000);
+                        Touch(4000);
                         break;
                     }
                     else
