@@ -64,6 +64,11 @@ namespace ArkHelper
 
                 VersionNumber = 1000 * getInt(0) + 100 * getInt(1) + 10 * getInt(2) + 1 * getInt(3);
             }
+
+            public override string ToString()
+            {
+                return Version + Type;
+            }
         }
 
         public static Data Current = new Data("2.0.0.1", "local", false, Data.VersionType.beta);

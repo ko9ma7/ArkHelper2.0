@@ -176,6 +176,8 @@ namespace ArkHelper
                 Current.Shutdown();
             }
 
+            Output.Log("ArkHelper Startup,ver=" + Version.Current.ToString() + ",currentDirectory=" + Address.akh + ",dataDirectory=" + Address.data);
+
             #region 启动message装载
 
             if (Data.message.status)
