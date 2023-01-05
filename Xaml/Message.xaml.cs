@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
+using System.Linq.Expressions;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text.Json;
 using System.Threading;
@@ -47,7 +48,15 @@ namespace ArkHelper.Pages
                 {
                     // 微博
                     case ArkHelperDataStandard.MessageSource.weibo:
-                        JsonElement _userinfo = Net.GetFromApi("https://m.weibo.cn/api/container/getIndex?type=uid&value=" + UID).GetProperty("data").GetProperty("userInfo");
+                        JsonElement __userinfo = Net.GetFromApi("https://m.weibo.cn/api/container/getIndex?type=uid&value=" + UID);
+                    st:;
+                        JsonElement _userinfo;
+                        try
+                        {
+                            _userinfo = __userinfo.GetProperty("data").GetProperty("userInfo");
+                        }
+                        catch{ goto st; }
+
                         Avatar = _userinfo.GetProperty("profile_image_url").GetString();
                         Name = _userinfo.GetProperty("screen_name").GetString();
                         break;
