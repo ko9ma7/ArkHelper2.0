@@ -232,7 +232,7 @@ namespace ArkHelper
         /// 获取星期在中文中对应的下标
         /// </summary>
         /// <param name="week"></param>
-        /// <returns>对于星期日，返回6；否则返回x（其中x为“星期”后的数字）</returns>
+        /// <returns>对于星期日，返回6；否则返回x-1（其中x为“星期”后的数字）</returns>
         public static int GetWeekSubInChinese(System.DayOfWeek week)
         {
             var _wek = (int)week - 1;

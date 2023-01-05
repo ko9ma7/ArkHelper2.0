@@ -383,16 +383,16 @@ namespace ArkHelper.Pages.OtherList
             {
                 //找到周期时间中最早的DateTime
                 var weekEarliestTime = nullTime;
-                for (int i = 0; i < 14; i++)//不成就加一，代表次日
+                for (int i = 0; i < 8; i++)//不成就加一，代表次日
                 {
                     foreach (DateTime ableToRunTimeInList in App.Data.scht.ct.times)
                     {
                         DateTime time = new DateTime(year: nowTime.Year,
                                                      month: nowTime.Month,
-                                                     day: nowTime.Day + i,
+                                                     day: nowTime.Day,
                                                      hour: ableToRunTimeInList.Hour,
                                                      minute: ableToRunTimeInList.Minute,
-                                                     second: 59);
+                                                     second: 59) + new TimeSpan(i,0,0,0);
                         if (time >= nowTime
                             && App.Data.scht.ct.weekFliter[ArkHelperDataStandard.GetWeekSubInChinese(time.DayOfWeek)])
                         {
@@ -484,7 +484,7 @@ namespace ArkHelper.Pages.OtherList
                 }
                 else
                 {
-                    App.Data.scht.ct.times.Add(new DateTime(time.Year, time.Month, time.Day, time.Hour, time.Minute, 59));
+                    App.Data.scht.ct.times.Add(new DateTime(2000, 1, 1, time.Hour, time.Minute, 59));
                 }
             }
             App.Data.scht.ct.times.Sort();
