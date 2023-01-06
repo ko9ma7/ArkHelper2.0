@@ -18,13 +18,13 @@ namespace ArkHelper.Xaml
             public string Name { get; set; }
             public string ID { get; set; }
             public PackIconKind Icon { get; set; }
-            public bool IsHidden { get; set; }
-            public Menu(string name, string id, PackIconKind icon, bool ishidden = false)
+            public bool Sync { get; set; }
+            public Menu(string name, string id, PackIconKind icon, bool sync = false)
             {
                 Name = name;
                 ID = id;
                 Icon = icon;
-                IsHidden = ishidden;
+                Sync = sync;
             }
         }
 
@@ -42,7 +42,7 @@ namespace ArkHelper.Xaml
                 new Menu("寻访记录查询","UserData_Gacha",PackIconKind.AccountCheck),
                 new Menu("SCHT控制台","SCHT",PackIconKind.ThermostatAuto,false),
                 //new Menu("材料计算器","MaterialCalc",PackIconKind.Material),
-                new Menu("SCHT","SCHTRunning",PackIconKind.ThermostatAuto,false),
+                new Menu("SCHT","SCHTRunning",PackIconKind.ThermostatAuto,true),
             },
             new List<Menu>()
             {
@@ -115,7 +115,7 @@ namespace ArkHelper.Xaml
                         {
                             rb.Visibility = Visibility.Visible;
                             rb.IsChecked = true;
-                            if (rb.Name == "SCHTRunning") FuncList.IsEnabled = false;
+                            //if (rb.Name == "SCHTRunning") FuncList.IsEnabled = false;
                             break;
                         }
                     }
@@ -135,7 +135,7 @@ namespace ArkHelper.Xaml
                 {
                     if (page == menub.ID)
                     {
-                        needIndependentFrame = menub.IsHidden;
+                        needIndependentFrame = menub.Sync;
                         goto end;
                     }
                 }
