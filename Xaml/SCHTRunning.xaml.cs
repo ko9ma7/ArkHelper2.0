@@ -277,10 +277,13 @@ namespace ArkHelper.Pages.OtherList
                             Info("指令：制造站");
                             Thread.Sleep(2000);
                             Akhcmd("shell input tap 327 691", "制造计划", 2);
-                            Akhcmd("shell input tap 1371 603", "加速", 2);
-                            Akhcmd("shell input tap 1081 377", "最多", 1);
-                            Akhcmd("shell input tap 1069 653", "确定", 2);
-                            Akhcmd("shell input tap 1258 711", "收取", 2);
+                            if (schtData.control.usingUAVToSpeedUpProduction)
+                            {
+                                Akhcmd("shell input tap 1371 603", "加速", 2);
+                                Akhcmd("shell input tap 1081 377", "最多", 1);
+                                Akhcmd("shell input tap 1069 653", "确定", 2);
+                                Akhcmd("shell input tap 1258 711", "收取", 2);
+                            }
                             Akhcmd("shell input tap 89 50", "返回", 2);
                             Akhcmd("shell input tap 89 50", "返回", 2);
                         }
@@ -304,7 +307,7 @@ namespace ArkHelper.Pages.OtherList
                         Akhcmd("shell input tap 722 719", "收取", 2);
                         Akhcmd("shell input tap 746 51", "", 2);
 
-                        for (int i = 1; i <= 2; i++)
+                        for (int i = 1; i <= 2 && schtData.control.buyThingsInShop; i++)
                         {
                             for (int j = 1; j <= 5; j++)
                             {

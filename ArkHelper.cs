@@ -300,6 +300,13 @@ namespace ArkHelper
                             public string password { get; set; } = "";
                         }
                     }
+
+                    public Control control { get; set; } = new Control();
+                    public class Control
+                    {
+                        public bool usingUAVToSpeedUpProduction { get; set; } = true;
+                        public bool buyThingsInShop { get; set; } = true;
+                    }
                 }
                 public bool showHelper { get; set; } = false;
                 public bool showGuide { get; set; } = true;
