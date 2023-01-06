@@ -168,7 +168,8 @@ namespace ArkHelper.Pages.OtherList
                                                 Akhcmd("shell input text "+ schtData.server.login.account, "账号：" + schtData.server.login.account, 2);
                                                 Akhcmd("shell input tap 729 341", "", 2);
                                                 Akhcmd("shell input tap 695 542", "密码输入", 2);
-                                                Akhcmd("shell input text " + schtData.server.login.password, "密码：********", 2);
+                                                string _ = "";foreach(char __ in schtData.server.login.password) _+= "*";
+                                                Akhcmd("shell input text " + schtData.server.login.password, "密码：" + _, 2);
                                                 Akhcmd("shell input tap 729 341", "", 2);
                                                 Akhcmd("shell input tap 718 654", "登录", 0);
                                             }
