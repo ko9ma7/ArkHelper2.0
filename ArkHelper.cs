@@ -1312,8 +1312,8 @@ namespace ArkHelper
                 dataSheet.Rows.Add("CB", "明日方舟", "明日方舟（国服，CN，bilibili）", "com.hypergryph.arknights.bilibili");
                 dataSheet.Rows.Add("JP", "アークナイツ", "アークナイツ（日服，JP，悠星网络）", "com.YoStarJP.Arknights");
                 dataSheet.Rows.Add("EN", "Arknights", "Arknights（英服，EN，悠星网络）", "com.YoStarEN.Arknights");
-                dataSheet.Rows.Add("KR", "명일방주", "명일방주（韩服，KR，悠星网络）", "com.YoStarKR.Arknights");
-                dataSheet.Rows.Add("TW", "明日方舟", "明日方舟（台服，TW，龙成网络）", "tw.txwy.and.arknights");
+                //dataSheet.Rows.Add("KR", "명일방주", "명일방주（韩服，KR，悠星网络）", "com.YoStarKR.Arknights");
+                //dataSheet.Rows.Add("TW", "明日方舟", "明日方舟（台服，TW，龙成网络）", "tw.txwy.and.arknights");
             }
         }
     }

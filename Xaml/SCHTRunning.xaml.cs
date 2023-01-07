@@ -293,7 +293,7 @@ namespace ArkHelper.Pages.OtherList
                         }
                     }
 
-                    if (schtData.control.clue && schtData.server.id != "TW")
+                    if (schtData.control.clue)
                     {
                         var cluePinnedInfo = new List<Tuple<int, int, int, int, int, int, int>>()
                         {
