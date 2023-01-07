@@ -19,6 +19,9 @@ using System.Security.Policy;
 using System.Net;
 using Windows.ApplicationModel;
 using Windows.Media.Playback;
+using Windows.Networking.Vpn;
+using Windows.ApplicationModel.Contacts.DataProvider;
+using System.Reflection;
 
 namespace ArkHelper.Pages.OtherList
 {
@@ -120,7 +123,7 @@ namespace ArkHelper.Pages.OtherList
                         string NewestLink = response.Headers["Location"];
                         //获取游戏版本号
                         string _infoText = ADB.CMD(@"shell ""pm dump com.hypergryph.arknights | grep versionName""");
-                        string verNow = _infoText.Substring(_infoText.IndexOf("=")+1, _infoText.IndexOf("\r") - _infoText.IndexOf("=")-"=".Length).Replace(".", "");
+                        string verNow = _infoText.Substring(_infoText.IndexOf("=") + 1, _infoText.IndexOf("\r") - _infoText.IndexOf("=") - "=".Length).Replace(".", "");
                         //检查版本是否匹配
                         if (!NewestLink.Contains(verNow + ".apk"))
                         {
@@ -160,15 +163,15 @@ namespace ArkHelper.Pages.OtherList
                                         var point = sc.PicToPoint(Address.res + "\\pic\\UI\\loginButton" + schtData.server.id + ".png");
                                         if (point.Count != 0)
                                         {
-                                            if(schtData.server.id == "CO" && schtData.server.login.status)
+                                            if (schtData.server.id == "CO" && schtData.server.login.status)
                                             {
                                                 Akhcmd("shell input tap 1039 769", "账号管理", 2);
                                                 Akhcmd("shell input tap 593 573", "账号登录", 3);
                                                 Akhcmd("shell input tap 695 483", "账号输入", 2);
-                                                Akhcmd("shell input text "+ schtData.server.login.account, "账号：" + schtData.server.login.account, 2);
+                                                Akhcmd("shell input text " + schtData.server.login.account, "账号：" + schtData.server.login.account, 2);
                                                 Akhcmd("shell input tap 729 341", "", 2);
                                                 Akhcmd("shell input tap 695 542", "密码输入", 2);
-                                                string _ = "";foreach(char __ in schtData.server.login.password) _+= "*";
+                                                string _ = ""; foreach (char __ in schtData.server.login.password) _ += "*";
                                                 Akhcmd("shell input text " + schtData.server.login.password, "密码：" + _, 2);
                                                 Akhcmd("shell input tap 729 341", "", 2);
                                                 Akhcmd("shell input tap 718 654", "登录", 0);
@@ -288,6 +291,81 @@ namespace ArkHelper.Pages.OtherList
                             Akhcmd("shell input tap 89 50", "返回", 2);
                         }
                     }
+
+                    if (schtData.control.clue)
+                    {
+                        var cluePinnedInfo = new List<Tuple<int, int, int>>()
+                        {
+                            Tuple.Create(1,433,252),
+                            Tuple.Create(2,671,332),
+                            Tuple.Create(3,882,231),
+                            Tuple.Create(4,1120,295),
+                            Tuple.Create(5,740,547),
+                            Tuple.Create(6,1001,527),
+                            Tuple.Create(7,482,506)
+                        };
+                        var isOnBoard = new bool[7]
+                        {
+                            true,true,true,true,true,true,true
+                        };
+                        Akhcmd("shell input tap 1339 225", "会客室", 2);
+                        Akhcmd("shell input tap 345 684", "", 2);
+                        //截图检查线索摆放情况
+                        using (ADB.Screenshot sc = new ADB.Screenshot())
+                        {
+                            foreach (var clue in cluePinnedInfo)
+                            {
+                                int clueNum = clue.Item1;
+                                /*if (sc.PicToPoint(Address.res + "\\pic\\UI\\clue" + clueNum + ".png",opencv_errorCon:0.1).Count != 0)
+                                {
+                                    isOnBoard[clueNum - 1] = true;
+                                }*/
+                                if (PictureProcess.ColorPick(sc.Location, clue.Item2, clue.Item3)[0] == "#FFFFFF")
+                                {
+                                    isOnBoard[clueNum - 1] = false;
+                                }
+                            }
+                            foreach (var a in sc.PicToPoint(Address.res + "\\pic\\UI\\clueNew.png"))
+                            {
+                                Akhcmd("shell input tap " + (a.X - 50) + " " + (a.Y + 20), "", 2);
+                                bool getSelf = false;
+                                using (var sc1 = new ADB.Screenshot())
+                                {
+                                    if (sc1.PicToPoint(Address.res + "\\pic\\UI\\close.png").Count != 0) getSelf = true;
+                                }
+                                if (getSelf)
+                                {
+                                    Akhcmd("shell input tap 907 651", "领取线索", 5);
+                                    Akhcmd("shell input tap 1108 112", "关闭", 2);
+                                }
+                                else
+                                {
+                                    Akhcmd("shell input tap 1193 764", "全部收取", 2);
+                                    Akhcmd("shell input tap 322 117", "", 2);
+                                }
+                            }
+                        }
+
+                        foreach (var clue in cluePinnedInfo)
+                        {
+                            int clueNum = clue.Item1;
+                            if (!isOnBoard[clueNum - 1])
+                            {
+                                Akhcmd("shell input tap " + clue.Item2 + " " + clue.Item3, "线索" + clueNum, 3);
+                                Akhcmd("shell input tap 1160 264", "第一条线索", 2);
+                                Akhcmd("shell input tap 322 117", "", 2);
+                            }
+                        }
+
+                        Akhcmd("shell input tap 1349 441", "传递线索", 4);
+                        Akhcmd("shell input tap 231 251", "第一条线索", 1);
+                        Akhcmd("shell input tap 1345 142", "传递线索", 3);
+                        Akhcmd("shell input tap 1399 43", "关闭", 2);
+                        Akhcmd("shell input tap 765 740", "线索交流", 3);
+                        Akhcmd("shell input tap 89 50", "返回", 2);
+                        Akhcmd("shell input tap 89 50", "返回", 2);
+                    }
+
                     Akhcmd("shell input tap 89 50", "返回", 2);
                     Akhcmd("shell input tap 962 555", "确认", 5);
                     if (AMmode == true)
@@ -352,7 +430,7 @@ namespace ArkHelper.Pages.OtherList
                         if (PictureProcess.ColorCheck(431, 770, "#FFFFFF", 432, 770, "#FFFFFF")) { }
                         else
                         {
-                            MB.MBCore(MB.Mode.time, anntime,ann_cardToUse:schtData.ann.allowToUseCard?10:0);
+                            MB.MBCore(MB.Mode.time, anntime, ann_cardToUse: schtData.ann.allowToUseCard ? 10 : 0);
                         }
 
                         Akhcmd("shell input tap 299 46", "菜单", 1);

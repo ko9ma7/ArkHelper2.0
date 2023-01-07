@@ -306,6 +306,7 @@ namespace ArkHelper
                     {
                         public bool usingUAVToSpeedUpProduction { get; set; } = true;
                         public bool buyThingsInShop { get; set; } = true;
+                        public bool clue { get; set; } = true;
                     }
                 }
                 public bool showHelper { get; set; } = false;
@@ -659,7 +660,7 @@ namespace ArkHelper
             public class ScreenshotNotAvailableException : NullReferenceException
             {
             }
-            private string Location { get; set; }
+            public string Location { get; set; }
             private Bitmap ImgBitmap { get; set; }
             public Screenshot()
             {
