@@ -59,7 +59,10 @@ namespace ArkHelper.Xaml
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            File.WriteAllText(@"C:\Users\evative7\Desktop\DownloaderComments.json", JsonSerializer.Serialize(Version.Current));
+            using (var sc = new ADB.Screenshot())
+            {
+                
+            }
         }
     }
 }

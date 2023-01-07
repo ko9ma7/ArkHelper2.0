@@ -293,17 +293,17 @@ namespace ArkHelper.Pages.OtherList
                         }
                     }
 
-                    if (schtData.control.clue)
+                    if (schtData.control.clue && schtData.server.id != "TW")
                     {
-                        var cluePinnedInfo = new List<Tuple<int, int, int>>()
+                        var cluePinnedInfo = new List<Tuple<int, int, int, int, int, int, int>>()
                         {
-                            Tuple.Create(1,433,252),
-                            Tuple.Create(2,671,332),
-                            Tuple.Create(3,882,231),
-                            Tuple.Create(4,1120,295),
-                            Tuple.Create(5,740,547),
-                            Tuple.Create(6,1001,527),
-                            Tuple.Create(7,482,506)
+                            Tuple.Create(1,433,252,0,0,437,252),
+                            Tuple.Create(2,671,332,0,0,658,335),
+                            Tuple.Create(3,882,231,0,0,892,228),
+                            Tuple.Create(4,1120,295,0,0,1140,291),
+                            Tuple.Create(5,740,547,752,567,447,589),
+                            Tuple.Create(6,1001,527,687,524,0,0),
+                            Tuple.Create(7,482,506,0,0,0,0)
                         };
                         var isOnBoard = new bool[7]
                         {
@@ -321,14 +321,37 @@ namespace ArkHelper.Pages.OtherList
                                 {
                                     isOnBoard[clueNum - 1] = true;
                                 }*/
-                                if (PictureProcess.ColorPick(sc.Location, clue.Item2, clue.Item3)[0] == "#FFFFFF")
+                                int XForColorPick = clue.Item2;
+                                int YForColorPick = clue.Item3;
+                                switch (schtData.server.id)
+                                {
+                                    case "JP":
+                                        if (clue.Item4 != 0) XForColorPick = clue.Item4;
+                                        if (clue.Item5 != 0) YForColorPick = clue.Item5;
+                                        break;
+                                    case "EN":
+                                        if (clue.Item6 != 0) XForColorPick = clue.Item6;
+                                        if (clue.Item7 != 0) YForColorPick = clue.Item7;
+                                        break;
+                                }
+                                if (PictureProcess.ColorPick(sc.Location, XForColorPick, YForColorPick)[0] == "#FFFFFF")
                                 {
                                     isOnBoard[clueNum - 1] = false;
                                 }
                             }
-                            foreach (var a in sc.PicToPoint(Address.res + "\\pic\\UI\\clueNew.png"))
+                            var _newPosition = sc.PicToPoint(Address.res + "\\pic\\UI\\clueNew.png", 0.9);
+                            var newPosition = new List<System.Drawing.Point>();
+                            for(; ; )
                             {
-                                Akhcmd("shell input tap " + (a.X - 50) + " " + (a.Y + 20), "", 2);
+                                if (_newPosition.Count == 0) break;
+                                var examplePoint = _newPosition[0];
+                                _newPosition.RemoveAll(t=> Math.Abs(t.Y-examplePoint.Y) < 50);
+                                newPosition.Add(examplePoint);
+                            }
+
+                            foreach (var @new in newPosition)
+                            {
+                                Akhcmd("shell input tap " + (@new.X - 50) + " " + (@new.Y + 20), "", 2);
                                 bool getSelf = false;
                                 using (var sc1 = new ADB.Screenshot())
                                 {
@@ -401,12 +424,12 @@ namespace ArkHelper.Pages.OtherList
                                 }
                                 foreach (var room in roomInfo)
                                 {
-                                    ADB.Tap(room.Item2);Info("指令：房间");Thread.Sleep(2000);
-                                    for(int j = 1; ; )
+                                    ADB.Tap(room.Item2); Info("指令：房间"); Thread.Sleep(2000);
+                                    for (int j = 1; ;)
                                     {
-                                        int X = 549 + ((j-1)/2)*161;
-                                        int Y = (j%2==0)?555:234;
-                                        Akhcmd("shell input tap "+ X + " " + Y, "干员" + j, 1);
+                                        int X = 549 + ((j - 1) / 2) * 161;
+                                        int Y = (j % 2 == 0) ? 555 : 234;
+                                        Akhcmd("shell input tap " + X + " " + Y, "干员" + j, 1);
                                         if (j == room.Item1) break;
                                         j++;
                                     }
