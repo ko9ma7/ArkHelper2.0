@@ -22,6 +22,7 @@ using Windows.Media.Playback;
 using Windows.Networking.Vpn;
 using Windows.ApplicationModel.Contacts.DataProvider;
 using System.Reflection;
+using System.Linq;
 
 namespace ArkHelper.Pages.OtherList
 {
@@ -366,6 +367,58 @@ namespace ArkHelper.Pages.OtherList
                         Akhcmd("shell input tap 89 50", "返回", 2);
                     }
 
+                    if (schtData.control.changeOperatorWork)
+                    {
+                        Akhcmd("shell input tap 147 141", "进驻一览", 2);
+                        for (int i = 0; ; i++)
+                        {
+                            if (i == 5) break;
+                            Akhcmd("shell input tap 1237 48", "撤下干员", 2);
+                            using (var sc = new ADB.Screenshot())
+                            {
+                                var tkdPosition = sc.PicToPoint(Address.res + "\\pic\\UI\\takeDownOperator.png", opencv_errorCon: 0.9);
+                                tkdPosition.RemoveAll(t => t.Y < 100);
+                                foreach (var poi in tkdPosition)
+                                {
+                                    ADB.Tap(poi); Info("指令：撤下干员"); Thread.Sleep(1300);
+                                    Akhcmd("shell input tap 1417 553", "确定", 2);
+                                }
+
+                                Akhcmd("shell input tap 1237 48", "取消撤下干员", 2);
+                                var sc1 = new ADB.Screenshot();
+                                var plusPosition = sc1.PicToPoint(Address.res + "\\pic\\UI\\takeDownPlus.png", opencv_errorCon: 0.85);
+                                sc1.Dispose();
+                                var roomInfo = new List<Tuple<int, System.Drawing.Point>>();//房间容纳数，第一个目标点
+                                for (; ; )
+                                {
+                                    if (plusPosition.Count == 0) break;
+                                    List<System.Drawing.Point> roomOperators = new List<System.Drawing.Point>();
+                                    var examplePoint = plusPosition[0];
+                                    var _ = plusPosition.FindAll(t => Math.Abs(t.Y - examplePoint.Y) < 150);
+                                    roomOperators.AddRange((IEnumerable<System.Drawing.Point>)_);
+                                    plusPosition.RemoveAll(t => Math.Abs(t.Y - examplePoint.Y) < 150);
+                                    roomInfo.Add(Tuple.Create(roomOperators.Count, roomOperators[0]));
+                                }
+                                foreach (var room in roomInfo)
+                                {
+                                    ADB.Tap(room.Item2);Info("指令：房间");Thread.Sleep(2000);
+                                    for(int j = 1; ; )
+                                    {
+                                        int X = 549 + ((j-1)/2)*161;
+                                        int Y = (j%2==0)?555:234;
+                                        Akhcmd("shell input tap "+ X + " " + Y, "干员" + j, 1);
+                                        if (j == room.Item1) break;
+                                        j++;
+                                    }
+                                    Akhcmd("shell input tap 1326 768", "确认", 2);
+                                }
+
+                                Akhcmd("shell input swipe 1350 " + tkdPosition.Max(t => t.Y) + " 1350 100 2000");
+                            }
+                        }
+                        Akhcmd("shell input tap 89 50", "返回", 2);
+                    }
+
                     Akhcmd("shell input tap 89 50", "返回", 2);
                     Akhcmd("shell input tap 962 555", "确认", 5);
                     if (AMmode == true)
@@ -390,7 +443,7 @@ namespace ArkHelper.Pages.OtherList
                             for (int j = 1; j <= 5; j++)
                             {
                                 if (i == 1 && j == 1) { continue; }
-                                Akhcmd("shell input tap " + ((j-1) * 280 + 150) + " " + (300 * i), "商品", 2);
+                                Akhcmd("shell input tap " + ((j - 1) * 280 + 150) + " " + (300 * i), "商品", 2);
                                 Akhcmd("shell input tap 1042 655", "购买物品", 3);
                                 using (var sc = new ADB.Screenshot())
                                 {

@@ -307,6 +307,7 @@ namespace ArkHelper
                         public bool usingUAVToSpeedUpProduction { get; set; } = true;
                         public bool buyThingsInShop { get; set; } = true;
                         public bool clue { get; set; } = true;
+                        public bool changeOperatorWork { get; set; } = false;
                     }
                 }
                 public bool showHelper { get; set; } = false;
