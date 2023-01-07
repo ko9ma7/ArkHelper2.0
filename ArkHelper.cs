@@ -477,7 +477,7 @@ namespace ArkHelper
                 if (Process.GetProcessesByName(ConnectedInfo.IM).Length == 0)
                 {
                     ConnectedInfo = null;
-                    Output.Log("Simulator Lost Connection","ADB");
+                    Output.Log("Simulator Lost Connection", "ADB");
                 }
                 else
                     return;
@@ -707,7 +707,7 @@ namespace ArkHelper
 
                 if (!File.Exists(smallimg))
                 {
-                    Output.Log("=>[null image]", "PicToPoint");
+                    Output.Log("=>[image not exist]", "PicToPoint", Output.InfoKind.Error);
                     return new List<Point>();
                 }
 
@@ -717,7 +717,7 @@ namespace ArkHelper
                 return PictureProcess.PicToPoint.GetPointUsingNative(this.ImgBitmap, smallBM, errorCon, errorRange, num);*/
 
                 var a = PictureProcess.PicToPoint.GetPointUsingOpenCV(this.Location, smallimg, errorCon: opencv_errorCon);
-               
+
                 //log
                 string _end = "";
                 foreach (var _pot in a)
@@ -822,8 +822,23 @@ namespace ArkHelper
         /// <returns>16进制点颜色</returns>
         public static string[] ColorPick(string img, params int[] param)
         {
+            Output.Log("from " + img, "ColorPick");
+            string _ = "";
+            foreach (int i in param)
+            {
+                _ += i.ToString() + ",";
+            }
+            Output.Log(_, "ColorPick");
+
             if (param.Length % 2 != 0)
             {
+                Output.Log("=>[Num of param is not an odd]", "ColorPick", Output.InfoKind.Error);
+                return new string[0];
+            }
+
+            if (!File.Exists(img))
+            {
+                Output.Log("=>[image not exist]", "ColorPick", Output.InfoKind.Error);
                 return new string[0];
             }
 
@@ -836,8 +851,15 @@ namespace ArkHelper
                     _bitmap.GetPixel(param[i * 2], param[i * 2 + 1])
                     );
             }
-
             _bitmap.Dispose();
+
+            string __ = "";
+            foreach (string i in _strings)
+            {
+                __ += i.ToString() + ",";
+            }
+            Output.Log("=>" + __, "ColorPick");
+
             return _strings;
         }
 
