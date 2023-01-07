@@ -458,7 +458,7 @@ namespace ArkHelper
         beginTask:;
             ADB.Tap(1266, 753);
             Info("指令：开始行动");
-            Thread.Sleep(2000);
+            Thread.Sleep(3500);
 
             using (ADB.Screenshot screenshot = new ADB.Screenshot())
             {
