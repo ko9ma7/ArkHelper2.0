@@ -311,6 +311,11 @@ namespace ArkHelper.Pages.OtherList
                         };
                         Akhcmd("shell input tap 1339 225", "会客室", 2);
                         Akhcmd("shell input tap 345 684", "", 2);
+                        using (ADB.Screenshot sc = new ADB.Screenshot())
+                        {
+                            if (sc.PicToPoint(Address.res + "\\pic\\UI\\creditPointInExchangeEndScreen.png").Count!=0)
+                                Akhcmd("shell input tap 89 50", "返回", 2);
+                        }
                         //截图检查线索摆放情况
                         using (ADB.Screenshot sc = new ADB.Screenshot())
                         {
