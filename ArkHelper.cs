@@ -1240,13 +1240,17 @@ namespace ArkHelper
         public static void Log(string content, string module = "ArkHelper", InfoKind infokind = InfoKind.Infomational)
         {
             if (!App.Data.arkHelper.debug) return;
-            Text(DateTime.Now.ToString("s")
+            string text = DateTime.Now.ToString("s")
                 + " "
                 + "[" + module + "]"
                 + " "
                 + "[" + infokind.ToString() + "]"
                 + " "
-                + content
+                + content;
+#if DEBUG
+            Console.WriteLine(text);
+#endif
+            Text(text
                 , ArkHelperDataStandard.Log
                 );
         }
@@ -1477,7 +1481,7 @@ namespace ArkHelper
         }
     }
 
-    #region
+#region
     namespace thing
     {
         /// <summary>
@@ -1646,5 +1650,5 @@ namespace ArkHelper
         }*/
 
     }
-    #endregion
+#endregion
 }
