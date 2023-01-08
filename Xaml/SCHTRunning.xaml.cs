@@ -434,6 +434,14 @@ namespace ArkHelper.Pages.OtherList
                                         j++;
                                     }
                                     Akhcmd("shell input tap 1326 768", "确认", 2);
+                                    using (var sc2 = new ADB.Screenshot())
+                                    {
+                                        if (sc2.PicToPoint(Address.res + "\\pic\\UI\\confirm.png").Count != 0)
+                                        {
+                                            Akhcmd("shell input tap 356 768", "取消", 2);
+                                            Akhcmd("shell input tap 89 50", "返回", 2);
+                                        }
+                                    }
                                 }
 
                                 Akhcmd("shell input swipe 1350 " + tkdPosition.Max(t => t.Y) + " 1350 100 2000");
