@@ -295,7 +295,7 @@ namespace ArkHelper.Pages.OtherList
                         }
                     }
 
-                    if (schtData.control.clue)
+                    if (schtData.control.clue && AMmode)
                     {
                         var cluePinnedInfo = new List<Tuple<int, int, int, int, int, int, int>>()
                         {
@@ -397,7 +397,7 @@ namespace ArkHelper.Pages.OtherList
                         Akhcmd("shell input tap 89 50", "返回", 2);
                     }
 
-                    if (schtData.control.changeOperatorWork)
+                    if (schtData.control.changeOperatorWork && AMmode)
                     {
                         Akhcmd("shell input tap 147 141", "进驻一览", 2);
                         for (int i = 0; ; i++)
