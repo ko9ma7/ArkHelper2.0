@@ -308,6 +308,7 @@ namespace ArkHelper
                         public bool buyThingsInShop { get; set; } = true;
                         public bool clue { get; set; } = true;
                         public bool changeOperatorWork { get; set; } = false;
+                        public List<string> operatorsNotToUse { get; set; } = new List<string>();
                     }
                 }
                 public bool showHelper { get; set; } = false;

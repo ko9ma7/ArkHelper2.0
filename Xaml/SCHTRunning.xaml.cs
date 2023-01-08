@@ -315,7 +315,7 @@ namespace ArkHelper.Pages.OtherList
                         Akhcmd("shell input tap 345 684", "", 2);
                         using (ADB.Screenshot sc = new ADB.Screenshot())
                         {
-                            if (sc.PicToPoint(Address.res + "\\pic\\UI\\creditPointInExchangeEndScreen.png").Count!=0)
+                            if (sc.PicToPoint(Address.res + "\\pic\\UI\\creditPointInExchangeEndScreen.png").Count != 0)
                                 Akhcmd("shell input tap 89 50", "返回", 2);
                         }
                         //截图检查线索摆放情况
@@ -348,11 +348,11 @@ namespace ArkHelper.Pages.OtherList
                             }
                             var _newPosition = sc.PicToPoint(Address.res + "\\pic\\UI\\clueNew.png", 0.9);
                             var newPosition = new List<System.Drawing.Point>();
-                            for(; ; )
+                            for (; ; )
                             {
                                 if (_newPosition.Count == 0) break;
                                 var examplePoint = _newPosition[0];
-                                _newPosition.RemoveAll(t=> Math.Abs(t.Y-examplePoint.Y) < 50);
+                                _newPosition.RemoveAll(t => Math.Abs(t.Y - examplePoint.Y) < 50);
                                 newPosition.Add(examplePoint);
                             }
 
@@ -432,13 +432,43 @@ namespace ArkHelper.Pages.OtherList
                                 foreach (var room in roomInfo)
                                 {
                                     ADB.Tap(room.Item2); Info("指令：房间"); Thread.Sleep(2000);
-                                    for (int j = 1; ;)
+
+                                    var operatorNotToUseSkillIconPosition = new List<Point>();
+                                    using (Screenshot screenshot = new Screenshot())
                                     {
-                                        int X = 549 + ((j - 1) / 2) * 161;
-                                        int Y = (j % 2 == 0) ? 555 : 234;
-                                        Akhcmd("shell input tap " + X + " " + Y, "干员" + j, 1);
-                                        if (j == room.Item1) break;
-                                        j++;
+                                        foreach (string operatorNotToUse in schtData.control.operatorsNotToUse)
+                                        {
+                                            var bs = screenshot.PicToPoint(Address.res + "\\pic\\BaseSkill\\" + operatorNotToUse + ".png", 0.9);
+                                            if (bs.Count != 0)
+                                            {
+                                                operatorNotToUseSkillIconPosition.AddRange(bs);
+                                            }
+                                        }
+                                    }
+
+                                    for (int index = 0, alreadySelected = 0; ;)
+                                    {
+                                        if (alreadySelected == room.Item1 || index > 10) break;
+
+                                        index++;
+
+                                        int X = 549 + ((index - 1) / 2) * 161;
+                                        int Y = (index % 2 == 0) ? 555 : 234;
+
+                                        if (operatorNotToUseSkillIconPosition.Exists
+                                        (t =>X - t.X < 80
+                                        && X - t.X > 0
+                                        && t.Y - Y < 100
+                                        && t.Y - Y > 0))
+                                        {
+                                            continue;
+                                        }
+                                        else
+                                        {
+                                            alreadySelected++;
+                                        }
+
+                                        Akhcmd("shell input tap " + X + " " + Y, "干员" + alreadySelected, 1);
                                     }
                                     Akhcmd("shell input tap 1326 768", "确认", 2);
                                     using (var sc2 = new ADB.Screenshot())
