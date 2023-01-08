@@ -23,6 +23,8 @@ using Windows.Networking.Vpn;
 using Windows.ApplicationModel.Contacts.DataProvider;
 using System.Reflection;
 using System.Linq;
+using System.Drawing;
+using Point = System.Drawing.Point;
 
 namespace ArkHelper.Pages.OtherList
 {
@@ -531,16 +533,18 @@ namespace ArkHelper.Pages.OtherList
                     {
                         using (var _screenshot = new ADB.Screenshot())
                         {
-                            var _point = _screenshot.PicToPoint(Address.res + "\\pic\\battle\\" + "threeStarCp" + ".png");
-                            if (_point.Count != 0)
+                            var points = _screenshot.PicToPoint(Address.res + "\\pic\\battle\\" + "threeStarCp" + ".png");
+                            if (points.Count != 0)
                             {
-                                System.Drawing.Point point1 = new System.Drawing.Point(0, 10000);
-                                foreach (var point in _point)
+                                points.Sort((x, y) => x.Y.CompareTo(y.Y));//Y最小的排第一 //fu 可替换
+                                foreach (var point in points)
                                 {
-                                    if (point.Y < point1.Y) point1 = point;
+                                    ADB.Tap(point);
+                                    if (MB.MBCore(MB.Mode.time, 0).Type != MB.MBResult.ResultType.Error_AutoDeployNotAvailable)
+                                        break;
+                                    else
+                                        Akhcmd("shell input tap 89 50", "返回", 2);
                                 }
-
-                                ADB.Tap(point1);
                             }
                         }
                         Thread.Sleep(1000);
