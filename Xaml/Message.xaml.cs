@@ -176,20 +176,16 @@ namespace ArkHelper.Pages
                 public string Small { get; set; }
                 public string Link { get; set; }
                 public MediaType Type { get; set; }
-                public int Height { get; set; }
-                public int Width { get; set; }
                 public enum MediaType
                 {
                     photo,
                     video
                 }
-                public Media(string viewPic, string link, MediaType type, int height, int width)
+                public Media(string viewPic, string link, MediaType type)
                 {
                     Small = viewPic;
                     Link = link;
                     Type = type;
-                    Height = height;
-                    Width = width;
                 }
                 public Media() { }
             }
@@ -279,11 +275,9 @@ namespace ArkHelper.Pages
                     {
                         Text = Text.Replace("<br />", "\n");
                         int _lef = Text.IndexOf("<");
-                        try
-                        {
+                        if(_lef != -1)
                             Text = Text.Remove(_lef, Text.IndexOf(">") - _lef + 1); //换行
-                        }
-                        catch { }
+                        
                     }
                     Text = System.Net.WebUtility.HtmlDecode(Text);//从html反转义
 
@@ -310,7 +304,7 @@ namespace ArkHelper.Pages
                         foreach (var item in pics)
                         {
                             var _large = item.GetProperty("large");
-                            var _size = _large.GetProperty("geo");
+                            /*var _size = _large.GetProperty("geo");
                             int _hei = 0;
                             int _wid = 0;
                             var hej = _size.GetProperty("height");
@@ -324,9 +318,9 @@ namespace ArkHelper.Pages
                             {
                                 _hei = hej.GetInt32();
                                 _wid = wij.GetInt32();
-                            }
+                            }*/
                             string url = _large.GetProperty("url").GetString();
-                            Medias.Add(new Media(null, url, Media.MediaType.photo, _hei, _wid));
+                            Medias.Add(new Media(null, url, Media.MediaType.photo));
                         }
                     }
                     else
