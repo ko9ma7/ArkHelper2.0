@@ -153,10 +153,6 @@ namespace ArkHelper.Pages
                     }
                 }
                 GC.Collect();
-                Output.Log("=>" + ID + " is updating message","Message");
-                string _ = "";
-                foreach (var __ in back) _ += __.ID + ",";
-                Output.Log("=>" + "{" + _ + "}","Message");
                 return back;
             }
         }
