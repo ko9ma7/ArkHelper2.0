@@ -1228,12 +1228,22 @@ namespace ArkHelper
             Emergency
         }
 
+        private static StreamWriter outputStream;
+        private static string activeFile = "";
         private static void Text(string content, string file)
         {
             if (File.Exists(file)) { } else { File.Create(file).Close(); } //检查有无该文件，无就创建
-            StreamWriter output_stream = new StreamWriter(file, true) { AutoFlush = true }; //启动写入流
-            output_stream.WriteLine(content);
-            output_stream.Close();
+            if (activeFile != file)
+            {
+                activeFile = file;
+                outputStream = new StreamWriter(file) { AutoFlush = true };
+            }
+            outputStream.WriteLine(content);
+        }
+
+        public static void CloseTextStream()
+        {
+            outputStream.Close();
         }
 
         //方法 日志输出
@@ -1482,7 +1492,7 @@ namespace ArkHelper
         }
     }
 
-#region
+    #region
     namespace thing
     {
         /// <summary>
@@ -1651,5 +1661,5 @@ namespace ArkHelper
         }*/
 
     }
-#endregion
+    #endregion
 }

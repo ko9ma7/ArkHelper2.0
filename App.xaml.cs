@@ -105,6 +105,7 @@ namespace ArkHelper
             notifyIcon.Visible = false;
 
             App.SaveData();
+            Output.CloseTextStream();
             Process.GetCurrentProcess().Kill();
             Current.Shutdown();
         }
