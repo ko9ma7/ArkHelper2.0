@@ -393,7 +393,13 @@ namespace ArkHelper.Pages.OtherList
                         Akhcmd("shell input tap 1345 142", "传递线索", 3);
                         Akhcmd("shell input tap 1399 43", "关闭", 2);
                         Akhcmd("shell input tap 765 740", "线索交流", 3);
-                        Akhcmd("shell input tap 89 50", "返回", 2);
+                        using(var sc = new ADB.Screenshot())
+                        {
+                            if (sc.PicToPoint(Address.res + "\\pic\\UI\\searchingClueSymbol.png").Count==0)
+                            {
+                                Akhcmd("shell input tap 89 50", "返回", 2);
+                            }
+                        }
                         Akhcmd("shell input tap 89 50", "返回", 2);
                     }
 
