@@ -505,7 +505,10 @@ namespace ArkHelper
 
             //等待模拟器端守护进程响应连接
             if (CMD("connect " + "127.0.0.1:" + ConnectThis.Port).Contains("connected"))
+            {
                 ConnectedInfo = ConnectThis;
+                Output.Log("made connection with " + ConnectedInfo.ToString(),"ADB");
+            }
         }
 
         #region 点击
@@ -649,7 +652,7 @@ namespace ArkHelper
                 }
                 catch
                 {
-                    Thread.Sleep(2000);
+                    Thread.Sleep(4000);
                     continue;
                 }
                 Thread.Sleep(1000);
