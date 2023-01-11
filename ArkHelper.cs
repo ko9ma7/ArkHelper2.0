@@ -1239,7 +1239,7 @@ namespace ArkHelper
             if (activeFile != file)
             {
                 activeFile = file;
-                outputStream = new StreamWriter(file) { AutoFlush = true };
+                outputStream = new StreamWriter(file,true) { AutoFlush = true };
             }
             outputStream.WriteLine(content);
         }
