@@ -1421,7 +1421,7 @@ namespace ArkHelper
             Process[] _pr = Process.GetProcessesByName(ADB.ConnectedInfo.IM);
             var pr = _pr[0];
             pr.Kill();
-            ADB.ConnectedInfo = null;
+            //ADB.ConnectedInfo = null;
         }
 
         /// <summary>
