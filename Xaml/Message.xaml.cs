@@ -55,7 +55,7 @@ namespace ArkHelper.Pages
                         {
                             _userinfo = __userinfo.GetProperty("data").GetProperty("userInfo");
                         }
-                        catch{ goto st; }
+                        catch { goto st; }
 
                         Avatar = _userinfo.GetProperty("profile_image_url").GetString();
                         Name = _userinfo.GetProperty("screen_name").GetString();
@@ -154,10 +154,10 @@ namespace ArkHelper.Pages
                     }
                 }
                 GC.Collect();
-                Output.Log("=>" + ID + " is updating message","Message");
+                Output.Log("=>" + ID + " is updating message", "Message");
                 string _ = "";
                 foreach (var __ in back) _ += __.ID + ",";
-                Output.Log("=>" + "{" + _ + "}","Message");
+                Output.Log("=>" + "{" + _ + "}", "Message");
                 return back;
             }
         }
@@ -277,9 +277,9 @@ namespace ArkHelper.Pages
                     {
                         Text = Text.Replace("<br />", "\n");
                         int _lef = Text.IndexOf("<");
-                        if(_lef != -1)
+                        if (_lef != -1)
                             Text = Text.Remove(_lef, Text.IndexOf(">") - _lef + 1); //换行
-                        
+
                     }
                     Text = System.Net.WebUtility.HtmlDecode(Text);//从html反转义
 
@@ -477,49 +477,42 @@ namespace ArkHelper.Pages
 
             for (; ; Thread.Sleep(60000))
             {
-                var createat = DateTime.Now;
-                if (!firstUpdate) createat = Messages[0].CreateAt;
-
                 foreach (User user in UserList)
                 {
-                    foreach (ArkHelperMessage message in user.UpdateMessage())
+                    var _updMsgList = user.UpdateMessage().FindAll(
+                        t =>
+                        !Messages.Exists(u => u.ID == t.ID)
+                        && !t.Text.Contains("对本次抽奖进行监督，结果公正有效。公示链接：")
+                        && (DateTime.Now - t.CreateAt) < new TimeSpan(60, 0, 0, 0, 0)
+                        );
+                    Messages.AddRange(_updMsgList);
+                    if (!firstUpdate)
+                    foreach(var message in _updMsgList)
                     {
-                        //加入消息池
-                        if (!Messages.Exists(mes => mes.ID == message.ID))
-                            if (!message.Text.Contains("对本次抽奖进行监督，结果公正有效。公示链接："))
-                                if ((DateTime.Now - message.CreateAt) < new TimeSpan(60, 0, 0, 0, 0))
-                                {
-                                    Messages.Add(message);
+                        ToastContentBuilder Toast = new ToastContentBuilder();
+                        Toast.AddArgument("kind", "Message");
+                        Toast.AddText(user.Name + "发布了新的动态");
+                        Toast.AddText(message.Text);
+                        Toast.AddCustomTimeStamp(message.CreateAt);
 
-                                    //更新通知
-                                    if (!firstUpdate)
-                                    {
-                                        ToastContentBuilder Toast = new ToastContentBuilder();
-                                        Toast.AddArgument("kind", "Message");
-                                        Toast.AddText(user.Name + "发布了新的动态");
-                                        Toast.AddText(message.Text);
-                                        Toast.AddCustomTimeStamp(message.CreateAt);
+                        if (message.Medias.Count > 0)
+                        {
+                            var me = message.Medias[0];
+                            switch (me.Type)
+                            {
+                                case ArkHelperMessage.Media.MediaType.photo:
+                                    Toast.AddHeroImage(new Uri(me.Link));
+                                    break;
+                                case ArkHelperMessage.Media.MediaType.video:
+                                    Toast.AddHeroImage(new Uri(me.Small));
+                                    break;
+                            }
+                        }
 
-                                        if (message.Medias.Count > 0)
-                                        {
-                                            var me = message.Medias[0];
-                                            switch (me.Type)
-                                            {
-                                                case ArkHelperMessage.Media.MediaType.photo:
-                                                    Toast.AddHeroImage(new Uri(me.Link));
-                                                    break;
-                                                case ArkHelperMessage.Media.MediaType.video:
-                                                    Toast.AddHeroImage(new Uri(me.Small));
-                                                    break;
-                                            }
-                                        }
-
-                                        Toast.Show(tag =>
-                                        {
-                                            tag.Tag = "Message";
-                                        });
-                                    }
-                                }
+                        Toast.Show(tag =>
+                        {
+                            tag.Tag = "Message";
+                        });
                     }
                 }
                 Messages.Sort();
