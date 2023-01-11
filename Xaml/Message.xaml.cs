@@ -473,7 +473,7 @@ namespace ArkHelper.Pages
                 //new Pages.Message.User(ArkHelperDataStandard.MessageSource.weibo, "7784464307") //test
             };
 
-            for (; ; Thread.Sleep(20000))
+            for (; ; Thread.Sleep(60000))
             {
                 var createat = DateTime.Now;
                 if (!firstUpdate) createat = Messages[0].CreateAt;
