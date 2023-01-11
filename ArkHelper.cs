@@ -477,6 +477,11 @@ namespace ArkHelper
             {
                 if (Process.GetProcessesByName(ConnectedInfo.IM).Length == 0)
                 {
+                    new ToastContentBuilder()
+                    .AddArgument("kind", "ADB")
+                    .AddText("提示")
+                    .AddText("已失去与" + ConnectedInfo.Name + "的连接")
+                    .Show();
                     ConnectedInfo = null;
                     Output.Log("Simulator Lost Connection", "ADB");
                 }
@@ -507,7 +512,12 @@ namespace ArkHelper
             if (CMD("connect " + "127.0.0.1:" + ConnectThis.Port).Contains("connected"))
             {
                 ConnectedInfo = ConnectThis;
-                Output.Log("made connection with " + ConnectedInfo.ToString(),"ADB");
+                Output.Log("Made Connection With " + ConnectedInfo.ToString(), "ADB");
+                new ToastContentBuilder()
+                .AddArgument("kind", "ADB")
+                .AddText("提示")
+                .AddText("已与" + ConnectedInfo.Name + "取得连接")
+                .Show();
             }
         }
 
@@ -1239,7 +1249,7 @@ namespace ArkHelper
             if (activeFile != file)
             {
                 activeFile = file;
-                outputStream = new StreamWriter(file,true) { AutoFlush = true };
+                outputStream = new StreamWriter(file, true) { AutoFlush = true };
             }
             outputStream.WriteLine(content);
         }
