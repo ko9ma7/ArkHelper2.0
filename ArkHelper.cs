@@ -1489,19 +1489,21 @@ namespace ArkHelper
         public static JsonElement GetFromApi(string url)
         {
         start:;
+            string ret;
+            var request = new RestRequest { Method = Method.Get };
             try
             {
                 //API
-                var client = new RestClient(url);
-                var request = new RestRequest { Method = Method.Get };
-                var response = client.Get(request);
-                var _result = JsonSerializer.Deserialize<JsonElement>(response.Content);
-                return _result;
+                using (var client = new RestClient(url))
+                {
+                    ret = client.Get(request).Content;
+                }
             }
             catch
             {
                 goto start;
             }
+            return JsonSerializer.Deserialize<JsonElement>(ret);
         }
     }
 

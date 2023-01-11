@@ -137,6 +137,7 @@ namespace ArkHelper.Pages
                         {
                             User = this
                         };
+                        _aa.Dispose();
                         back.Add(_aaaa);
                         break;
                 }
@@ -227,6 +228,7 @@ namespace ArkHelper.Pages
                             int _c = response.IndexOf(@"""status""");
                             response = response.Substring(_c, response.LastIndexOf(",") - _c);
                             response = "{" + response + "}";
+                            client.Dispose();
                         }
                         catch
                         {
