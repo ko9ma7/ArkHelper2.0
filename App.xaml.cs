@@ -184,6 +184,17 @@ namespace ArkHelper
             if (Data.message.status)
                 MessageInit.Start();
             #endregion
+            #region 按频率持续保存配置
+            Task SaveDataBg = Task.Run(() =>
+            {
+                while (true)
+                {
+                    int _t = 1000;
+                    Thread.Sleep(_t);
+                    App.SaveData();
+                }
+            });
+            #endregion
             #region 启动ADB连接
             Task adbConnect = Task.Run(() =>
             {
