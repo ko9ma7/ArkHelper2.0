@@ -339,6 +339,13 @@ namespace ArkHelper
                 public bool pure { get; set; } = false;
                 public bool debug { get; set; } = false;
             }
+
+            public Beta beta { get; set; } = new Beta();
+            public class Beta
+            {
+                public bool status { get; set; } = false;
+                public List<SCHT.SCHTData> ms { get; set; } = new List<SCHT.SCHTData>();
+            }
         }
         #endregion
     }

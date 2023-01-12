@@ -679,15 +679,11 @@ namespace ArkHelper.Pages.OtherList
                 WaitingSimulator();
 
                 main(App.Data.scht.data);
-                if (File.Exists(Address.dataExternal + "\\moreSCHT.json"))
-                {
-                    var schts = JsonSerializer.Deserialize<JsonElement>(File.ReadAllText(Address.dataExternal + "\\moreSCHT.json"));
-                    foreach (var scht in schts.EnumerateArray())
+                if (App.Data.beta.status)
+                    foreach (var scht in App.Data.beta.ms)
                     {
-                        var schtdt = JsonSerializer.Deserialize<Data.SCHT.SCHTData>(scht.ToString());
-                        main(schtdt);
+                        main(scht);
                     }
-                }
 
                 //结束
                 WithSystem.KillSimulator();
