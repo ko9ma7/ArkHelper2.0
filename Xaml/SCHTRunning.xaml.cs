@@ -444,7 +444,7 @@ namespace ArkHelper.Pages.OtherList
                                     {
                                         foreach (string operatorNotToUse in schtData.control.operatorsNotToUse)
                                         {
-                                            var bs = screenshot.PicToPoint(Address.res + "\\pic\\BaseSkill\\" + operatorNotToUse + ".png", 0.9);
+                                            var bs = screenshot.PicToPoint(Address.res + "\\pic\\BaseSkill\\" + operatorNotToUse + ".png", 0.95);
                                             if (bs.Count != 0)
                                             {
                                                 operatorNotToUseSkillIconPosition.AddRange(bs);
