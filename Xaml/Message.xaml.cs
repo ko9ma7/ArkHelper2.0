@@ -48,8 +48,8 @@ namespace ArkHelper.Pages
                 {
                     // 微博
                     case ArkHelperDataStandard.MessageSource.weibo:
-                        JsonElement __userinfo = Net.GetFromApi("https://m.weibo.cn/api/container/getIndex?type=uid&value=" + UID);
                     st:;
+                        JsonElement __userinfo = Net.GetFromApi("https://m.weibo.cn/api/container/getIndex?type=uid&value=" + UID);
                         JsonElement _userinfo;
                         try
                         {
