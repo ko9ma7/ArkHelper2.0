@@ -455,6 +455,10 @@ namespace ArkHelper
             {
                 process.Start();
                 end = process.StandardOutput.ReadToEnd();
+                if(end.Contains("null")&& end.Contains("not found")){
+                  Output.Log("[Bad Connect]", "ADB");
+                  ConnectedInfo = null;
+                }
                 //log结果
                 if (true) Output.Log("=>" + end.Replace("\n", "[linebreak]").Replace("\r", ""), "ADB");
                 //等待退出
