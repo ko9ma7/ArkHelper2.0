@@ -159,6 +159,10 @@ namespace ArkHelper
 
             PinnedData.Server.Load();//fu
 
+#if DEBUG
+            App.Data.arkHelper.debug = true;
+#endif
+
             if (!File.Exists(Address.config)) //配置文件缺失
             {
                 //if (Directory.Exists(Address.programData)) { Directory.Delete(Address.programData, true); } //删除残缺的数据文件
