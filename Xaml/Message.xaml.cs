@@ -264,7 +264,8 @@ namespace ArkHelper.Pages
                         string link = Text.Substring(_herfAddress + 6, Text.IndexOf(@"""", _herfAddress + 10) - _herfAddress - 6);
 
                         if (!link.Contains(@"m.weibo.cn/p")
-                            && !link.Contains(@"m.weibo.cn/search"))
+                            && !link.Contains(@"m.weibo.cn/search")
+                            && !link.Contains(@"lottery.media.weibo.com"))
                         {
                             var _decodeResult = HttpUtility.UrlDecode(link.Replace("https://weibo.cn/sinaurl?u=", ""));
                             Links.Add(_decodeResult);
