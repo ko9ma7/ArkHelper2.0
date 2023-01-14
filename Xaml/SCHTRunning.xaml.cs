@@ -304,9 +304,9 @@ namespace ArkHelper.Pages.OtherList
                             Tuple.Create(3,882,231,0,0,892,228),
                             Tuple.Create(4,1120,295,0,0,1140,291),
                             Tuple.Create(5,740,547,752,567,447,589),
-                            Tuple.Create(6,1001,527,687,524,0,0),
+                            Tuple.Create(6,1001,527,1007,524,0,0),
                             Tuple.Create(7,482,506,0,0,0,0)
-                        };
+                        };//线索号，CN,JP,EN
                         var isOnBoard = new bool[7]
                         {
                             true,true,true,true,true,true,true
