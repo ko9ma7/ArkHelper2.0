@@ -520,6 +520,7 @@ namespace ArkHelper
             }
 
             //等待模拟器端守护进程响应连接
+            CMD("kill-server");
             if (CMD("connect " + "127.0.0.1:" + ConnectThis.Port).Contains("connected"))
             {
                 ConnectedInfo = ConnectThis;
