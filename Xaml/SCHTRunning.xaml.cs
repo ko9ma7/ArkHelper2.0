@@ -146,6 +146,7 @@ namespace ArkHelper.Pages.OtherList
 
                     void StartGame()
                     {
+                        Akhcmd("shell am force-stop " + packname, "关闭" + packname, 1);
                         Akhcmd("shell am start -n " + packname + "/com.u8.sdk.U8UnityContext", "启动" + packname, 7);//启动游戏
                         while
                         (!PictureProcess.ColorCheck(719, 759, "#FFD802", 720, 759, "#FFD802")//START图标未显示（可能是在更新或者未加载好）
