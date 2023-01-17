@@ -449,7 +449,7 @@ namespace ArkHelper
 
             //启动命令并读取结果
             string end = "";
-            if (!cmd.Contains("connect") && ConnectedInfo == null)
+            if (!cmd.Contains("connect") && !cmd.Contains("kill-server") && ConnectedInfo == null)
             {
                 System.Windows.Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -521,6 +521,7 @@ namespace ArkHelper
             }
 
             //等待模拟器端守护进程响应连接
+            CMD("kill-server");
             if (CMD("connect " + "127.0.0.1:" + ConnectThis.Port).Contains("connected"))
             {
                 ConnectedInfo = ConnectThis;
