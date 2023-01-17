@@ -16,6 +16,8 @@ using static ArkHelper.ArkHelperDataStandard;
 using Windows.Media.Protection.PlayReady;
 using ArkHelper.Style.Control;
 using System.Threading;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
+using System.Threading.Tasks;
 
 namespace ArkHelper.Xaml
 {
@@ -32,7 +34,18 @@ namespace ArkHelper.Xaml
         {
             InitializeComponent();
             changeVis(false);
-
+            exebtn.IsEnabled = false;
+            listenBtn.IsEnabled = false;
+            Task.Run(() =>
+            {
+                while (ADB.ConnectedInfo == null)
+                    Thread.Sleep(2000);
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    exebtn.IsEnabled = true;
+                    listenBtn.IsEnabled = true;
+                });
+            });
         }
 
         void changeVis(bool edit = true)
@@ -43,6 +56,7 @@ namespace ArkHelper.Xaml
                 editArea.Visibility = Visibility.Visible;
                 savebtn.Visibility = Visibility.Visible;
                 exebtn.Visibility = Visibility.Visible;
+                listenBtn.Visibility = Visibility.Visible;
             }
             else
             {
@@ -50,6 +64,8 @@ namespace ArkHelper.Xaml
                 editArea.Visibility = Visibility.Collapsed;
                 savebtn.Visibility = Visibility.Collapsed;
                 exebtn.Visibility = Visibility.Collapsed;
+                listenBtn.Visibility = Visibility.Collapsed;
+
             }
         }
         private class MessageFromADB
@@ -60,33 +76,6 @@ namespace ArkHelper.Xaml
             {
                 time = DateTime.Now;
                 msg = str;
-            }
-        }
-        private void StartListening()
-        {
-            Process adb = new Process()
-            {
-                StartInfo = new ProcessStartInfo
-                {
-                    FileName = Address.adb,
-                    WindowStyle = ProcessWindowStyle.Normal,
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    CreateNoWindow = false,
-                    Arguments = "shell getevent"
-                }
-            };
-            adb.OutputDataReceived += Process_OutputDataReceived;
-            adb.Start();
-            adb.BeginOutputReadLine();
-        }
-        List<MessageFromADB> messages = new List<MessageFromADB>();
-        private void Process_OutputDataReceived(object sender, DataReceivedEventArgs e)
-        {
-            string msg = e.Data as string;
-            if (msg != "" && msg.Contains(@"/dev/input/event5:"))
-            {
-                messages.Add(new MessageFromADB(msg));
             }
         }
 
@@ -137,7 +126,7 @@ namespace ArkHelper.Xaml
         private void _create(object sender, RoutedEventArgs e)
         {
             edit = false;
-            cardList.Children.Add(new Style.Control.AKHcpiCard() { Num = 1 });
+            //cardList.Children.Add(new Style.Control.AKHcpiCard() { Num = 1 });
             changeVis();
         }
         private void add(object sender, RoutedEventArgs e)
@@ -253,10 +242,160 @@ namespace ArkHelper.Xaml
 
         private void exebtn_Click(object sender, RoutedEventArgs e)
         {
+            exebtn.IsEnabled = false;
+            listenBtn.IsEnabled = false;
             new Thread(() =>
             {
                 Exe(getString());
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    exebtn.IsEnabled = true;
+                    listenBtn.IsEnabled = true;
+                });
             }).Start();
         }
+
+        #region 监听ADB
+        Process process = new Process()
+        {
+            StartInfo = new ProcessStartInfo
+            {
+                FileName = Address.adb,
+                WindowStyle = ProcessWindowStyle.Hidden,
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                CreateNoWindow = true,
+                Arguments = "shell getevent"
+            }
+        };
+        List<List<string>> eventsForAll = new List<List<string>>();
+        List<TimeSpan> timesDuring = new List<TimeSpan>();
+        List<TimeSpan> timesSwipe = new List<TimeSpan>();
+        bool listening = false;
+        void StartListening()
+        {
+            listening = true;
+            process.Start();
+            process.BeginOutputReadLine();
+            process.OutputDataReceived += Process_OutputDataReceived;
+
+            recordIcon.Kind = MaterialDesignThemes.Wpf.PackIconKind.Stop;
+            exebtn.IsEnabled = false;
+        }
+
+        void EndListening()
+        {
+            listening = false;
+            process.CancelOutputRead();
+            process.Kill();
+
+            recordIcon.Kind = MaterialDesignThemes.Wpf.PackIconKind.Record;
+            exebtn.IsEnabled = true;
+
+            eventsForAll.RemoveAll(t => t.Count == 0);
+            if (eventsForAll.Count == 0)
+            {
+                Clear(); return;
+            }
+            timesDuring.RemoveAt(0);
+            List<AKHcmd> ret = new List<AKHcmd>();
+            int indexInList = 0;
+            foreach (var a in eventsForAll)
+            {
+                a.RemoveAll(
+                    t =>
+                    t.Contains("0000 0000 00000000")
+                    || t == ""
+                    || t.Contains("0003 0039 ffffffff"));
+
+                var _ = a.Find(t => t.Contains("0035")).Split(' ');
+                int x1 = Convert.ToInt32(_[_.Length - 1], 16) - 1;
+
+                var __ = a.Find(t => t.Contains("0036")).Split(' ');
+                int y1 = Convert.ToInt32(__[__.Length - 1], 16) - 1;
+
+                var ___ = a.FindLast(t => t.Contains("0035")).Split(' ');
+                int x2 = Convert.ToInt32(___[___.Length - 1], 16) - 1;
+
+                var ____ = a.FindLast(t => t.Contains("0036")).Split(' ');
+                int y2 = Convert.ToInt32(____[____.Length - 1], 16) - 1;
+
+
+                int waittime = (indexInList == timesDuring.Count) ? 2 : (int)timesDuring[indexInList].TotalSeconds + 1;
+                if (x1 == x2 && y1 == y2)
+                {
+                    ret.Add(
+                        new AKHcmd("shell input tap " + x1 + " " + y1, waitTime: waittime)
+                        );
+                }
+                else
+                {
+                    ret.Add(
+                        new AKHcmd("shell input swipe " + x1 + " " + y1 + " " + x2 + " " + y2 + " " + (int)timesSwipe[indexInList].TotalMilliseconds, waitTime: waittime)
+                        );
+                }
+                indexInList++;
+            }
+
+            int num = 1;
+            foreach (var a in ret)
+            {
+                var c = new AKHcpiCard(a.ToString());
+                c.Num = num;
+                cardList.Children.Add(c);
+                num++;
+            }
+
+            Clear();
+
+            void Clear()
+            {
+                eventsForAll.Clear();
+                timesDuring.Clear();
+                timesSwipe.Clear();
+            }
+        }
+
+        bool isPressed = false;
+        List<string> _eventsDuringEveryTime = new List<string>();
+        DateTime time = DateTime.Now;
+        private void Process_OutputDataReceived(object sender, DataReceivedEventArgs e)
+        {
+            if (!listening) return;
+            var cmd = e.Data;
+            if (cmd.Contains("0001 014a 00000001"))//keyDown
+            {
+                isPressed = true;
+                timesDuring.Add(DateTime.Now - time);
+                time = DateTime.Now;
+            }
+            else
+            {
+                if (cmd.Contains("0001 014a 00000000"))//keyUp
+                {
+                    isPressed = false;
+                    timesSwipe.Add(DateTime.Now - time);
+                    time = DateTime.Now;
+                    var list = new List<string>();
+                    list.AddRange(_eventsDuringEveryTime);
+                    eventsForAll.Add(list);
+                    _eventsDuringEveryTime.Clear();
+                }
+                else
+                {
+                    if (isPressed)
+                    {
+                        Console.WriteLine("add" + DateTime.Now.ToString("O"));
+                        _eventsDuringEveryTime.Add(e.Data);
+                    }
+                }
+            }
+        }
+        private void listenBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (!listening) StartListening();
+            else EndListening();
+        }
+        #endregion
     }
 }

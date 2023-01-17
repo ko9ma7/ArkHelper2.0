@@ -55,7 +55,9 @@
                     <TextBlock VerticalAlignment="Center">
                         adb
                     </TextBlock>
-                    <TextBox Width="200"
+                    <TextBox MaxWidth="240"
+                             Width="auto"
+                             MinWidth="200"
                              Height="auto"
                              Margin="6,0,0,12"
                              materialDesign:HintAssist.Hint="内容"

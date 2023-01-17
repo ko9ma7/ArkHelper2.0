@@ -87,6 +87,14 @@
                    HorizontalAlignment="Right"
                    VerticalAlignment="Bottom"
                    Orientation="Vertical">
+            <Button x:Name="listenBtn"
+                    Background="{DynamicResource MaterialDesignTextFieldBoxBackground}"
+                    Click="listenBtn_Click"
+                    Margin="0,0,0,20"
+                    Style="{StaticResource MaterialDesignIconButton}"
+                    ToolTip="录制">
+                <materialDesign:PackIcon Name="recordIcon" Kind="Record" />
+            </Button>
             <Button x:Name="exebtn"
                     Margin="0,0,0,20"
                     Background="{DynamicResource MaterialDesignTextFieldBoxBackground}"
