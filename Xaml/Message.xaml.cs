@@ -457,8 +457,7 @@ namespace ArkHelper.Pages
         #endregion
 
         #region 更新消息
-        static ArrayList UserList;
-        static bool firstUpdate = true;
+        private static bool firstUpdate = true;
         public static Task MessageInit = new Task(() =>
         {
             UserList = new ArrayList
@@ -488,33 +487,33 @@ namespace ArkHelper.Pages
                         );
                     Messages.AddRange(_updMsgList);
                     if (!firstUpdate)
-                    foreach(var message in _updMsgList)
-                    {
-                        ToastContentBuilder Toast = new ToastContentBuilder();
-                        Toast.AddArgument("kind", "Message");
-                        Toast.AddText(user.Name + "发布了新的动态");
-                        Toast.AddText(message.Text);
-                        Toast.AddCustomTimeStamp(message.CreateAt);
-
-                        if (message.Medias.Count > 0)
+                        foreach (var message in _updMsgList)
                         {
-                            var me = message.Medias[0];
-                            switch (me.Type)
+                            //消息更新通知
+                            ToastContentBuilder Toast = new ToastContentBuilder();
+                            Toast.AddArgument("kind", "Message");
+                            Toast.AddText(user.Name + "发布了新的动态");
+                            Toast.AddText(message.Text);
+                            Toast.AddCustomTimeStamp(message.CreateAt);
+                            if (message.Medias.Count > 0)
                             {
-                                case ArkHelperMessage.Media.MediaType.photo:
-                                    Toast.AddHeroImage(new Uri(me.Link));
-                                    break;
-                                case ArkHelperMessage.Media.MediaType.video:
-                                    Toast.AddHeroImage(new Uri(me.Small));
-                                    break;
+                                var me = message.Medias[0];
+                                switch (me.Type)
+                                {
+                                    case ArkHelperMessage.Media.MediaType.photo:
+                                        Toast.AddHeroImage(new Uri(me.Link));
+                                        break;
+                                    case ArkHelperMessage.Media.MediaType.video:
+                                        Toast.AddHeroImage(new Uri(me.Small));
+                                        break;
+                                }
                             }
-                        }
+                            Toast.Show(tag => { tag.Tag = "Message"; });
 
-                        Toast.Show(tag =>
-                        {
-                            tag.Tag = "Message";
-                        });
-                    }
+                            //加入未读列表
+                            if (!unreadMessages.ContainsKey(user)) unreadMessages.Add(user, new List<ArkHelperMessage>());
+                            unreadMessages[user].Add(message);
+                        }
                 }
                 Messages.Sort();
                 ////if (messages.Count > 20) { messages.RemoveRange(19, messages.Count - 19); }
@@ -524,9 +523,19 @@ namespace ArkHelper.Pages
                 firstUpdate = false;
             }
         });
-        static List<ArkHelperMessage> Messages = new List<ArkHelperMessage>();
-        public delegate void MessageInitPointer();
-        public static event MessageInitPointer MessageInited;
+        private delegate void MessageInitPointer();
+        private static event MessageInitPointer MessageInited;
+        #endregion
+
+        #region 接口
+        public static List<ArkHelperMessage> GetAllMessages()
+        {
+            return Messages;
+        }
+        public static Dictionary<User, List<ArkHelperMessage>> GetAllUnreadMessages()
+        {
+            return unreadMessages;
+        }
         #endregion
 
         #region 页面更新
@@ -537,8 +546,8 @@ namespace ArkHelper.Pages
             ReadyToInitFromBlank();
             if (!firstUpdate) InitFromList();
         }
-        public int AlreadyInitedCards = 0;
-        public List<DateTime> DTList = new List<DateTime>();
+        private int AlreadyInitedCards = 0;
+        private List<DateTime> DTList = new List<DateTime>();
         private void ReadyToInitFromBlank()
         {
             if (App.Data.message.status)
@@ -802,7 +811,10 @@ namespace ArkHelper.Pages
         }
         #endregion
 
-        #region 图片
+        #region 存储
+        private static ArrayList UserList;
+        private static List<ArkHelperMessage> Messages = new List<ArkHelperMessage>();
+
         private List<BitmapImage> UserAvatarList = new List<BitmapImage>();
         Image GetUserAvatar(User user)
         {
@@ -837,7 +849,6 @@ namespace ArkHelper.Pages
 
             return avatar;
         }
-
         private List<BitmapImage> BitmapImageList = new List<BitmapImage>();
         BitmapImage GetBitmapImage(string absoluteUri)
         {
@@ -853,6 +864,8 @@ namespace ArkHelper.Pages
 
             return bitImage;
         }
+
+        private static Dictionary<User, List<ArkHelperMessage>> unreadMessages = new Dictionary<User, List<ArkHelperMessage>>();
 
         #endregion
         #region 页面响应
@@ -943,6 +956,7 @@ namespace ArkHelper.Pages
         private void Page_Unloaded(object sender, RoutedEventArgs e)
         {
             MessageInited -= InitFromList;
+            unreadMessages.Clear();
         }
         #endregion
     }
