@@ -338,6 +338,7 @@ namespace ArkHelper
             {
                 public bool pure { get; set; } = false;
                 public bool debug { get; set; } = false;
+                public Output.InfoKind logOutputKind { get; set; } = Output.InfoKind.Infomational;
             }
 
             public Beta beta { get; set; } = new Beta();
@@ -1274,7 +1275,7 @@ namespace ArkHelper
         // 参数：输出内容，操作模块，日志级别
         public static void Log(string content, string module = "ArkHelper", InfoKind infokind = InfoKind.Infomational)
         {
-            if (!App.Data.arkHelper.debug) return;
+            if (!App.Data.arkHelper.debug || App.Data.arkHelper.logOutputKind > infokind) return;
             string text = DateTime.Now.ToString("s")
                 + " "
                 + "[" + module + "]"
