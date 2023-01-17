@@ -385,7 +385,6 @@ namespace ArkHelper.Xaml
                 {
                     if (isPressed)
                     {
-                        Console.WriteLine("add" + DateTime.Now.ToString("O"));
                         _eventsDuringEveryTime.Add(e.Data);
                     }
                 }
