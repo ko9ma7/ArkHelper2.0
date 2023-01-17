@@ -59,10 +59,7 @@ namespace ArkHelper.Xaml
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            using (var sc = new ADB.Screenshot())
-            {
-                
-            }
+
         }
     }
 }

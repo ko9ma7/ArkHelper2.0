@@ -48,7 +48,7 @@ namespace ArkHelper.Xaml
             UpdateTime();
             time_welcome.Text = DateTime.Now.ToString("tt");
             Widget1.Navigate(new Uri(@"\Xaml\Widget\" + "SCHTStatus" + ".xaml", UriKind.RelativeOrAbsolute));
-            Widget2.Navigate(new Uri(@"\Xaml\Widget\" + "ArkHelperSuggestion" + ".xaml", UriKind.RelativeOrAbsolute));
+            Widget2.Navigate(new Uri(@"\Xaml\Widget\" + "UnreadMessage" + ".xaml", UriKind.RelativeOrAbsolute));
 
             DateTime dateTime = DateTime.Now;
             if (dateTime.Hour < 4) { dateTime = DateTime.Now.AddDays(-1); PushNewMessage("数据将于凌晨 4:00刷新", "Refresh"); }

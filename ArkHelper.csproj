@@ -123,6 +123,9 @@
     <Compile Include="Style\Control\CustomSimulator.xaml.cs">
       <DependentUpon>CustomSimulator.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Style\Control\RoundImageWithTwoTexts.xaml.cs">
+      <DependentUpon>RoundImageWithTwoTexts.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Style\Control\SimuSelect.xaml.cs">
       <DependentUpon>SimuSelect.xaml</DependentUpon>
     </Compile>
@@ -184,6 +187,9 @@
     <Compile Include="Xaml\Widget\SCHTstatus.xaml.cs">
       <DependentUpon>SCHTstatus.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Xaml\Widget\UnreadMessage.xaml.cs">
+      <DependentUpon>UnreadMessage.xaml</DependentUpon>
+    </Compile>
     <Page Include="Style\ControlStyle.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -201,6 +207,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Style\Control\CustomSimulator.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Style\Control\RoundImageWithTwoTexts.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -316,6 +326,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Xaml\Widget\SCHTstatus.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Xaml\Widget\UnreadMessage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
