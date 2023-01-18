@@ -417,9 +417,10 @@ namespace ArkHelper
     /// <summary>
     /// ADB
     /// </summary>
-    public class ADB
+    public static class ADB
     {
         public static PinnedData.Simulator.SimuInfo ConnectedInfo = null;//= new PinnedData.Simulator.SimuInfo();
+        private static List<string> UsingADBProcess = new List<string>();
 
         /// <summary>
         /// process
@@ -435,6 +436,65 @@ namespace ArkHelper
                 CreateNoWindow = true,
             }
         };
+
+        /// <summary>
+        /// 检查ADB是否可用
+        /// </summary>
+        /// <param name="exceptModules">排除指定模块列表</param>
+        /// <returns>若ADB可用，则返回true，否则返回false</returns>
+        public static bool CheckADBCanUsed(List<string> exceptModules = null)
+        {
+            if (ADB.ConnectedInfo == null) return false;
+            if (UsingADBProcess.Count != 0)
+            {
+                if (exceptModules == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    foreach (var excMod in exceptModules)
+                    {
+                        if (UsingADBProcess.Exists(t => t != excMod)) return false;
+                    }
+                    return true;
+                }
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// 注册建立ADB使用
+        /// </summary>
+        /// <param name="module">注册模块</param>
+        /// <returns></returns>
+        public static bool RegisterADBUsing(string module)
+        {
+            Output.Log("=>Register ADB from " + module,"ADB");
+            if (UsingADBProcess.Exists(t => t == module))
+            {
+                Output.Log("=>Register Error." + module +" already exists.","ADB",Output.InfoKind.Error);
+                return false;
+            }
+            UsingADBProcess.Add(module);
+            Output.Log("=>Registered " + module + ".", "ADB");
+            return true;
+        }
+        
+        /// <summary>
+        /// 取消注册ADB使用
+        /// </summary>
+        /// <param name="module">取消注册模块</param>
+        /// <returns></returns>
+        public static void UnregisterADBUsing(string module)
+        {
+            Output.Log("=>Unregister ADB from " + module, "ADB");
+            UsingADBProcess.Remove(module);
+            Output.Log("=>Unregistered " + module + ".", "ADB");
+        }
 
         /// <summary>
         /// 指令
@@ -463,9 +523,10 @@ namespace ArkHelper
             {
                 process.Start();
                 end = process.StandardOutput.ReadToEnd();
-                if(end.Contains("null")&& end.Contains("not found")){
-                  Output.Log("[Bad Connect]", "ADB");
-                  ConnectedInfo = null;
+                if (end.Contains("null") && end.Contains("not found"))
+                {
+                    Output.Log("[Bad Connect]", "ADB");
+                    ConnectedInfo = null;
                 }
                 //log结果
                 if (true) Output.Log("=>" + end.Replace("\n", "[linebreak]").Replace("\r", ""), "ADB");

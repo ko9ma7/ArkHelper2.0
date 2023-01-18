@@ -108,9 +108,30 @@ namespace ArkHelper
         public MB()
         {
             InitializeComponent();
+            Task.Run(() =>
+            {
+                for(; ; )
+                {
+                    if (ADB.CheckADBCanUsed())
+                    {
+                        Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            start_button.IsEnabled = true;
+                        });
+                    }
+                    else
+                    {
+                        Application.Current.Dispatcher.Invoke(() =>
+                        start_button.IsEnabled = false);
+                    }
+                    Thread.Sleep(2000);
+                }
+            });
         }
         private async void start(object sender, RoutedEventArgs e)
         {
+            ADB.RegisterADBUsing("MB");
+
             Mode mode = Mode.san;
             int time = -1;
 
@@ -221,6 +242,8 @@ namespace ArkHelper
             start_button.Visibility = Visibility.Visible;
             battle_setting_wrappanel.IsEnabled = true;
             waiting_processbar.Visibility = Visibility.Collapsed;
+
+            ADB.UnregisterADBUsing("MB");
         }
         #endregion
 

@@ -682,6 +682,15 @@ namespace ArkHelper.Pages.OtherList
                 }
                 WaitingSimulator();
 
+                if (!ADB.CheckADBCanUsed())
+                {
+                    goto SCHTRunningEnd;
+                }
+                else
+                {
+                    ADB.RegisterADBUsing("SCHTRunning");
+                }
+
                 main(App.Data.scht.data);
                 if (App.Data.beta.status)
                     foreach (var scht in App.Data.beta.ms)
@@ -689,7 +698,9 @@ namespace ArkHelper.Pages.OtherList
                         main(scht);
                     }
 
+                SCHTRunningEnd:;
                 //结束
+                ADB.UnregisterADBUsing("SCHTRunning");
                 WithSystem.KillSimulator();
                 Info("正在关闭模拟器神经网络依托平台...");
                 Info("系统任务运行完毕");

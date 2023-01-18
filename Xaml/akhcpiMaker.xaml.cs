@@ -38,7 +38,7 @@ namespace ArkHelper.Xaml
             listenBtn.IsEnabled = false;
             Task.Run(() =>
             {
-                while (ADB.ConnectedInfo == null)
+                while (!ADB.CheckADBCanUsed())
                     Thread.Sleep(2000);
                 Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -240,11 +240,12 @@ namespace ArkHelper.Xaml
             }
         }
 
-        private void exebtn_Click(object sender, RoutedEventArgs e)
+        private async void exebtn_Click(object sender, RoutedEventArgs e)
         {
+            ADB.RegisterADBUsing("akhcpiMaker_exe");
             exebtn.IsEnabled = false;
             listenBtn.IsEnabled = false;
-            new Thread(() =>
+            Task exe = new Task(() =>
             {
                 Exe(getString());
                 Application.Current.Dispatcher.Invoke(() =>
@@ -252,7 +253,11 @@ namespace ArkHelper.Xaml
                     exebtn.IsEnabled = true;
                     listenBtn.IsEnabled = true;
                 });
-            }).Start();
+            });
+            exe.Start();
+            await exe;
+            ADB.UnregisterADBUsing("akhcpiMaker_exe");
+
         }
 
         #region 监听ADB
@@ -274,6 +279,7 @@ namespace ArkHelper.Xaml
         bool listening = false;
         void StartListening()
         {
+            ADB.RegisterADBUsing("akhcpiMaker_Listen");
             listening = true;
             process.Start();
             process.BeginOutputReadLine();
@@ -347,6 +353,8 @@ namespace ArkHelper.Xaml
             }
 
             Clear();
+            ADB.UnregisterADBUsing("akhcpiMaker_Listen");
+
 
             void Clear()
             {
