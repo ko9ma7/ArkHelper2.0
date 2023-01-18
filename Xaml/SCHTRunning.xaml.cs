@@ -558,7 +558,10 @@ namespace ArkHelper.Pages.OtherList
                         if (PictureProcess.ColorCheck(431, 770, "#FFFFFF", 432, 770, "#FFFFFF")) { }
                         else
                         {
-                            MB.MBCore(MB.Mode.time, anntime, ann_cardToUse: schtData.ann.allowToUseCard ? 10 : 0);
+                            MB.MBCore(MB.Mode.time, 
+                            anntime, 
+                            false,
+                            ann_cardToUse: schtData.ann.allowToUseCard ? 10 : 0);
                         }
 
                         Akhcmd("shell input tap 299 46", "菜单", 1);

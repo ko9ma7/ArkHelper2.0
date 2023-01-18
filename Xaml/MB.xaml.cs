@@ -144,7 +144,7 @@ namespace ArkHelper
             {
                 var startTime = DateTime.Now;//启动时间
 
-                var result = MBCore(mode: mode, time: time);
+                var result = MBCore(mode: mode, time: time,allowToRecoverSantiy:false);
 
                 if (result.Type == MBResult.ResultType.Succeed)
                 {
@@ -314,7 +314,7 @@ namespace ArkHelper
         /// <param name="time">次数（仅当mode=Mode.time时可用）</param>
         /// <param name="ann_cardToUse">可用剿灭代理卡数量（仅当作战类型为剿灭时可用）</param>
         /// <returns></returns>
-        public static MBResult MBCore(Mode mode, int time = -1, int ann_cardToUse = 0)
+        public static MBResult MBCore(Mode mode, int time = -1,bool allowToRecoverSantiy=false, int ann_cardToUse = 0)
         {
             //ann_cardToUse = 1;//debug
             int battleKind = 0;//0：普通，1：剿灭
@@ -465,17 +465,18 @@ namespace ArkHelper
                 //检查是否有回理智界面
                 if (screenshot.PicToPoint(Address.res + "\\pic\\UI\\RecoverSanitySymbol.png").Count != 0)
                 {
+                    Info("剩余理智不足以指挥本次作战");
                     //理智模式直接退出
                     if (mode == Mode.san)
                     {
-                        Info("剩余理智不足以指挥本次作战");
                         ADB.Tap(871, 651); //点叉
                         goto MBend;
                     }
                     //次数模式恢复理智
                     if (mode == Mode.time)
                     {
-                        Info("剩余理智不足以指挥本次作战 /正在使用理智恢复物恢复理智...");
+                        if (allowToRecoverSantiy) goto MBend;
+                        Info("指令：使用理智恢复物恢复理智");
                         ADB.Tap(1224, 648);//点对号
                         Thread.Sleep(3000);
 
