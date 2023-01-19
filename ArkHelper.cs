@@ -1330,7 +1330,14 @@ namespace ArkHelper
 
         public static void CloseTextStream()
         {
-            outputStream.Close();
+            try
+            {
+                outputStream.Close();
+            }
+            catch
+            {
+
+            }
         }
 
         //方法 日志输出
