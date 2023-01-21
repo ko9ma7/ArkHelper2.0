@@ -124,7 +124,7 @@ namespace ArkHelper
                         Application.Current.Dispatcher.Invoke(() =>
                         start_button.IsEnabled = false);
                     }
-                    Thread.Sleep(2000);
+                    Thread.Sleep(1000);
                 }
             });
         }
