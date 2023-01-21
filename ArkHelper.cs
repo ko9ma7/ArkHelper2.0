@@ -473,17 +473,17 @@ namespace ArkHelper
         /// <returns></returns>
         public static bool RegisterADBUsing(string module)
         {
-            Output.Log("=>Register ADB from " + module,"ADB");
+            Output.Log("=>Register ADB from " + module, "ADB");
             if (UsingADBProcess.Exists(t => t == module))
             {
-                Output.Log("=>Register Error." + module +" already exists.","ADB",Output.InfoKind.Error);
+                Output.Log("=>Register Error." + module + " already exists.", "ADB", Output.InfoKind.Error);
                 return false;
             }
             UsingADBProcess.Add(module);
             Output.Log("=>Registered " + module + ".", "ADB");
             return true;
         }
-        
+
         /// <summary>
         /// 取消注册ADB使用
         /// </summary>
@@ -508,33 +508,20 @@ namespace ArkHelper
             if (true) Output.Log(cmd, "ADB");
 
             //启动命令并读取结果
-            string end = "";
-            if (!cmd.Contains("connect") && !cmd.Contains("kill-server") && ConnectedInfo == null)
+            string end;
+            if (ConnectedInfo == null)
             {
-                System.Windows.Application.Current.Dispatcher.Invoke(() =>
-                {
-                    //WithSystem.Message("模拟器连接断开", "请启动或重启模拟器");
-                });
-                end = "[Bad Connect]";
-                if (true) Output.Log("=>" + end, "ADB");
-                throw new BadConnectException();
+                if (true) Output.Log("=>" + "[Operating with bad connection]", "ADB", Output.InfoKind.Warning);
             }
-            else
-            {
-                process.Start();
-                end = process.StandardOutput.ReadToEnd();
-                if (end.Contains("null") && end.Contains("not found"))
-                {
-                    Output.Log("[Bad Connect]", "ADB");
-                    ConnectedInfo = null;
-                }
-                //log结果
-                if (true) Output.Log("=>" + end.Replace("\n", "[linebreak]").Replace("\r", ""), "ADB");
-                //等待退出
-                process.WaitForExit();
-                //log退出
-                if (true) Output.Log("=>" + "Exited", "ADB");
-            }
+            process.Start();
+            end = process.StandardOutput.ReadToEnd();
+            //log结果
+            if (true) Output.Log("=>" + end.Replace("\n", "[br]").Replace("\r", ""), "ADB");
+            //等待退出
+            process.WaitForExit();
+            //log退出
+            if (true) Output.Log("=>" + "Exited", "ADB");
+
 
             //返回结果
             return end;
@@ -545,29 +532,14 @@ namespace ArkHelper
         /// </summary>
         public static void Connect()
         {
-            //判断标示的模拟器是否运行，若否 则清空连接信息重连
-            if (ConnectedInfo != null)
-            {
-                if (Process.GetProcessesByName(ConnectedInfo.IM).Length == 0)
-                {
-                    new ToastContentBuilder()
-                    .AddArgument("kind", "ADB")
-                    .AddText("提示")
-                    .AddText("已失去与" + ConnectedInfo.Name + "的连接")
-                    .Show();
-                    ConnectedInfo = null;
-                    Output.Log("Simulator Lost Connection", "ADB");
-                }
-                else
-                    return;
-            }
+            if (ConnectedInfo != null) return;
 
             //尝试遍历寻找在线的模拟器
             PinnedData.Simulator.SimuInfo ConnectThis = new PinnedData.Simulator.SimuInfo();
             if (App.Data.simulator.custom.status)
             {
                 if (Process.GetProcessesByName(App.Data.simulator.custom.im).Length != 0)
-                    ConnectThis = new PinnedData.Simulator.SimuInfo("custom", "自定义", App.Data.simulator.custom.port, App.Data.simulator.custom.im);
+                    ConnectThis = new PinnedData.Simulator.SimuInfo("custom", "自定义模拟器", App.Data.simulator.custom.port, App.Data.simulator.custom.im);
                 else return;
             }
             else
@@ -595,7 +567,43 @@ namespace ArkHelper
             }
         }
 
-        #region 点击
+        /// <summary>
+        /// 检查ADB连接有效性
+        /// </summary>
+        public static void ADBHeartbeatTest()
+        {
+            void Clear(string reason)
+            {
+                Output.Log("Lost Simulator Connection Beacuse " + reason, "ADB", Output.InfoKind.Warning);
+                new ToastContentBuilder()
+                    .AddArgument("kind", "ADB")
+                    .AddText("提示")
+                    .AddText("已失去与" + ConnectedInfo.Name + "的连接")
+                    .Show();
+                ConnectedInfo = null;
+            }
+            //检验连接有效性，若否 则清空连接信息重连
+            Output.Log("ADB Heartbeat Testing", "ADB");
+            if (ConnectedInfo != null)
+            {
+                Output.Log("ADB Now Connect:" + ConnectedInfo.ToString(), "ADB");
+                if (Process.GetProcessesByName(ConnectedInfo.IM).Length == 0)
+                {
+                    Clear("No Simulator Window");
+                }
+                else if (!CMD("get-state").Contains("device"))
+                {
+                    Clear("No Status");
+                }
+                else
+                    return;
+            }
+            else
+            {
+                Output.Log("ADB Now Connect:" + "null", "ADB");
+            }
+        }
+
         /// <summary>
         /// adb点击
         /// </summary>
@@ -613,9 +621,7 @@ namespace ArkHelper
         {
             CMD("shell input tap " + x + " " + y);
         }
-        #endregion
 
-        #region 滑动
         /// <summary>
         /// adb滑动
         /// </summary>
@@ -638,7 +644,6 @@ namespace ArkHelper
         {
             CMD("shell input swipe " + x1 + " " + y1 + " " + x2 + " " + y2 + time);
         }
-        #endregion
 
         /// <summary>
         /// 简单截图
@@ -719,7 +724,7 @@ namespace ArkHelper
         }
 
         /// <summary>
-        /// 等待模拟器运行
+        /// 等待模拟器变为可交互状态
         /// </summary>
         public static void WaitingSimulator()
         {
@@ -739,7 +744,6 @@ namespace ArkHelper
                     Thread.Sleep(4000);
                     continue;
                 }
-                Thread.Sleep(1000);
                 break;
             }
         }
@@ -888,13 +892,6 @@ namespace ArkHelper
             #endregion
 
         }
-
-        #region 报故
-        public class BadConnectException : Exception
-        {
-            public BadConnectException() : base("丢失模拟器连接") { }
-        }
-        #endregion
     }
 
     /// <summary>
@@ -1397,7 +1394,7 @@ namespace ArkHelper
 
                 public override string ToString()
                 {
-                    return ID + Name + Port + " " + IM;
+                    return ID + ":" + Name + "(" + IM + "," + Port + ")";
                 }
             }
         }

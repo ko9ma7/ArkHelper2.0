@@ -208,6 +208,14 @@ namespace ArkHelper
                     Thread.Sleep(3000);
                 }
             });
+            Task adbCheck = Task.Run(() =>
+            {
+                while (true)
+                {
+                    Thread.Sleep(60000);
+                    ADB.ADBHeartbeatTest();
+                }
+            });
             #endregion
             #region SCHT等待
             Task SCHT = Task.Run(() =>
