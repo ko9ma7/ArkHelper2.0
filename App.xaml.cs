@@ -45,7 +45,11 @@ namespace ArkHelper
             {
                 File.Create(Address.config).Dispose();
             }
-            File.WriteAllText(Address.config, JsonSerializer.Serialize(App.Data));
+            try
+            {
+                File.WriteAllText(Address.config, JsonSerializer.Serialize(App.Data));
+            }
+            catch { }
         }
         #endregion
 
