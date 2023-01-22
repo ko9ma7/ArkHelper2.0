@@ -586,6 +586,7 @@ namespace ArkHelper
             Output.Log("ADB Heartbeat Testing", "ADB");
             if (ConnectedInfo != null)
             {
+                if (!ADB.CheckADBCanUsed()) return;
                 Output.Log("ADB Now Connect:" + ConnectedInfo.ToString(), "ADB");
                 if (Process.GetProcessesByName(ConnectedInfo.IM).Length == 0)
                 {
