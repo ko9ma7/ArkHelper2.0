@@ -1567,8 +1567,9 @@ namespace ArkHelper
         /// <returns>json</returns>
         public static JsonElement GetFromApi(string url)
         {
+            int num = 0;
         start:;
-            string ret;
+            string ret = "{}";
             var request = new RestRequest { Method = Method.Get };
             try
             {
@@ -1580,7 +1581,8 @@ namespace ArkHelper
             }
             catch
             {
-                goto start;
+                num++;
+                if (num < 3) goto start;
             }
             return JsonSerializer.Deserialize<JsonElement>(ret);
         }
