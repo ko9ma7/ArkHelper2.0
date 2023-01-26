@@ -33,7 +33,7 @@ namespace ArkHelper.Xaml
         }
 
         #region
-        private void getToken()
+        /*private void getToken()
         {
             //token
             string user = "xxx";
@@ -45,16 +45,16 @@ namespace ArkHelper.Xaml
                 RequestFormat = RestSharp.DataFormat.Json
             };
             var json = new JsonElement();
-            /*{
+            *//*{
                 { "phone",user },
                 { "password",pswd }
-            };*/
+            };*//*
             request.AddParameter("", json, ParameterType.RequestBody);
             var client = new RestClient("https://as.hypergryph.com/user/auth/v1/token_by_phone_password");
             var result = client.Post(request);
             MessageBox.Show(result.Content.ToString());
             Clipboard.SetText(result.Content.ToString());
-        }
+        }*/
         #endregion
 
         private void Button_Click(object sender, RoutedEventArgs e)

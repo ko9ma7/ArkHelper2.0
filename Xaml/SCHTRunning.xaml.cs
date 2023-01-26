@@ -89,7 +89,6 @@ namespace ArkHelper.Pages.OtherList
 
         void Page_Loaded(object sender, RoutedEventArgs e)
         {
-            MB.Info += Info;
             //开始工作
             Task SCHT = Task.Run(() =>
             {
@@ -655,7 +654,9 @@ namespace ArkHelper.Pages.OtherList
                     Thread.Sleep(2000);
                     TouchCp();
                 UnitInited:;
+                    MB.Info += Info;
                     MB.MBCore(mode: MB.Mode.san);
+                    MB.Info -= Info;
                     Akhcmd("shell input tap 299 46", "菜单", 1);
                     Akhcmd("shell input tap 103 305", "首页", 3);
                     Akhcmd("shell input tap 908 676", "任务", 2);
