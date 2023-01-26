@@ -94,6 +94,8 @@ namespace ArkHelper.Pages.OtherList
             {
                 void main(Data.SCHT.SCHTData schtData)
                 {
+                    MB.Info += Info;
+
                     //游戏
                     string packname = ADB.GetGamePackageName(schtData.server.id);
 
@@ -393,9 +395,9 @@ namespace ArkHelper.Pages.OtherList
                         Akhcmd("shell input tap 1345 142", "传递线索", 3);
                         Akhcmd("shell input tap 1399 43", "关闭", 2);
                         Akhcmd("shell input tap 765 740", "线索交流", 3);
-                        using(var sc = new ADB.Screenshot())
+                        using (var sc = new ADB.Screenshot())
                         {
-                            if (sc.PicToPoint(Address.res + "\\pic\\UI\\searchingClueSymbol.png").Count==0)
+                            if (sc.PicToPoint(Address.res + "\\pic\\UI\\searchingClueSymbol.png").Count == 0)
                             {
                                 Akhcmd("shell input tap 89 50", "返回", 2);
                             }
@@ -462,7 +464,7 @@ namespace ArkHelper.Pages.OtherList
                                         int Y = (index % 2 == 0) ? 555 : 234;
 
                                         if (operatorNotToUseSkillIconPosition.Exists
-                                        (t =>X - t.X < 80
+                                        (t => X - t.X < 80
                                         && X - t.X > 0
                                         && t.Y - Y < 100
                                         && t.Y - Y > 0))
@@ -557,8 +559,8 @@ namespace ArkHelper.Pages.OtherList
                         if (PictureProcess.ColorCheck(431, 770, "#FFFFFF", 432, 770, "#FFFFFF")) { }
                         else
                         {
-                            MB.MBCore(MB.Mode.time, 
-                            anntime, 
+                            MB.MBCore(MB.Mode.time,
+                            anntime,
                             false,
                             ann_cardToUse: schtData.ann.allowToUseCard ? 10 : 0);
                         }
@@ -568,15 +570,29 @@ namespace ArkHelper.Pages.OtherList
                     }
 
                     //准备作战
-                    void TouchCp()
+                    void MoveToCPInfo(int num = 0)
                     {
                         using (var _screenshot = new ADB.Screenshot())
                         {
-                            var points = _screenshot.PicToPoint(Address.res + "\\pic\\battle\\" + "threeStarCp" + ".png");
-                            if (points.Count != 0)
+                            var points = _screenshot.PicToPoint(Address.res + "\\pic\\battle\\" + "threeStarCp" + ".png",0.95);
+                            if (points.Count == 0)
+                                goto End;
+
+                            //消去重复项
+                            List<Point> reslst = new List<Point>();
+                            while(points.Count != 0)
                             {
-                                points.Sort((x, y) => x.Y.CompareTo(y.Y));//Y最小的排第一 //fu 可替换
-                                foreach (var point in points)
+                                var _pot = points[0];
+                                reslst.Add(_pot);
+                                points.RemoveAll(t => Math.Abs(_pot.X - t.X) < 881-848
+                                                      && Math.Abs(_pot.Y - t.Y) < 881-848
+                                                      );
+                            }
+
+                            if (num == 0)
+                            {
+                                reslst.Sort((x, y) => x.Y.CompareTo(y.Y));//Y最小的排第一
+                                foreach (var point in reslst)
                                 {
                                     ADB.Tap(point);
                                     if (MB.MBCore(MB.Mode.time, 0).Type != MB.MBResult.ResultType.Error_AutoDeployNotAvailable)
@@ -585,19 +601,27 @@ namespace ArkHelper.Pages.OtherList
                                         Akhcmd("shell input tap 89 50", "返回", 2);
                                 }
                             }
+                            else
+                            {
+                                reslst.Sort((x, y) => -x.Y.CompareTo(y.Y));//Y最大的排第一
+                                ADB.Tap(reslst[num - 1]);
+                            }
                         }
+                    End:;
                         Thread.Sleep(1000);
                     }
-                    void GetCustomCp(string _unit)
+                    void MoveToCustomCP(string cpinfo)
                     {
-                        var akhcpiaddress = _unit.Replace("custom:##", "").Replace("##", "");
+                        var akhcpiaddress = cpinfo;
                         akhcpiMaker.Exe(akhcpiMaker.ReadFromAKHcpi(akhcpiaddress));
                     }
+                    Data.SCHT.SCHTData.Cp exeCpInfo;
                     //first
-                    if (!schtData.first.unit.Contains("custom"))
+                    if (schtData.first.unit != ("custom"))
                     {
                         AKHcmd.FormatAKHcmd["zhongduan"].RunCmd();
                         AKHcmd.FormatAKHcmd["ziyuanshouji"].RunCmd();
+                        exeCpInfo = schtData.first;
 
                         if (schtData.first.unit == "LS")
                         {
@@ -629,12 +653,13 @@ namespace ArkHelper.Pages.OtherList
                     }
                     else
                     {
-                        GetCustomCp(schtData.first.unit);
+                        MoveToCustomCP(schtData.first.cp);
                         goto UnitInited;
                     }
                     //second
                     if (!schtData.second.unit.Contains("custom"))
                     {
+                        exeCpInfo = schtData.second;
                         AKHcmd.FormatAKHcmd["zhongduan_menu_zhongduan"].RunCmd();
                         AKHcmd.FormatAKHcmd["ziyuanshouji"].RunCmd();
                         if (schtData.second.unit == "LS")
@@ -647,16 +672,16 @@ namespace ArkHelper.Pages.OtherList
                     {
                         AKHcmd.FormatAKHcmd["menu"].RunCmd();
                         AKHcmd.FormatAKHcmd["menu_home"].RunCmd();
-                        GetCustomCp(schtData.second.unit);
+                        MoveToCustomCP(schtData.second.cp);
                         goto UnitInited;
                     }
                 NativeUnitInited:;
                     Thread.Sleep(2000);
-                    TouchCp();
+                    MoveToCPInfo(exeCpInfo.cp == "auto"?0:Convert.ToInt32(exeCpInfo.cp));
                 UnitInited:;
-                    MB.Info += Info;
                     MB.MBCore(mode: MB.Mode.san);
                     MB.Info -= Info;
+
                     Akhcmd("shell input tap 299 46", "菜单", 1);
                     Akhcmd("shell input tap 103 305", "首页", 3);
                     Akhcmd("shell input tap 908 676", "任务", 2);

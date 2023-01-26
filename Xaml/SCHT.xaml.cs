@@ -13,6 +13,7 @@ namespace ArkHelper.Pages.OtherList
     public partial class SCHT : Page
     {
         bool inited = false;
+        ArkHelper.ArkHelperDataStandard.Data.SCHT.SCHTData schtData = App.Data.scht.data;
         public SCHT()
         {
             InitializeComponent();
@@ -26,33 +27,33 @@ namespace ArkHelper.Pages.OtherList
 
             //UI
             server_combobox.ItemsSource = PinnedData.Server.dataSheet.DefaultView;
-            ann_status_togglebutton.IsChecked = App.Data.scht.data.ann.status;
+            ann_status_togglebutton.IsChecked = schtData.ann.status;
             status_togglebutton.IsChecked = App.Data.scht.status;
-            server_combobox.SelectedValue = App.Data.scht.data.server.id;
-            ann_useCard_checkbox.IsChecked = App.Data.scht.data.ann.allowToUseCard;
-            if (!App.Data.scht.data.first.unit.Contains("custom"))
+            server_combobox.SelectedValue = schtData.server.id;
+            ann_useCard_checkbox.IsChecked = schtData.ann.allowToUseCard;
+            if (!schtData.first.unit.Contains("custom"))
             {
-                ((RadioButton)GetType().GetField(App.Data.scht.data.first.unit.Replace("PR-", "PR") + "First", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(this)).IsChecked = true;
+                ((RadioButton)GetType().GetField(schtData.first.unit.Replace("PR-", "PR") + "First", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(this)).IsChecked = true;
             }
             else
             {
                 customFirst.IsChecked = true;
             }
-            if (!App.Data.scht.data.second.unit.Contains("custom"))
+            if (!schtData.second.unit.Contains("custom"))
             {
-                ((RadioButton)GetType().GetField(App.Data.scht.data.second.unit + "Second", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(this)).IsChecked = true;
+                ((RadioButton)GetType().GetField(schtData.second.unit + "Second", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(this)).IsChecked = true;
             }
             else
             {
                 customSecond.IsChecked = true;
             }
-            ((RadioButton)GetType().GetField(App.Data.scht.data.ann.select, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(this)).IsChecked = true;
-            ann_custom_time_status_checkbox.IsChecked = App.Data.scht.data.ann.customTime;
+            ((RadioButton)GetType().GetField(schtData.ann.select, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(this)).IsChecked = true;
+            ann_custom_time_status_checkbox.IsChecked = schtData.ann.customTime;
 
             string[] strArr = { "一", "二", "三", "四", "五", "六", "日" };
 
             int _num = 0;
-            foreach (int num in App.Data.scht.data.ann.time)
+            foreach (int num in schtData.ann.time)
             {
                 WrapPanel wrapPanel = new WrapPanel();
                 TextBlock textBlock = new TextBlock()
@@ -236,7 +237,7 @@ namespace ArkHelper.Pages.OtherList
             try
             {
                 var _sender = (TextBox)sender;
-                App.Data.scht.data.ann.time[(int)_sender.Tag] = Convert.ToInt32(_sender.Text);
+                schtData.ann.time[(int)_sender.Tag] = Convert.ToInt32(_sender.Text);
             }
             catch { }
         }
@@ -272,12 +273,13 @@ namespace ArkHelper.Pages.OtherList
                 }
                 else
                 {
-                    App.Data.scht.data.first.unit = unit + ":##" + cpiAddress + "##";
+                    schtData.first.unit = unit;
+                    schtData.first.cp = cpiAddress;
                 }
             }
             else
             {
-                App.Data.scht.data.first.unit = unit;
+                schtData.first.unit = unit;
             }
         }
         private void Second_Unit_Selected(object sender, RoutedEventArgs e)
@@ -298,30 +300,31 @@ namespace ArkHelper.Pages.OtherList
                 }
                 else
                 {
-                    App.Data.scht.data.second.unit = unit + ":##" + cpiAddress + "##";
+                    schtData.second.unit = unit;
+                    schtData.second.cp = cpiAddress;
                 }
             }
             else
             {
-                App.Data.scht.data.second.unit = unit;
+                schtData.second.unit = unit;
             }
         }
         private void ann_Selected(object sender, RoutedEventArgs e)
         {
             //检测是哪个button被激活
-            App.Data.scht.data.ann.select = (sender as RadioButton).Name;
+            schtData.ann.select = (sender as RadioButton).Name;
         }
         private void ann_custom_time_status_checkbox_Click(object sender, RoutedEventArgs e)
         {
-            App.Data.scht.data.ann.customTime = (bool)ann_custom_time_status_checkbox.IsChecked;
+            schtData.ann.customTime = (bool)ann_custom_time_status_checkbox.IsChecked;
         }
         private void server_combobox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            App.Data.scht.data.server.id = server_combobox.SelectedValue.ToString();
+            schtData.server.id = server_combobox.SelectedValue.ToString();
         }
         private void ann_status_togglebutton_Click(object sender, RoutedEventArgs e)
         {
-            App.Data.scht.data.ann.status = (bool)ann_status_togglebutton.IsChecked;
+            schtData.ann.status = (bool)ann_status_togglebutton.IsChecked;
         }
         #endregion
 
@@ -516,7 +519,7 @@ namespace ArkHelper.Pages.OtherList
 
         private void ann_useCard_checkbox_Click(object sender, RoutedEventArgs e)
         {
-            App.Data.scht.data.ann.allowToUseCard = (bool)ann_useCard_checkbox.IsChecked;
+            schtData.ann.allowToUseCard = (bool)ann_useCard_checkbox.IsChecked;
         }
     }
 }

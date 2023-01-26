@@ -276,6 +276,7 @@ namespace ArkHelper
                     public class Cp
                     {
                         public string unit { get; set; } = "LS";
+                        public string cp { get; set; } = "auto";
                     }
 
                     public Ann ann { get; set; } = new Ann();
