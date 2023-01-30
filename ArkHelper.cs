@@ -72,7 +72,7 @@ namespace ArkHelper
             }
         }
 
-        public static Data Current = new Data("2.0.0.5", "local", false, Data.VersionType.beta);
+        public static Data Current = new Data("2.0.0.6", "local", false, Data.VersionType.beta);
 
         /// <summary>
         /// 更新
@@ -1470,7 +1470,7 @@ namespace ArkHelper
             public static List<SimuInfo> Support = new List<SimuInfo>
             {
                 new SimuInfo("MuMu", "MuMu模拟器", 7555, "NemuPlayer"),
-                new SimuInfo("BlueStacks", "蓝叠模拟器", 5555, "HD-Player"),
+                new SimuInfo("BlueStacks", "蓝叠模拟器", 5555, "HD-Player","-s emulator-5554"),
                 new SimuInfo("dnplayer", "雷电模拟器", 5555, "dnplayer","-s emulator-5554"),
                 new SimuInfo("MEMU", "逍遥模拟器", 21503, "MEmu"),
                 new SimuInfo("NOX", "夜神模拟器", 62001, "Nox"),
