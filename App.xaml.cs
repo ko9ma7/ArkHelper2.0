@@ -33,7 +33,14 @@ namespace ArkHelper
         }
         public static void LoadData()
         {
-            App.Data = JsonSerializer.Deserialize<Data>(File.ReadAllText(Address.config));
+            try
+            {
+                App.Data = JsonSerializer.Deserialize<Data>(File.ReadAllText(Address.config));
+            }
+            catch
+            {
+                App.Data = new Data();
+            }
             if (true) ;
 
             if (Version.Current.Type != Version.Data.VersionType.realese) App.Data.arkHelper.debug = true ;
@@ -176,15 +183,15 @@ namespace ArkHelper
                 var win = new NewUser();
                 win.ShowDialog();
             }
-            try
+            if (!File.Exists(Address.config)) //配置文件缺失
+            {
+                Current.Shutdown();
+            }
+            else
             {
                 App.LoadData();
                 OpenMainWindow();
                 notifyIcon.Visible = true;
-            }
-            catch
-            {
-                Current.Shutdown();
             }
 
             Output.Log("ArkHelper Startup,ver=" + Version.Current.ToString() + ",currentDirectory=" + Address.akh + ",dataDirectory=" + Address.data);
@@ -211,14 +218,14 @@ namespace ArkHelper
                 while (true)
                 {
                     ADB.Connect();
-                    Thread.Sleep(3000);
+                    Thread.Sleep(2000);
                 }
             });
             Task adbCheck = Task.Run(() =>
             {
                 while (true)
                 {
-                    Thread.Sleep(60000);
+                    Thread.Sleep(5000);
                     ADB.ADBHeartbeatTest();
                 }
             });
