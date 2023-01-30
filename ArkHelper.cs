@@ -72,7 +72,7 @@ namespace ArkHelper
             }
         }
 
-        public static Data Current = new Data("2.0.0.4", "local", false, Data.VersionType.beta);
+        public static Data Current = new Data("2.0.0.5", "local", false, Data.VersionType.beta);
 
         /// <summary>
         /// 更新
@@ -262,6 +262,7 @@ namespace ArkHelper
                     public bool status { get; set; } = false;
                     public int port { get; set; } = 0;
                     public string im { get; set; } = "";
+                    public string externalCMD { get; set; } = "";
                 }
                 public bool HeartbeatTest { get; set; } = false;
             }
@@ -507,7 +508,6 @@ namespace ArkHelper
         public static string CMD(string cmd)
         {
             //cmd
-            process.StartInfo.Arguments = cmd;
             if (true) Output.Log(cmd, "ADB");
 
             //启动命令并读取结果
@@ -516,6 +516,11 @@ namespace ArkHelper
             {
                 if (true) Output.Log("=>" + "[Operating with bad connection]", "ADB", Output.InfoKind.Warning);
             }
+            else
+            {
+                cmd =" " + ConnectedInfo.ExternalCMD + " " + cmd;
+            }
+            process.StartInfo.Arguments = cmd;
             process.Start();
             end = process.StandardOutput.ReadToEnd();
             //log结果
@@ -553,7 +558,6 @@ namespace ArkHelper
                         ConnectThis = info;
                         break;
                     }
-                    else return;
             }
 
             //等待模拟器端守护进程响应连接
@@ -1467,7 +1471,7 @@ namespace ArkHelper
             {
                 new SimuInfo("MuMu", "MuMu模拟器", 7555, "NemuPlayer"),
                 new SimuInfo("BlueStacks", "蓝叠模拟器", 5555, "HD-Player"),
-                new SimuInfo("LDplayer", "雷电模拟器", 5555, "dnplayer"),
+                new SimuInfo("dnplayer", "雷电模拟器", 5555, "dnplayer","-s emulator-5554"),
                 new SimuInfo("MEMU", "逍遥模拟器", 21503, "MEmu"),
                 new SimuInfo("NOX", "夜神模拟器", 62001, "Nox"),
                 new SimuInfo("WSA", "WSA", 58526, "WSAClient"),
@@ -1478,12 +1482,14 @@ namespace ArkHelper
                 public string Name { get; set; }
                 public int Port { get; set; }
                 public string IM { get; set; }
-                public SimuInfo(string id, string name, int port, string im)
+                public string ExternalCMD { get; set; }
+                public SimuInfo(string id, string name, int port, string im , string externalCmd="")
                 {
                     ID = id;
                     Name = name;
                     Port = port;
                     IM = im;
+                    ExternalCMD= externalCmd;
                 }
                 public SimuInfo() { }
 
