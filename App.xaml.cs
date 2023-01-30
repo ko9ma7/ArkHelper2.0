@@ -226,7 +226,7 @@ namespace ArkHelper
                 while (true)
                 {
                     Thread.Sleep(5000);
-                    ADB.ADBHeartbeatTest();
+                    if (App.Data.simulator.HeartbeatTest) ADB.ADBHeartbeatTest();
                 }
             });
             #endregion

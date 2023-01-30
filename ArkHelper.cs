@@ -72,7 +72,7 @@ namespace ArkHelper
             }
         }
 
-        public static Data Current = new Data("2.0.0.3", "local", false, Data.VersionType.beta);
+        public static Data Current = new Data("2.0.0.4", "local", false, Data.VersionType.beta);
 
         /// <summary>
         /// 更新
@@ -263,6 +263,7 @@ namespace ArkHelper
                     public int port { get; set; } = 0;
                     public string im { get; set; } = "";
                 }
+                public bool HeartbeatTest { get; set; } = false;
             }
 
             public SCHT scht { get; set; } = new SCHT();
