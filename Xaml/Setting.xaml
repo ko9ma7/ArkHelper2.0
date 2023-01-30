@@ -133,6 +133,10 @@
 
                         <WrapPanel HorizontalAlignment="Left">
                             <TextBlock FontSize="{StaticResource p}" Foreground="Gray">
+                                <Run>版本号：</Run>
+                                <Run Name="ver">测试版本号</Run>
+                            </TextBlock>
+                            <TextBlock Margin="10,0,0,0" FontSize="{StaticResource p}" Foreground="Gray">
                                 <Run>数据保存位置：</Run>
                                 <Run Name="address">测试地址</Run>
                             </TextBlock>

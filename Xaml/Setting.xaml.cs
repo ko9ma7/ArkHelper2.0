@@ -19,6 +19,8 @@ namespace ArkHelper.Pages.OtherList
 
             address.Text = Address.programData;
 
+            ver.Text = Version.Current.ToString();
+
             pure.IsChecked = App.Data.arkHelper.pure;
             debug.IsChecked = App.Data.arkHelper.debug;
             /*if (Data.SCHT.status)

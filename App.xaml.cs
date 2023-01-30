@@ -36,6 +36,8 @@ namespace ArkHelper
             App.Data = JsonSerializer.Deserialize<Data>(File.ReadAllText(Address.config));
             if (true) ;
 
+            if (Version.Current.Type != Version.Data.VersionType.realese) App.Data.arkHelper.debug = true ;
+
             App.Data.scht.ct.times.Sort();
             App.Data.scht.ct.forceTimes.Sort();
         }
