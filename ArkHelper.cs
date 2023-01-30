@@ -14,6 +14,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Security.Policy;
 using System.Security.RightsManagement;
 using System.Text.Json;
@@ -622,6 +623,94 @@ namespace ArkHelper
         public static void Tap(int x, int y)
         {
             CMD("shell input tap " + x + " " + y);
+        }
+        /// <summary>
+        /// adb点击
+        /// <br></br>
+        /// 自动等待图片匹配点出现并点击匹配到的第一个坐标。
+        /// <br></br>
+        /// 请谨慎使用errorTime=-1，有阻塞线程的风险！
+        /// </summary>
+        /// <param name="picture">图片模板地址</param>
+        /// <param name="errorTime">等待次数，为负数时无限等待。请谨慎使用无限等待，有阻塞线程的风险！</param>
+        /// <param name="opencv_errorCon">调用pictopoint传入容差</param>
+        /// <returns>若成功地点击了坐标，返回true，否则false</returns>
+        public static bool Tap(string picture,int errorTime = 5,double opencv_errorCon = 0.8)
+        {
+            var _pot = WaitPicture(picture, errorTime, opencv_errorCon);
+            if (_pot.Count == 0) return false;
+            ADB.Tap(_pot[0]);
+            return true;
+        }
+
+        /// <summary>
+        /// 等待图片匹配点出现
+        /// </summary>
+        /// <param name="picture">图片模板地址</param>
+        /// <param name="errorTime">等待次数，为负数时无限等待。请谨慎使用无限等待，有阻塞线程的风险！</param>
+        /// <param name="opencv_errorCon">调用pictopoint传入容差</param>
+        public static List<Point> WaitPicture(string picture, int errorTime = 5, double opencv_errorCon = 0.8)
+        {
+            for(; ; )
+            {
+                errorTime--;
+                using (var screenshot = new Screenshot())
+                {
+                    var _pot = screenshot.PicToPoint(picture, opencv_errorCon: opencv_errorCon);
+                    if (_pot.Count != 0)
+                    {
+                        return _pot;
+                    }
+                }
+                Thread.Sleep(200);
+                if (errorTime == 0) return new List<Point>();
+            }
+        }
+
+        /// <summary>
+        /// 等待所有图片匹配点出现
+        /// </summary>
+        /// <param name="pictures">图片地址</param>
+        /// <param name="errorTime">等待次数，为负数时无限等待。请谨慎使用无限等待，有阻塞线程的风险！</param>
+        /// <param name="opencv_errorCon">调用pictopoint传入容差</param>
+        /// <returns>成功true，失败false</returns>
+        public static bool WaitAllPicture(List<string> pictures, int errorTime = 5, double opencv_errorCon = 0.8)
+        {
+            for(; ; )
+            {
+                errorTime--;
+                using (var screenshot = new Screenshot())
+                {
+                    bool res = true;
+                    foreach(var pic in pictures)
+                        if(screenshot.PicToPoint(pic, opencv_errorCon: opencv_errorCon).Count == 0) res = true;
+                    if (res) return res;
+                }
+                Thread.Sleep(200);
+                if (errorTime == 0) return false;
+            }
+        }
+        
+        /// <summary>
+        /// 等待其一图片匹配点出现
+        /// </summary>
+        /// <param name="pictures">图片地址</param>
+        /// <param name="errorTime">等待次数，为负数时无限等待。请谨慎使用无限等待，有阻塞线程的风险！</param>
+        /// <param name="opencv_errorCon">调用pictopoint传入容差</param>
+        /// <returns>匹配到的图片。否则返回""</returns>
+        public static string WaitOnePicture(List<string> pictures, int errorTime = 5, double opencv_errorCon = 0.8)
+        {
+            for(; ; )
+            {
+                errorTime--;
+                using (var screenshot = new Screenshot())
+                {
+                    foreach(var pic in pictures)
+                        if(screenshot.PicToPoint(pic, opencv_errorCon: opencv_errorCon).Count != 0) return pic;
+                }
+                Thread.Sleep(200);
+                if (errorTime == 0) return "";
+            }
         }
 
         /// <summary>
