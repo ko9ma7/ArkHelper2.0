@@ -507,9 +507,6 @@ namespace ArkHelper
         /// <returns>adb的返回结果</returns>
         public static string CMD(string cmd)
         {
-            //cmd
-            if (true) Output.Log(cmd, "ADB");
-
             //启动命令并读取结果
             string end;
             if (ConnectedInfo == null)
@@ -520,6 +517,8 @@ namespace ArkHelper
             {
                 cmd =" " + ConnectedInfo.ExternalCMD + " " + cmd;
             }
+            //cmd
+            if (true) Output.Log(cmd, "ADB");
             process.StartInfo.Arguments = cmd;
             process.Start();
             end = process.StandardOutput.ReadToEnd();
@@ -556,10 +555,12 @@ namespace ArkHelper
                     if (Process.GetProcessesByName(info.IM).Length != 0)
                     {
                         ConnectThis = info;
-                        break;
+                        goto Connect;
                     }
+                return;
             }
 
+        Connect:;
             //等待模拟器端守护进程响应连接
             CMD("kill-server");
             if (CMD("connect " + "127.0.0.1:" + ConnectThis.Port).Contains("connected"))
