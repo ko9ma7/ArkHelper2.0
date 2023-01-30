@@ -6,6 +6,7 @@
       xmlns:local="clr-namespace:ArkHelper"
       xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:thing="clr-namespace:ArkHelper.thing"
       Title="MB"
       d:Background="White"
       d:DesignHeight="470"
@@ -82,6 +83,45 @@
                                      Foreground="#006493"
                                      Style="{StaticResource MaterialDesignFloatingHintTextBox}"
                                      Text="1" />
+
+                        </WrapPanel>
+
+                    </StackPanel>
+                </Border>
+                <Border Width="220"
+                        Margin="0,8,0,0"
+                        d:Background="White"
+                        CornerRadius="16"
+                        Style="{StaticResource extendRBtn}">
+                    <StackPanel>
+                        <RadioButton Name="mode_SXYS"
+                                     Width="220"
+                                     Height="55"
+                                     Margin="0"
+                                     ContentStringFormat="生息演算"
+                                     GroupName="BtKind"
+                                     Style="{StaticResource RadioButtonDock}"
+                                     Tag="SproutOutline" />
+                        <WrapPanel Margin="0,0,0,20" Visibility="{Binding ElementName=mode_SXYS, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <!--<materialDesign:PackIcon Width="20"
+                                                 Height="20"
+                                                 VerticalAlignment="Center"
+                                                 Foreground="#006493"
+                                                 Kind="Clock" />-->
+                            <WrapPanel Margin="14,0,0,0">
+                                <CheckBox Name="SXYS_time_status" FontSize="14">限制次数</CheckBox>
+                            </WrapPanel>
+                            <TextBox x:Name="SXYS_time"
+                                     Width="180"
+                                     Margin="14,0,0,0"
+                                     HorizontalAlignment="Center"
+                                     VerticalAlignment="Center"
+                                     materialDesign:HintAssist.Hint="次数"
+                                     FontSize="15"
+                                     Foreground="#006493"
+                                     Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                                     IsEnabled="{Binding ElementName=SXYS_time_status,Path=IsChecked}"
+                                     Text="5" />
 
                         </WrapPanel>
 
@@ -177,6 +217,17 @@
                         </StackPanel>
                     </Border>
 
+                    <Border Name="error" Visibility="Visible">
+                        <StackPanel Orientation="Vertical">
+                            <akhc:ChapterTitle Icon="Error" Text="错误" />
+                            <TextBlock FontSize="{StaticResource h3}">
+                                ArkHelper没有连接到模拟器或有其它任务在执行，暂时无法进行连续作战。
+                                <LineBreak></LineBreak>
+                                请检查模拟器连接。
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
+
                     <Border d:Visibility="Visible" Visibility="{Binding ElementName=waiting_processbar, Path=Visibility}">
                         <StackPanel Name="monitor">
                             <akhc:ChapterTitle Icon="ChartDonut" Text="实时作战监测系统：回传报告" />
@@ -228,6 +279,7 @@
             </Grid>
         </Grid>
         <Button x:Name="start_button"
+                IsEnabled="False"
                 Width="48"
                 Height="48"
                 Margin="0,0,50,50"

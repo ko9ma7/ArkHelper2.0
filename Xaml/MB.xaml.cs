@@ -12,6 +12,10 @@ using System.Windows.Threading;
 using System.Globalization;
 using System.ComponentModel;
 using Windows.Services.Maps;
+using System.Security.Cryptography;
+using System.IO;
+using System.Collections.Generic;
+using Point = System.Drawing.Point;
 
 namespace ArkHelper
 {
@@ -84,7 +88,7 @@ namespace ArkHelper
                 {
                     TimeSpan UsingTime = DateTime.Now - DStartTime;
                     data_speed_text.Text = UsingTime.TotalSeconds.ToString("0.00");
-                    if ((bool)mode_time.IsChecked)
+                    if (uimode == UIMode.time || uimode == UIMode.SXYS_time)
                     {
                         var endtime = DStartTime + new TimeSpan(UsingTime.Ticks * DT);
                         data_end_text.Text = endtime.ToString("g");
@@ -95,13 +99,16 @@ namespace ArkHelper
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
             Info += Show;
+            SXYSInfo += Show;
             Next += reactNext;
+            SXYSNext += reactNext;
         }
         private void Page_Unloaded(object sender, RoutedEventArgs e)
         {
             Info -= Show;
+            SXYSInfo -= Show;
             Next -= reactNext;
-
+            SXYSNext -= reactNext;
         }
 
 
@@ -110,19 +117,24 @@ namespace ArkHelper
             InitializeComponent();
             Task.Run(() =>
             {
-                for(; ; )
+                for (; ; )
                 {
                     if (ADB.CheckADBCanUsed())
                     {
                         Application.Current.Dispatcher.Invoke(() =>
                         {
                             start_button.IsEnabled = true;
+                            error.Visibility = Visibility.Collapsed;
                         });
                     }
                     else
                     {
                         Application.Current.Dispatcher.Invoke(() =>
-                        start_button.IsEnabled = false);
+                        {
+                            start_button.IsEnabled = false;
+                            error.Visibility = Visibility.Visible;
+                            error.Visibility = start_button.Visibility;
+                        });
                     }
                     Thread.Sleep(1000);
                 }
@@ -132,22 +144,46 @@ namespace ArkHelper
         {
             ADB.RegisterADBUsing("MB");
 
+            //用于MBCore的参数
             Mode mode = Mode.san;
             int time = -1;
+
+            //用于生息演算的参数
+            bool SXYS = true;
+            int time_sxys = -1;
 
             //判断模式
             if ((bool)mode_san.IsChecked)
             {
+                uimode = UIMode.san;
                 mode = Mode.san;
                 data_end.Visibility = Visibility.Collapsed;
                 data_progress_T.Text = "--";
             }
             if ((bool)mode_time.IsChecked)
             {
+                uimode = UIMode.time;
                 mode = Mode.time;
                 time = Convert.ToInt32(times_setting.Text);
                 DT = time;
                 data_end.Visibility = Visibility.Visible;
+            }
+            if ((bool)mode_SXYS.IsChecked)
+            {
+                SXYS = true;
+                uimode = UIMode.SXYS;
+                if ((bool)SXYS_time_status.IsChecked)
+                {
+                    uimode = UIMode.SXYS_time;
+                    time_sxys = Convert.ToInt32(SXYS_time.Text);
+                    data_end.Visibility = Visibility.Visible;
+                    DT = time_sxys;
+                }
+                else
+                {
+                    data_progress_T.Text = "--";
+                    data_end.Visibility = Visibility.Collapsed;
+                }
             }
 
             //UI
@@ -164,12 +200,65 @@ namespace ArkHelper
             Task run = new Task(() =>
             {
                 var startTime = DateTime.Now;//启动时间
+                int alreadyTime;
 
-                var result = MBCore(mode: mode, time: time,allowToRecoverSantiy:false);
-
-                if (result.Type == MBResult.ResultType.Succeed)
+                if (!SXYS)
                 {
-                    var alreadyTime = result.Time;
+                    var result = MBCore(mode: mode, time: time, allowToRecoverSantiy: false);
+                    if (result.Type == MBResult.ResultType.Succeed)
+                    {
+                        alreadyTime = result.Time;
+                        MBUITaskEndAction();
+                    }
+                    else
+                    {
+                        if (result.Type == MBResult.ResultType.Error_NotDetectACheckpoint)
+                        {
+                            Show("未检测到关卡信息界面 /请切换至关卡信息界面", Output.InfoKind.Warning);
+                            Thread.Sleep(3000);
+                        }
+                        if (result.Type == MBResult.ResultType.Error_AutoDeployNotAvailable)
+                        {
+                            Show("代理指挥不可用 /请换一个关卡", Output.InfoKind.Warning);
+                            Thread.Sleep(3000);
+                        }
+                        if (result.Type == MBResult.ResultType.Error_UndefinedError)
+                        {
+                            Show("发生未知错误 /请重启ArkHelper重试", Output.InfoKind.Error);
+                            Thread.Sleep(3000);
+                        }
+                    }
+                }
+                else
+                {
+                    var result = SXYSCore(time_sxys);
+                    if (result.Type == SXYSResult.ResultType.Succeed)
+                    {
+                        alreadyTime = 0;
+                        MBUITaskEndAction();
+                    }
+                    else
+                    {
+                        if (result.Type == SXYSResult.ResultType.Error_NotDetectACheckpoint)
+                        {
+                            Show("错误 /请切换至生息演算界面", Output.InfoKind.Warning);
+                            Thread.Sleep(3000);
+                        }
+                        if (result.Type == SXYSResult.ResultType.Error_LastTimeNotEnd)
+                        {
+                            Show("错误 /请结束上次生息演算", Output.InfoKind.Warning);
+                            Thread.Sleep(3000);
+                        }
+                        if (result.Type == SXYSResult.ResultType.Error_UndefinedError)
+                        {
+                            Show("发生未知错误 /请重启ArkHelper重试", Output.InfoKind.Error);
+                            Thread.Sleep(3000);
+                        }
+                    }
+                }
+
+                void MBUITaskEndAction()
+                {
                     var endTime = DateTime.Now;//结束时间
                     TimeSpan UsingTime = endTime - startTime;
                     double speed = (alreadyTime == 0) ? -1 : (UsingTime.TotalSeconds / alreadyTime);
@@ -215,24 +304,6 @@ namespace ArkHelper
                     if (after_action == "lock") { WithSystem.LockWorkStation(); }
                     if (after_action == "sleep") { WithSystem.Sleep(); }
                 }
-                else
-                {
-                    if (result.Type == MBResult.ResultType.Error_NotDetectACheckpoint)
-                    {
-                        Show("未检测到关卡信息界面 /请切换至关卡信息界面", Output.InfoKind.Warning);
-                        Thread.Sleep(3000);
-                    }
-                    if (result.Type == MBResult.ResultType.Error_AutoDeployNotAvailable)
-                    {
-                        Show("代理指挥不可用 /请换一个关卡", Output.InfoKind.Warning);
-                        Thread.Sleep(3000);
-                    }
-                    if (result.Type == MBResult.ResultType.Error_UndefinedError)
-                    {
-                        Show("发生未知错误 /请重启ArkHelper重试", Output.InfoKind.Error);
-                        Thread.Sleep(3000);
-                    }
-                }
             });
 
             run.Start();
@@ -245,6 +316,11 @@ namespace ArkHelper
 
             ADB.UnregisterADBUsing("MB");
         }
+        private enum UIMode
+        {
+            san, time, SXYS, SXYS_time
+        }
+        private UIMode uimode;
         #endregion
 
         #region core
@@ -337,7 +413,7 @@ namespace ArkHelper
         /// <param name="time">次数（仅当mode=Mode.time时可用）</param>
         /// <param name="ann_cardToUse">可用剿灭代理卡数量（仅当作战类型为剿灭时可用）</param>
         /// <returns></returns>
-        public static MBResult MBCore(Mode mode, int time = -1,bool allowToRecoverSantiy=false, int ann_cardToUse = 0)
+        public static MBResult MBCore(Mode mode, int time = -1, bool allowToRecoverSantiy = false, int ann_cardToUse = 0)
         {
             //ann_cardToUse = 1;//debug
             int battleKind = 0;//0：普通，1：剿灭
@@ -530,7 +606,7 @@ namespace ArkHelper
             {
                 using (var screenshot = new ADB.Screenshot())
                 {
-                    if (screenshot.PicToPoint(Address.res + "\\pic\\UI\\missionEndSymbol.png",opencv_errorCon:0.95).Count != 0)
+                    if (screenshot.PicToPoint(Address.res + "\\pic\\UI\\missionEndSymbol.png", opencv_errorCon: 0.95).Count != 0)
                     {
                         Thread.Sleep(2000);
                         screenshot.Save(Address.Screenshot.MB, ArkHelperDataStandard.Screenshot);
@@ -569,6 +645,261 @@ namespace ArkHelper
             //结束
             Info("连续作战指挥系统运行结束");
             return new MBResult(MBResult.ResultType.Succeed, time: alreadyTime);
+        }
+        #endregion
+
+        #region SXYS
+        public delegate void SXYSMessage(string content, Output.InfoKind infoKind = Output.InfoKind.Infomational);
+        /// <summary>
+        /// MB进程更新事件
+        /// </summary>
+        public static event SXYSMessage SXYSInfo;
+
+        public delegate void SXYSNextTime();
+        /// <summary>
+        /// MB进程更新事件
+        /// </summary>
+        public static event SXYSNextTime SXYSNext;
+        public class SXYSResult
+        {
+            /// <summary>
+            /// 生息演算作战结果
+            /// </summary>
+            public enum ResultType
+            {
+                /// <summary>
+                /// 成功作战结束
+                /// </summary>
+                Succeed,
+                /// <summary>
+                /// 未检测到关卡界面
+                /// </summary>
+                Error_NotDetectACheckpoint,
+                /// <summary>
+                /// 未检测到关卡界面
+                /// </summary>
+                Error_LastTimeNotEnd,
+                /// <summary>
+                /// 未知错误
+                /// </summary>
+                Error_UndefinedError
+            }
+            public ResultType Type { get; }
+
+            public SXYSResult(ResultType resultType)
+            {
+                Type = resultType;
+                Logger("Code=" + resultType
+                    , resultType == ResultType.Succeed ?
+                    InfoKind.Infomational :
+                    InfoKind.Error);
+                Logger("--- 生息演算 END ---");
+            }
+        }
+        /// <summary>
+        /// SXYS日志输出
+        /// </summary>
+        /// <param name="content">日志内容</param>
+        /// <param name="infoKind">日志重要程度</param>
+        private static void SXYSLogger(string content, Output.InfoKind infoKind = Output.InfoKind.Infomational)
+        {
+            Output.Log(content, "SXYS", infoKind);
+        }
+        private static SXYSResult SXYSCore(int time = -1)
+        {
+            #region tool
+            List<Point> getPoint(string pic, double errCon = 0.8, ADB.Screenshot screenshot = null)
+            {
+                bool newsc = false;
+                if (!File.Exists(pic)) return new List<Point>();
+                if (screenshot == null)
+                {
+                    screenshot = new ADB.Screenshot();
+                    newsc = true;
+                }
+                var _pot = screenshot.PicToPoint(pic, opencv_errorCon: errCon);
+                if (newsc) screenshot.Dispose();
+                return _pot;
+            }
+            bool isHave(string pic, double errCon = 0.8, ADB.Screenshot screenshot = null)
+            {
+                if (getPoint(pic, errCon, screenshot).Count == 0) return false;
+                else return true;
+            }
+            string address(string pic) => Address.res + "\\pic\\SXYS\\" + pic + ".png";
+            #endregion
+
+            #region voids
+            void sleep(double second)
+            {
+                second = second * 1000;
+                Thread.Sleep((int)second);
+            }
+            #endregion
+
+
+            SXYSLogger("--- 生息演算 START ---");
+            SXYSInfo("连续生息演算开始");
+
+            var scs = new ADB.Screenshot();
+            if (!isHave(address("availableSymbol"), screenshot: scs)) return new SXYSResult(SXYSResult.ResultType.Error_NotDetectACheckpoint);
+            if (isHave(address("cancel"), screenshot: scs)) return new SXYSResult(SXYSResult.ResultType.Error_LastTimeNotEnd);
+            scs.Dispose();
+            int exetimes = 0;
+
+        SXYS_start:;
+
+            ADB.Tap(1358, 740);
+            SXYSInfo("开始演算");
+            sleep(2);
+
+            ADB.Tap(1301, 54);
+            SXYSInfo("选择干员");
+            sleep(2);
+
+
+            ADB.Tap(1301, 54);
+            SXYSInfo("快捷编队");
+            sleep(1);
+
+            ADB.Tap(530, 769);
+            SXYSInfo("清空选择");
+            sleep(1);
+
+            ADB.Tap(661, 149);
+            SXYSInfo("干员1");
+            sleep(1);
+
+            ADB.Tap(1143, 762);
+            SXYSInfo("确认");
+            sleep(2);
+
+            ADB.Tap(1143, 762);
+            SXYSInfo("补充");
+            sleep(3);
+
+            ADB.Tap(1143, 762);
+            SXYSInfo("确认");
+            sleep(10);
+
+            for (; ; ) //天数循环
+            {
+                if (isHave(address("news"))) sleep(10);
+
+                ADB.Tap(1369, 761);
+                SXYSInfo("关闭日报");
+                sleep(2);
+
+                if (isHave(address("emergency")))
+                {
+                    break;
+                }
+
+                int judge = 0;
+
+                for (; ; )
+                {
+                    if (judge == 2) break;
+
+                    ADB.Tap(44, 759);
+                    SXYSInfo("缩小地图");
+                    sleep(1.5);
+
+                    var portPoint = getPoint(Address.res + "\\pic\\SXYS\\port.png", 0.9);
+                    portPoint.RemoveAll(t => t.Y < 200);
+
+                    foreach (var port in portPoint)//port循环
+                    {
+                        ADB.Tap(44, 759);
+                        SXYSInfo("缩小地图");
+                        sleep(1.5);
+
+                        ADB.Tap(port);
+                        SXYSInfo("点击节点");
+                        sleep(1.5);
+
+                        var a = ADB.WaitOnePicture(new List<string>()
+                        {
+                            address("huntPlace"),
+                            address("resourcePlace"),
+                        }, 1, 0.7);
+                        if (!a.IsEmpty)
+                        {
+                            ADB.Tap(a);
+                            SXYSInfo("点击节点");
+                            sleep(1.5);
+
+                            break;
+                        }
+                    }
+
+                    ADB.Tap(1279, 695);
+                    SXYSInfo("开始行动");
+                    sleep(1.5);
+
+                    judge++;
+
+                    ADB.Tap(1263, 744);
+                    SXYSInfo("准备");
+                    sleep(1.5);
+
+                    ADB.Tap(1277, 356);
+                    SXYSInfo("开始行动");
+                    sleep(1.5);
+
+                    ADB.Tap(1411, 550);
+                    SXYSInfo("确认");
+                    sleep(5);
+
+                    ADB.WaitPicture(address("pack"), -1);
+                    sleep(2);
+
+                    ADB.Tap(84, 58);
+                    SXYSInfo("退出");
+                    sleep(1.5);
+
+                    ADB.Tap(1161, 473);
+                    SXYSInfo("确认离开");
+                    sleep(6);
+
+                    ADB.Tap(1258, 283);
+                    SXYSInfo("");
+                    sleep(5);
+                }
+
+                ADB.Tap(1313, 60);
+                SXYSInfo("进入下一天");
+                sleep(8);
+            }
+
+            ADB.Tap(42, 46);
+            SXYSInfo("结束");
+            sleep(2);
+
+            ADB.Tap(938, 743);
+            SXYSInfo("放弃");
+            sleep(1);
+            
+            ADB.Tap(977, 562);
+            SXYSInfo("确定");
+            sleep(3.5);
+            
+            ADB.Tap(1302, 701);
+            SXYSInfo("确定");
+            sleep(1.5);
+            
+            ADB.Tap(1302, 701);
+            SXYSInfo("确定");
+            sleep(1.5);
+            
+            ADB.Tap(1302, 701);
+            SXYSInfo("确定");
+            sleep(3);
+
+            exetimes++;
+            if (exetimes != time) goto SXYS_start;
+
+            return new SXYSResult(SXYSResult.ResultType.Succeed);
         }
         #endregion
     }

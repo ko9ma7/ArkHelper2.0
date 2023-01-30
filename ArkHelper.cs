@@ -72,7 +72,7 @@ namespace ArkHelper
             }
         }
 
-        public static Data Current = new Data("2.0.0.2", "local", false, Data.VersionType.beta);
+        public static Data Current = new Data("2.0.0.3", "local", false, Data.VersionType.beta);
 
         /// <summary>
         /// 更新
@@ -697,8 +697,8 @@ namespace ArkHelper
         /// <param name="pictures">图片地址</param>
         /// <param name="errorTime">等待次数，为负数时无限等待。请谨慎使用无限等待，有阻塞线程的风险！</param>
         /// <param name="opencv_errorCon">调用pictopoint传入容差</param>
-        /// <returns>匹配到的图片。否则返回""</returns>
-        public static string WaitOnePicture(List<string> pictures, int errorTime = 5, double opencv_errorCon = 0.8)
+        /// <returns>匹配到的第一个点。否则返回(0,0)</returns>
+        public static Point WaitOnePicture(List<string> pictures, int errorTime = 5, double opencv_errorCon = 0.8)
         {
             for(; ; )
             {
@@ -706,10 +706,13 @@ namespace ArkHelper
                 using (var screenshot = new Screenshot())
                 {
                     foreach(var pic in pictures)
-                        if(screenshot.PicToPoint(pic, opencv_errorCon: opencv_errorCon).Count != 0) return pic;
+                    {
+                        var a = screenshot.PicToPoint(pic, opencv_errorCon: opencv_errorCon);
+                        if (a.Count != 0) return a[0];
+                    }
                 }
                 Thread.Sleep(200);
-                if (errorTime == 0) return "";
+                if (errorTime == 0) return new Point();
             }
         }
 
