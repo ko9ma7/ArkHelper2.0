@@ -72,7 +72,7 @@ namespace ArkHelper
             }
         }
 
-        public static Data Current = new Data("2.0.0.7", "local", false, Data.VersionType.beta);
+        public static Data Current = new Data("2.0.0.9", "local", false, Data.VersionType.beta);
 
         /// <summary>
         /// 更新
@@ -546,7 +546,7 @@ namespace ArkHelper
             if (App.Data.simulator.custom.status)
             {
                 if (Process.GetProcessesByName(App.Data.simulator.custom.im).Length != 0)
-                    ConnectThis = new PinnedData.Simulator.SimuInfo("custom", "自定义模拟器", App.Data.simulator.custom.port, App.Data.simulator.custom.im);
+                    ConnectThis = new PinnedData.Simulator.SimuInfo("custom", "自定义模拟器", App.Data.simulator.custom.port, App.Data.simulator.custom.im,App.Data.simulator.custom.externalCMD);
                 else return;
             }
             else

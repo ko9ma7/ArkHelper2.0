@@ -26,6 +26,7 @@ namespace ArkHelper.Style.Control
             im.Text = App.Data.simulator.custom.im;
             port.Text = App.Data.simulator.custom.port.ToString();
             custom.IsChecked = App.Data.simulator.custom.status;
+            ec.Text = App.Data.simulator.custom.externalCMD;
         }
         private void port_TextChanged(object sender, TextChangedEventArgs e)
         {
@@ -42,6 +43,10 @@ namespace ArkHelper.Style.Control
         private void im_TextChanged(object sender, TextChangedEventArgs e)
         {
             App.Data.simulator.custom.im = im.Text;
+        }
+        private void ec_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            App.Data.simulator.custom.externalCMD = ec.Text;
         }
 
         private void custom_Click(object sender, RoutedEventArgs e)
