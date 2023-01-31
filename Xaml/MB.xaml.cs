@@ -137,7 +137,7 @@ namespace ArkHelper
                             error.Visibility = start_button.Visibility;
                         });
                     }
-                    Thread.Sleep(1000);
+                    WithSystem.Wait(1000);
                 }
             });
         }
@@ -228,17 +228,17 @@ namespace ArkHelper
                         if (result.Type == MBResult.ResultType.Error_NotDetectACheckpoint)
                         {
                             Show("未检测到关卡信息界面 /请切换至关卡信息界面", Output.InfoKind.Warning);
-                            Thread.Sleep(3000);
+                            WithSystem.Wait(3000);
                         }
                         if (result.Type == MBResult.ResultType.Error_AutoDeployNotAvailable)
                         {
                             Show("代理指挥不可用 /请换一个关卡", Output.InfoKind.Warning);
-                            Thread.Sleep(3000);
+                            WithSystem.Wait(3000);
                         }
                         if (result.Type == MBResult.ResultType.Error_UndefinedError)
                         {
                             Show("发生未知错误 /请重启ArkHelper重试", Output.InfoKind.Error);
-                            Thread.Sleep(3000);
+                            WithSystem.Wait(3000);
                         }
                         MISSION_END();
                     }
@@ -256,17 +256,17 @@ namespace ArkHelper
                         if (result.Type == SXYSResult.ResultType.Error_NotDetectACheckpoint)
                         {
                             Show("错误 /请切换至生息演算界面", Output.InfoKind.Warning);
-                            Thread.Sleep(3000);
+                            WithSystem.Wait(3000);
                         }
                         if (result.Type == SXYSResult.ResultType.Error_LastTimeNotEnd)
                         {
                             Show("错误 /请结束上次生息演算", Output.InfoKind.Warning);
-                            Thread.Sleep(3000);
+                            WithSystem.Wait(3000);
                         }
                         if (result.Type == SXYSResult.ResultType.Error_UndefinedError)
                         {
                             Show("发生未知错误 /请重启ArkHelper重试", Output.InfoKind.Error);
-                            Thread.Sleep(3000);
+                            WithSystem.Wait(3000);
                         }
                         MISSION_END();
                     }
@@ -299,7 +299,7 @@ namespace ArkHelper
                     {
                         ADB.Tap(301, 45);//呼出菜单
                         Show("呼出菜单");
-                        Thread.Sleep(1000);
+                        WithSystem.Wait(1000);
 
                         ADB.Tap(102, 192);//返回主页
                         Show("正在返回游戏首页...");
@@ -500,7 +500,7 @@ namespace ArkHelper
                     {
                         Info("代理指挥模块未激活 /正在激活代理指挥模块...");
                         ADB.Tap(1200, 680); //激活代理指挥
-                        Thread.Sleep(500);
+                        WithSystem.Wait(500);
                     }
                 }
             }
@@ -538,7 +538,7 @@ namespace ArkHelper
                         {
                             Info("代理指挥模块未激活 /正在激活代理指挥模块...");
                             ADB.Tap(1200, 680); //激活代理指挥
-                            Thread.Sleep(500);
+                            WithSystem.Wait(500);
                         }
                     }
                     Logger("usingCard=false");
@@ -557,7 +557,7 @@ namespace ArkHelper
                         {
                             ADB.Tap(1146, 666);
                             Info("指令：启用全权委托");
-                            Thread.Sleep(500);
+                            WithSystem.Wait(500);
                             UseCard();
                         }
                         else
@@ -570,7 +570,7 @@ namespace ArkHelper
                         {
                             ADB.Tap(1146, 666);
                             Info("指令：禁用全权委托");
-                            Thread.Sleep(500);
+                            WithSystem.Wait(500);
                             NotUseCard();
                         }
                         else
@@ -589,7 +589,7 @@ namespace ArkHelper
         beginTask:;
             ADB.Tap(1266, 753);
             Info("指令：开始行动");
-            Thread.Sleep(3500);
+            WithSystem.Wait(3500);
 
             using (ADB.Screenshot screenshot = new ADB.Screenshot())
             {
@@ -609,7 +609,7 @@ namespace ArkHelper
                         if (allowToRecoverSantiy) goto MBend;
                         Info("指令：使用理智恢复物恢复理智");
                         ADB.Tap(1224, 648);//点对号
-                        Thread.Sleep(3000);
+                        WithSystem.Wait(3000);
 
                         goto beginTask;
                     }
@@ -620,27 +620,27 @@ namespace ArkHelper
 
             //已进本，等待出本
             Info("代理指挥作战运行中");
-            Thread.Sleep(firstSleepTime);
+            WithSystem.Wait(firstSleepTime);
             //循环检查是否在本里
             for (; ; )
             {
-                Thread.Sleep(5000);
+                WithSystem.Wait(5000);
                 if (!PictureProcess.ColorCheck(77, 70, "#8C8C8C", 1341, 62, "#FFFFFF"))
                 {
-                    Thread.Sleep(4500);
+                    WithSystem.Wait(4500);
                     break;
                 }
             }
 
             //退出作战
-            Thread.Sleep(2000);
+            WithSystem.Wait(2000);
             for (; ; )
             {
                 using (var screenshot = new ADB.Screenshot())
                 {
                     if (screenshot.PicToPoint(Address.res + "\\pic\\UI\\missionEndSymbol.png", opencv_errorCon: 0.95).Count != 0)
                     {
-                        Thread.Sleep(2000);
+                        WithSystem.Wait(2000);
                         screenshot.Save(Address.Screenshot.MB, ArkHelperDataStandard.Screenshot);
                         Touch(4000);
                         break;
@@ -654,7 +654,7 @@ namespace ArkHelper
                 {
                     ADB.Tap(1204, 290); //点击空白
                     Info("指令：退出作战");
-                    Thread.Sleep(waitTime);
+                    WithSystem.Wait(waitTime);
                 }
             }
 
@@ -673,7 +673,7 @@ namespace ArkHelper
         #endregion
 
         MBend:;
-            Thread.Sleep(3000);
+            WithSystem.Wait(3000);
             //结束
             Info("连续作战指挥系统运行结束");
             return new MBResult(MBResult.ResultType.Succeed, time: alreadyTime);
@@ -765,7 +765,7 @@ namespace ArkHelper
             void sleep(double second)
             {
                 second = second * 1000;
-                Thread.Sleep((int)second);
+                WithSystem.Wait((int)second);
             }
             #endregion
 

@@ -72,7 +72,7 @@ namespace ArkHelper
             }
         }
 
-        public static Data Current = new Data("2.0.0.9", "local", false, Data.VersionType.beta);
+        public static Data Current = new Data("2.0.1.0", "local", false, Data.VersionType.beta);
 
         /// <summary>
         /// 更新
@@ -342,6 +342,7 @@ namespace ArkHelper
             {
                 public bool pure { get; set; } = false;
                 public bool debug { get; set; } = false;
+                public double waitTimeMu { get; set; } = 1.0;
                 public Output.InfoKind logOutputKind { get; set; } = Output.InfoKind.Infomational;
             }
 
@@ -403,7 +404,7 @@ namespace ArkHelper
             for (int i = 1; i <= ForTimes; i++)
             {
                 if (ADBcmd != null) ADB.CMD(ADBcmd);
-                Thread.Sleep(WaitTime * 1000);
+                WithSystem.Wait(WaitTime * 1000);
             }
         }
 
@@ -668,7 +669,7 @@ namespace ArkHelper
                         return _pot;
                     }
                 }
-                Thread.Sleep(200);
+                WithSystem.Wait(200);
                 if (errorTime == 0) return new List<Point>();
             }
         }
@@ -692,7 +693,7 @@ namespace ArkHelper
                         if(screenshot.PicToPoint(pic, opencv_errorCon: opencv_errorCon).Count == 0) res = true;
                     if (res) return res;
                 }
-                Thread.Sleep(200);
+                WithSystem.Wait(200);
                 if (errorTime == 0) return false;
             }
         }
@@ -717,7 +718,7 @@ namespace ArkHelper
                         if (a.Count != 0) return a[0];
                     }
                 }
-                Thread.Sleep(200);
+                WithSystem.Wait(200);
                 if (errorTime == 0) return new Point();
             }
         }
@@ -831,7 +832,7 @@ namespace ArkHelper
             for (; ; )
             {
                 while (ADB.ConnectedInfo == null)
-                    Thread.Sleep(4000);
+                    WithSystem.Wait(4000);
                 try
                 {
                     using (var testOK = new ADB.Screenshot())
@@ -841,7 +842,7 @@ namespace ArkHelper
                 }
                 catch
                 {
-                    Thread.Sleep(4000);
+                    WithSystem.Wait(4000);
                     continue;
                 }
                 break;
@@ -938,7 +939,7 @@ namespace ArkHelper
             {
                 Task.Run(() =>
                 {
-                    Thread.Sleep(20000);
+                    WithSystem.Wait(20000);
                     Dispose();
                 });
             }
@@ -1586,7 +1587,7 @@ namespace ArkHelper
             //挂个线程
             Task task = Task.Run(() =>
             {
-                Thread.Sleep(3000);
+                WithSystem.Wait(3000);
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
                 GC.Collect();
@@ -1632,6 +1633,13 @@ namespace ArkHelper
         public static void Sleep()
         {
             WithSystem.Cmd("rundll32.exe powrprof.dll,SetSuspendState 0,1,0");
+        }
+
+        public static void Wait(double ms)
+        {
+            var slp = ms * App.Data.arkHelper.waitTimeMu;
+            //Output.Log("sleep " + slp,"Wait");
+            Thread.Sleep((int)slp);
         }
     }
 

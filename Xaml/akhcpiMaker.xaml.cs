@@ -39,7 +39,7 @@ namespace ArkHelper.Xaml
             Task.Run(() =>
             {
                 while (!ADB.CheckADBCanUsed())
-                    Thread.Sleep(2000);
+                    WithSystem.Wait(2000);
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     exebtn.IsEnabled = true;

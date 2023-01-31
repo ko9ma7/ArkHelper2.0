@@ -141,7 +141,7 @@ namespace ArkHelper.Pages.OtherList
                             Info("正在安装更新中...");
                             ADB.InstallFromLocal(addre);//安装
                             ADB.DeleteFile(addre);
-                            Thread.Sleep(3000);
+                            WithSystem.Wait(3000);
                         }
                     }
 
@@ -152,7 +152,7 @@ namespace ArkHelper.Pages.OtherList
                         while
                         (!PictureProcess.ColorCheck(719, 759, "#FFD802", 720, 759, "#FFD802")//START图标未显示（可能是在更新或者未加载好）
                         )
-                            Thread.Sleep(3000);
+                            WithSystem.Wait(3000);
 
                         Akhcmd("shell input tap 934 220", "START", 6);
                         //持续等待直到出现开始唤醒标志出现，点击开始唤醒
@@ -188,25 +188,25 @@ namespace ArkHelper.Pages.OtherList
                                             break;
                                         }
                                     }
-                                    Thread.Sleep(3000);
+                                    WithSystem.Wait(3000);
                                 }
                                 break;
                             case "CB":
-                                Thread.Sleep(6000);//B服自动登录，不用点击开始唤醒
+                                WithSystem.Wait(6000);//B服自动登录，不用点击开始唤醒
                                 break;
                             default:
-                                Thread.Sleep(6000);
+                                WithSystem.Wait(6000);
                                 Akhcmd("shell input tap 721 574", "开始唤醒", 0);
                                 break;
                         }
-                        Thread.Sleep(3000);
+                        WithSystem.Wait(3000);
                     }
 
                     StartGame();//启动游戏并登录
 
                     for (int i = 0; ; i++)
                     {
-                        Thread.Sleep(2000);
+                        WithSystem.Wait(2000);
                         using (Screenshot sc = new Screenshot())
                         {
                             var itemPosition = sc.PicToPoint(Address.res + @"\pic\UI\signItems.png", opencv_errorCon: 0.5);
@@ -227,7 +227,7 @@ namespace ArkHelper.Pages.OtherList
                             var loginSucceedSymbolPosition = sc.PicToPoint(Address.res + @"\pic\UI\shopCenter.png");
                             if (loginSucceedSymbolPosition.Count != 0)
                             {
-                                Thread.Sleep(3000);
+                                WithSystem.Wait(3000);
                                 //有时候会先显示UI再显示公告框，再识别一次保证准确性
                                 using (Screenshot sc1 = new Screenshot())
                                 {
@@ -267,7 +267,7 @@ namespace ArkHelper.Pages.OtherList
                         {
                             Tap(notiPosition[0]);
                             Info("指令：Notification");
-                            Thread.Sleep(2000);
+                            WithSystem.Wait(2000);
                             for (int i = 0; i < 3; i++)
                             {
                                 Akhcmd("shell input tap 211 771", "待办事项", 2);
@@ -283,7 +283,7 @@ namespace ArkHelper.Pages.OtherList
                         {
                             Tap(mfPosition[0]);
                             Info("指令：制造站");
-                            Thread.Sleep(2000);
+                            WithSystem.Wait(2000);
                             Akhcmd("shell input tap 327 691", "制造计划", 2);
                             if (schtData.control.usingUAVToSpeedUpProduction)
                             {
@@ -418,7 +418,7 @@ namespace ArkHelper.Pages.OtherList
                                 tkdPosition.RemoveAll(t => t.Y < 100);
                                 foreach (var poi in tkdPosition)
                                 {
-                                    ADB.Tap(poi); Info("指令：撤下干员"); Thread.Sleep(1300);
+                                    ADB.Tap(poi); Info("指令：撤下干员"); WithSystem.Wait(1300);
                                     Akhcmd("shell input tap 1417 553", "确定", 2);
                                 }
 
@@ -439,7 +439,7 @@ namespace ArkHelper.Pages.OtherList
                                 }
                                 foreach (var room in roomInfo)
                                 {
-                                    ADB.Tap(room.Item2); Info("指令：房间"); Thread.Sleep(2000);
+                                    ADB.Tap(room.Item2); Info("指令：房间"); WithSystem.Wait(2000);
 
                                     var operatorNotToUseSkillIconPosition = new List<Point>();
                                     using (Screenshot screenshot = new Screenshot())
@@ -608,7 +608,7 @@ namespace ArkHelper.Pages.OtherList
                             }
                         }
                     End:;
-                        Thread.Sleep(1000);
+                        WithSystem.Wait(1000);
                     }
                     void MoveToCustomCP(string cpinfo)
                     {
@@ -676,7 +676,7 @@ namespace ArkHelper.Pages.OtherList
                         goto UnitInited;
                     }
                 NativeUnitInited:;
-                    Thread.Sleep(2000);
+                    WithSystem.Wait(2000);
                     MoveToCPInfo(exeCpInfo.cp == "auto"?0:Convert.ToInt32(exeCpInfo.cp));
                 UnitInited:;
                     MB.MBCore(mode: MB.Mode.san);
