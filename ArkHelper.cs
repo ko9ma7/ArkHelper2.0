@@ -72,7 +72,7 @@ namespace ArkHelper
             }
         }
 
-        public static Data Current = new Data("2.0.0.6", "local", false, Data.VersionType.beta);
+        public static Data Current = new Data("2.0.0.7", "local", false, Data.VersionType.beta);
 
         /// <summary>
         /// 更新

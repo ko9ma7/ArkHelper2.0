@@ -149,7 +149,7 @@ namespace ArkHelper
             int time = -1;
 
             //用于生息演算的参数
-            bool SXYS = true;
+            bool SXYS = false;
             int time_sxys = -1;
 
             //判断模式
