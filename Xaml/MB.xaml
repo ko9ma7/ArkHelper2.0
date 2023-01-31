@@ -228,7 +228,7 @@
                         </StackPanel>
                     </Border>
 
-                    <Border d:Visibility="Visible" Visibility="{Binding ElementName=waiting_processbar, Path=Visibility}">
+                    <Border d:Visibility="Visible" Visibility="{Binding ElementName=logreport, Path=Visibility}">
                         <StackPanel Name="monitor">
                             <akhc:ChapterTitle Icon="ChartDonut" Text="实时作战监测系统：回传报告" />
                             <WrapPanel Margin="2.5" Orientation="Vertical">
@@ -278,38 +278,34 @@
                 </StackPanel>
             </Grid>
         </Grid>
-        <Button x:Name="start_button"
+        
+        <StackPanel 
+                    Margin="0,0,64,64"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Bottom"
+                    Orientation="Horizontal"
+                    Visibility="Visible">
+            <TextBlock Margin="0,0,20,0"
+                       Visibility="Collapsed"
+                       x:Name="logreport"
+                       VerticalAlignment="Center"
+                       FontSize="15">
+                <Run x:Name="times_textblock" Text=" " />
+                <Run x:Name="log_textblock" />
+            </TextBlock>
+            <Button x:Name="start_button"
                 IsEnabled="False"
                 Width="48"
                 Height="48"
-                Margin="0,0,50,50"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Bottom"
                 Background="{DynamicResource MaterialDesignTextFieldBoxBackground}"
                 Click="start"
                 Cursor="Hand"
                 Style="{StaticResource MaterialDesignIconButton}"
-                ToolTip="开始作战指挥">
-            <materialDesign:PackIcon Kind="Fencing" />
-        </Button>
-        <StackPanel x:Name="logreport_wrappanel"
-                    Margin="0,0,64,64"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Bottom"
-                    Orientation="Horizontal"
-                    Visibility="Collapsed">
-            <TextBlock Margin="0,0,20,0"
-                       VerticalAlignment="Bottom"
-                       FontSize="15">
-                <Run x:Name="times_textblock" Text=" " />
-                <Run x:Name="log_textblock" />
-            </TextBlock>
-            <ProgressBar x:Name="waiting_processbar"
-                         VerticalAlignment="Bottom"
-                         IsIndeterminate="True"
-                         Style="{StaticResource MaterialDesignCircularProgressBar}"
-                         Visibility="Collapsed"
-                         Value="0" />
+                ToolTip="开始/停止作战指挥">
+                <materialDesign:PackIcon Name="start_button_icon" Kind="Fencing" />
+            </Button>
         </StackPanel>
     </Grid>
 

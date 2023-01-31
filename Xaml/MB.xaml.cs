@@ -16,6 +16,7 @@ using System.Security.Cryptography;
 using System.IO;
 using System.Collections.Generic;
 using Point = System.Drawing.Point;
+using Windows.Devices.PointOfService;
 
 namespace ArkHelper
 {
@@ -119,7 +120,7 @@ namespace ArkHelper
             {
                 for (; ; )
                 {
-                    if (ADB.CheckADBCanUsed())
+                    if (ADB.CheckADBCanUsed(new List<string>() { "MB"}))
                     {
                         Application.Current.Dispatcher.Invoke(() =>
                         {
@@ -140,9 +141,21 @@ namespace ArkHelper
                 }
             });
         }
-        private async void start(object sender, RoutedEventArgs e)
+        private void start(object sender, RoutedEventArgs e)
+        {
+            if (IsBattling)
+            {
+                stopevent();
+            }
+            else
+            START_MISSION();
+
+        }
+
+        private async void START_MISSION()
         {
             ADB.RegisterADBUsing("MB");
+            IsBattling= true;
 
             //用于MBCore的参数
             Mode mode = Mode.san;
@@ -187,20 +200,20 @@ namespace ArkHelper
             }
 
             //UI
-            start_button.Visibility = Visibility.Collapsed;
-            logreport_wrappanel.Visibility = Visibility.Visible;
+            start_button_icon.Kind = MaterialDesignThemes.Wpf.PackIconKind.Stop;
+            logreport.Visibility = Visibility.Visible;
             battle_setting_wrappanel.IsEnabled = false;
-            waiting_processbar.Visibility = Visibility.Visible;
 
             DStartTime = DateTime.Now;
             data_speed_text.Text = "--";
             data_end_text.Text = "--";
             Dtime = 0;
 
-            Task run = new Task(() =>
+            CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
+            var run = new Thread(()=>
             {
                 var startTime = DateTime.Now;//启动时间
-                int alreadyTime;
+                int alreadyTime = 0;
 
                 if (!SXYS)
                 {
@@ -227,6 +240,7 @@ namespace ArkHelper
                             Show("发生未知错误 /请重启ArkHelper重试", Output.InfoKind.Error);
                             Thread.Sleep(3000);
                         }
+                        MISSION_END();
                     }
                 }
                 else
@@ -254,6 +268,7 @@ namespace ArkHelper
                             Show("发生未知错误 /请重启ArkHelper重试", Output.InfoKind.Error);
                             Thread.Sleep(3000);
                         }
+                        MISSION_END();
                     }
                 }
 
@@ -303,24 +318,41 @@ namespace ArkHelper
                     if (after_action == "shutdown") { WithSystem.Shutdown(); }
                     if (after_action == "lock") { WithSystem.LockWorkStation(); }
                     if (after_action == "sleep") { WithSystem.Sleep(); }
+
+                    MISSION_END();
                 }
             });
 
+            stopevent = () =>
+            {
+                run.Abort();
+                MISSION_END();
+            };
+
             run.Start();
-            await run;
+        }
 
-            logreport_wrappanel.Visibility = Visibility.Collapsed;
-            start_button.Visibility = Visibility.Visible;
-            battle_setting_wrappanel.IsEnabled = true;
-            waiting_processbar.Visibility = Visibility.Collapsed;
-
+        private void MISSION_END()
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                IsBattling = false;
+                logreport.Visibility = Visibility.Collapsed;
+                start_button_icon.Kind = MaterialDesignThemes.Wpf.PackIconKind.Play;
+                battle_setting_wrappanel.IsEnabled = true;
+            });
+            
             ADB.UnregisterADBUsing("MB");
         }
+
+        private delegate void STOP();
+        static STOP stopevent;
         private enum UIMode
         {
             san, time, SXYS, SXYS_time
         }
         private UIMode uimode;
+        private bool IsBattling = false;
         #endregion
 
         #region core
@@ -776,7 +808,7 @@ namespace ArkHelper
 
             ADB.Tap(1143, 762);
             SXYSInfo("补充");
-            sleep(3);
+            sleep(4);
 
             ADB.Tap(1143, 762);
             SXYSInfo("确认");
@@ -784,11 +816,11 @@ namespace ArkHelper
 
             for (; ; ) //天数循环
             {
-                if (isHave(address("news"))) sleep(10);
+                if (isHave(address("news"))) sleep(18);
 
                 ADB.Tap(1369, 761);
                 SXYSInfo("关闭日报");
-                sleep(2);
+                sleep(7);
 
                 if (isHave(address("emergency")))
                 {
@@ -803,7 +835,7 @@ namespace ArkHelper
 
                     ADB.Tap(44, 759);
                     SXYSInfo("缩小地图");
-                    sleep(1.5);
+                    sleep(2);
 
                     var portPoint = getPoint(Address.res + "\\pic\\SXYS\\port.png", 0.9);
                     portPoint.RemoveAll(t => t.Y < 200);
@@ -812,22 +844,22 @@ namespace ArkHelper
                     {
                         ADB.Tap(44, 759);
                         SXYSInfo("缩小地图");
-                        sleep(1.5);
+                        sleep(2);
 
                         ADB.Tap(port);
                         SXYSInfo("点击节点");
-                        sleep(1.5);
+                        sleep(3);
 
                         var a = ADB.WaitOnePicture(new List<string>()
                         {
                             address("huntPlace"),
                             address("resourcePlace"),
-                        }, 1, 0.7);
+                        }, 2, 0.7);
                         if (!a.IsEmpty)
                         {
                             ADB.Tap(a);
                             SXYSInfo("点击节点");
-                            sleep(1.5);
+                            sleep(2.5);
 
                             break;
                         }
@@ -835,28 +867,28 @@ namespace ArkHelper
 
                     ADB.Tap(1279, 695);
                     SXYSInfo("开始行动");
-                    sleep(1.5);
+                    sleep(2.5);
 
                     judge++;
 
                     ADB.Tap(1263, 744);
                     SXYSInfo("准备");
-                    sleep(1.5);
+                    sleep(2);
 
                     ADB.Tap(1277, 356);
                     SXYSInfo("开始行动");
-                    sleep(1.5);
+                    sleep(3);
 
                     ADB.Tap(1411, 550);
                     SXYSInfo("确认");
-                    sleep(5);
+                    sleep(10);
 
-                    ADB.WaitPicture(address("pack"), -1);
+                    ADB.WaitPicture(address("pack"),30,0.7);
                     sleep(2);
 
                     ADB.Tap(84, 58);
                     SXYSInfo("退出");
-                    sleep(1.5);
+                    sleep(2);
 
                     ADB.Tap(1161, 473);
                     SXYSInfo("确认离开");
@@ -869,7 +901,7 @@ namespace ArkHelper
 
                 ADB.Tap(1313, 60);
                 SXYSInfo("进入下一天");
-                sleep(8);
+                sleep(12);
             }
 
             ADB.Tap(42, 46);
