@@ -897,6 +897,7 @@ namespace ArkHelper
             sleep(3);
 
             exetimes++;
+            SXYSNext();
             if (exetimes != time) goto SXYS_start;
 
             return new SXYSResult(SXYSResult.ResultType.Succeed);
