@@ -23,6 +23,7 @@ namespace ArkHelper
 {
     public partial class MB : Page
     {
+        #region tool
         private static void UILogger(string content, Output.InfoKind infoKind = Output.InfoKind.Infomational)
         {
             Output.Log(content, "MB", infoKind);
@@ -56,8 +57,9 @@ namespace ArkHelper
                 });
             }
         }
+        #endregion
 
-        //数据
+        #region binding
         DateTime _DStartTime = DateTime.Now;
         DateTime DStartTime
         {
@@ -97,7 +99,9 @@ namespace ArkHelper
                 }
             });
         }
+        #endregion
 
+        #region UI
         public MB()
         {
             InitializeComponent();
@@ -126,6 +130,15 @@ namespace ArkHelper
                 }
             });
         }
+        private enum UIMode
+        {
+            san, time, SXYS, SXYS_time
+        }
+        private UIMode uimode;
+        #endregion
+
+        #region 逻辑
+        private bool IsBattling = false;
         private void start(object sender, RoutedEventArgs e)
         {
             if (IsBattling)
@@ -136,7 +149,6 @@ namespace ArkHelper
             START_MISSION();
 
         }
-
         private void START_MISSION()
         {
             ADB.RegisterADBUsing("MB");
@@ -324,7 +336,6 @@ namespace ArkHelper
 
             run.Start();
         }
-
         private void MISSION_END()
         {
             Application.Current.Dispatcher.Invoke(() =>
@@ -337,14 +348,8 @@ namespace ArkHelper
             
             ADB.UnregisterADBUsing("MB");
         }
-
         private delegate void STOP();
         static STOP stopevent;
-        private enum UIMode
-        {
-            san, time, SXYS, SXYS_time
-        }
-        private UIMode uimode;
-        private bool IsBattling = false;
+        #endregion
     }
 }
