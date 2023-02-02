@@ -162,6 +162,11 @@ namespace ArkHelper
     public static class ArkHelperDataStandard
     {
         /// <summary>
+        /// ArkHelper消息委托
+        /// </summary>
+        public delegate void ArkHelperMessage(string content,Output.InfoKind infoKind);
+
+        /// <summary>
         /// 截图名称获取
         /// </summary>
         /// <returns>四位数年+两位数月+两位数日+两位数时分秒+三位毫秒+“.png”</returns>

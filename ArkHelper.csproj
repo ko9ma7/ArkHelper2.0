@@ -111,6 +111,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Modules\MB\MBImplementation.cs" />
     <Compile Include="Style\Control\AKHcpiCard.xaml.cs">
       <DependentUpon>AKHcpiCard.xaml</DependentUpon>
     </Compile>
@@ -448,6 +449,7 @@
   <ItemGroup>
     <Resource Include="Asset\ArkHelper.ico" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>taskkill /f /t /im adb.exe

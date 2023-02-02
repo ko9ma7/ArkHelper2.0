@@ -25,6 +25,7 @@ using System.Reflection;
 using System.Linq;
 using System.Drawing;
 using Point = System.Drawing.Point;
+using ArkHelper.Modules.MB;
 
 namespace ArkHelper.Pages.OtherList
 {
@@ -94,8 +95,6 @@ namespace ArkHelper.Pages.OtherList
             {
                 void main(Data.SCHT.SCHTData schtData)
                 {
-                    MB.Info += Info;
-
                     //游戏
                     string packname = ADB.GetGamePackageName(schtData.server.id);
 
@@ -559,10 +558,12 @@ namespace ArkHelper.Pages.OtherList
                         if (PictureProcess.ColorCheck(431, 770, "#FFFFFF", 432, 770, "#FFFFFF")) { }
                         else
                         {
-                            MB.MBCore(MB.Mode.time,
+                            MBCore mb = new MBCore(MBCore.ModeType.time,
                             anntime,
                             false,
                             ann_cardToUse: schtData.ann.allowToUseCard ? 10 : 0);
+                            mb.MessageUpdated += Info;
+                            mb.Run();
                         }
 
                         Akhcmd("shell input tap 299 46", "菜单", 1);
@@ -595,7 +596,8 @@ namespace ArkHelper.Pages.OtherList
                                 foreach (var point in reslst)
                                 {
                                     ADB.Tap(point);
-                                    if (MB.MBCore(MB.Mode.time, 0).Type != MB.MBResult.ResultType.Error_AutoDeployNotAvailable)
+                                    MBCore mb = new MBCore(MBCore.ModeType.time, 0);
+                                    if (mb.Run().Type != MBCoreResult.ResultType.Error_AutoDeployNotAvailable)
                                         break;
                                     else
                                         Akhcmd("shell input tap 89 50", "返回", 2);
@@ -679,8 +681,8 @@ namespace ArkHelper.Pages.OtherList
                     WithSystem.Wait(2000);
                     MoveToCPInfo(exeCpInfo.cp == "auto"?0:Convert.ToInt32(exeCpInfo.cp));
                 UnitInited:;
-                    MB.MBCore(mode: MB.Mode.san);
-                    MB.Info -= Info;
+                    MBCore MB = new MBCore(mode: MBCore.ModeType.san);
+                    MB.MessageUpdated += Info;
 
                     Akhcmd("shell input tap 299 46", "菜单", 1);
                     Akhcmd("shell input tap 103 305", "首页", 3);

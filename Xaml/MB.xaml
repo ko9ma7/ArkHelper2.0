@@ -11,8 +11,6 @@
       d:Background="White"
       d:DesignHeight="470"
       d:DesignWidth="652"
-      Loaded="Page_Loaded"
-      Unloaded="Page_Unloaded"
       mc:Ignorable="d">
 
     <Grid>
