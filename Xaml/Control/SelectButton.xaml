@@ -1,0 +1,53 @@
+﻿<UserControl x:Class="ArkHelper.Xaml.Control.SelectButton"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:akhControl="clr-namespace:ArkHelper.Xaml.Control"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ArkHelper.Xaml.Control"
+             Name="RootElement"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d"
+             Padding="0"
+             BorderThickness="0"
+             Margin="0"
+             Cursor="Hand"
+             Tag="Home">
+    <Border x:Name="UIBackBorder"
+            Background="White"
+                    CornerRadius="16">
+        <StackPanel Orientation="Vertical">
+            <DockPanel Height="50">
+                <materialDesign:PackIcon x:Name="UIIcon"
+                                             DockPanel.Dock="Left"
+                                             Kind="{Binding Icon}"
+                                             Width="30"
+                                             Height="30"
+                                             Margin="10,0,0,0"
+                                             VerticalAlignment="Center"
+                                             Foreground="Black" />
+                <TextBlock x:Name="UIText"
+                                       DockPanel.Dock="Left"
+                                       Margin="12,0,0,0"
+                                       VerticalAlignment="Center"
+                                       FontSize="18"
+                                       Text="{Binding Text}"
+                                       Foreground="Black"
+                                       Visibility="Visible" />
+                <ProgressBar HorizontalAlignment="Right"
+                             DockPanel.Dock="Right"
+                             Margin="15,0,15,0"
+                             IsIndeterminate="True"
+                             Value="0"
+                             d:Visibility="Visible"
+                             Style="{StaticResource MaterialDesignCircularProgressBar}" 
+                             Name="UIProgressBar"/>
+            </DockPanel>
+
+            <!--<Border Name="UIChildWhenThisIsPressed">
+                <TextBlock>Lorem Ipsum</TextBlock>
+            </Border>-->
+
+        </StackPanel>
+    </Border>
+</UserControl>

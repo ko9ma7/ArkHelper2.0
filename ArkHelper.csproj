@@ -141,6 +141,9 @@
     <Compile Include="Xaml\akhcpiMaker.xaml.cs">
       <DependentUpon>akhcpiMaker.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Xaml\Control\SelectButton.xaml.cs">
+      <DependentUpon>SelectButton.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Xaml\Help.xaml.cs">
       <DependentUpon>Help.xaml</DependentUpon>
     </Compile>
@@ -231,6 +234,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Xaml\akhcpiMaker.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Xaml\Control\SelectButton.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
