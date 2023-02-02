@@ -41,7 +41,7 @@ namespace ArkHelper
             {
                 App.Data = new Data();
             }
-            if (true) ;
+            //if (true) ;
 
             if (Version.Current.Type != Version.Data.VersionType.realese) App.Data.arkHelper.debug = true ;
 

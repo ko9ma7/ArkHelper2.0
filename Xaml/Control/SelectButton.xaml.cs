@@ -122,6 +122,31 @@ namespace ArkHelper.Xaml.Control
         }
         private bool _isChecked = false;
 
+        public bool IsFolded
+        {
+            get
+            {
+                return _isFolded;
+            }
+            set
+            {
+                _isFolded = value;
+                if (value)
+                {
+                    UIProgressBar.Visibility = Visibility.Collapsed;
+                    UIText.Visibility = Visibility.Collapsed;
+                    UIBackBorder.CornerRadius = new CornerRadius(14);
+                }
+                else
+                {
+                    if (IsHaveProgressBar) UIProgressBar.Visibility = Visibility.Visible;
+                    UIText.Visibility = Visibility.Visible;
+                    UIBackBorder.CornerRadius = new CornerRadius(16);
+                }
+            }
+        }
+        private bool _isFolded = false;
+
         /*
         public UIElement ChildWhenThisIsPressed
         {
@@ -158,14 +183,16 @@ namespace ArkHelper.Xaml.Control
             {
                 if (_isPressing)
                 {
+#pragma warning disable CS0168 // 声明了变量，但从未使用过
                     try
                     {
                         Click(this, new RoutedEventArgs());
                     }
                     catch (NullReferenceException ex)
                     {
-
+                        
                     }
+#pragma warning restore CS0168 // 声明了变量，但从未使用过
                     IsChecked = true;
                 }
                 _isPressing = false;

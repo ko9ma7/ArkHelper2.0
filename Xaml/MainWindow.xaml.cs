@@ -98,6 +98,17 @@ namespace ArkHelper.Xaml
             }
             #endregion
         }
+        #region 折叠按钮
+        private void SwitchFold(bool fold)
+        {
+            foreach (Control.SelectButton sb in FuncList.Children)
+            {
+                sb.IsFolded = fold;
+            }
+
+            //SwitchFoldBtnIcon.Kind = !_fold ? PackIconKind.UnfoldLessVertical : PackIconKind.UnfoldMoreVertical;
+        }
+        #endregion
         #endregion
 
         #region 动画
@@ -120,6 +131,8 @@ namespace ArkHelper.Xaml
         {
             InitializeComponent();
 
+            this.SizeChanged += (s,e) => SwitchFold(this.Width <= 864);
+
             #region 装载侧栏菜单
             foreach (List<Menu> menuList in Menu.MenuItems)
             {
@@ -128,7 +141,7 @@ namespace ArkHelper.Xaml
                 {
                     var menuUIControl = menu.GetControl();
                     if (index == 0) menuUIControl.Margin = new Thickness(0, 15, 0, 0);
-                    else menuUIControl.Margin = new Thickness(0,2,0,0);
+                    else menuUIControl.Margin = new Thickness(0, 2, 0, 0);
 
                     if (menu.IsCheckedWhenInit)
                     {
@@ -191,7 +204,7 @@ namespace ArkHelper.Xaml
                     return;
                 }
                 else
-                ShowingFrame.Visibility = Visibility.Collapsed;//隐藏当前frame
+                    ShowingFrame.Visibility = Visibility.Collapsed;//隐藏当前frame
             }
 
             if (needIndependentFrame)
@@ -255,23 +268,6 @@ namespace ArkHelper.Xaml
             Navigate((sender as Control.SelectButton).Tag as Menu);
             WithSystem.GarbageCollect();
         }
-
-        #region 折叠按钮
-        /*private void SwitchFold(object sender, RoutedEventArgs e)
-        {
-            if (Home_button.Style == (System.Windows.Style)FindResource("RadioButtonDock"))
-            {
-                Home_button.Style = (System.Windows.Style)FindResource("RadioButtonDockCollpase");
-                SwitchFoldBtnIcon.Kind = MaterialDesignThemes.Wpf.PackIconKind.UnfoldMoreVertical;
-            }
-            else
-            {
-                Home_button.Style = (System.Windows.Style)FindResource("RadioButtonDock");
-                SwitchFoldBtnIcon.Kind = MaterialDesignThemes.Wpf.PackIconKind.UnfoldLessVertical;
-            }
-        }*/
-        #endregion
-
         #endregion
 
         #region 关闭

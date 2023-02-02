@@ -3,6 +3,7 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:akh="clr-namespace:ArkHelper"
       xmlns:akhc="clr-namespace:ArkHelper.Style.Control"
+      xmlns:akhd="clr-namespace:ArkHelper.Xaml.Control"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:local="clr-namespace:ArkHelper.Xaml"
       xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
@@ -15,6 +16,7 @@
 
     <WrapPanel Name="ge">
         <Button Content="Button" Click="Button_Click"/>
+        <akhd:SelectButton Text="snkl" IsHaveProgressBar="True" IsFolded="True"></akhd:SelectButton>
     </WrapPanel>
 
 </Page>

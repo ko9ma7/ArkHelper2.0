@@ -152,7 +152,7 @@ namespace ArkHelper
 
         }
 
-        private async void START_MISSION()
+        private void START_MISSION()
         {
             ADB.RegisterADBUsing("MB");
             IsBattling= true;
