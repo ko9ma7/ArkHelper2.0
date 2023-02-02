@@ -47,9 +47,9 @@
 
         <Grid Name="framegrid" Grid.Column="1">
             <!--  页面  -->
-            <Frame x:Name="frame"
+            <Frame x:Name="PublicFrame"
                    NavigationUIVisibility="Hidden"
-                   Tag="通用" />
+                   Tag="Public" />
         </Grid>
 
     </Grid>

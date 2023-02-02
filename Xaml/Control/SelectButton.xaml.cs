@@ -27,17 +27,15 @@ namespace ArkHelper.Xaml.Control
     /// </summary>
     public partial class SelectButton : UserControl
     {
+        #region 属性
         /// <summary>
         /// 图标
         /// </summary>
         public MaterialDesignThemes.Wpf.PackIconKind Icon { get; set; }
-
         /// <summary>
         /// 文本
         /// </summary>
         public string Text { get; set; }
-        #region 属性
-
 
         /// <summary>
         /// 是否在右侧显示ProgressBar
@@ -110,14 +108,16 @@ namespace ArkHelper.Xaml.Control
             {
                 _isChecked = value;
                 ChangeStyle();
-                for (int i = 0; i < VisualTreeHelper.GetChildrenCount(this.Parent); i++)
-                {
-                    var child = VisualTreeHelper.GetChild(this.Parent, i);
-                    if (child != this)
-                        if (child is SelectButton)
-                            if ((child as SelectButton).IsChecked)
-                                (child as SelectButton).IsChecked = false;
-                }
+                if (this.Parent == null) return;
+                if (value == true)
+                    for (int i = 0; i < VisualTreeHelper.GetChildrenCount(this.Parent); i++)
+                    {
+                        var child = VisualTreeHelper.GetChild(this.Parent, i);
+                        if (child != this)
+                            if (child is SelectButton)
+                                if ((child as SelectButton).IsChecked)
+                                    (child as SelectButton).IsChecked = false;
+                    }
             }
         }
         private bool _isChecked = false;

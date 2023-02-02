@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using MaterialDesignThemes.Wpf;
 using System.Windows.Media.Animation;
 using ArkHelper.Pages;
+using Windows.ApplicationModel.Contacts.DataProvider;
 
 namespace ArkHelper.Xaml
 {
@@ -15,47 +16,90 @@ namespace ArkHelper.Xaml
         #region 侧栏菜单
         private class Menu
         {
-            public string Name { get; set; }
-            public string ID { get; set; }
-            public PackIconKind Icon { get; set; }
-            public bool Sync { get; set; }
-            public Menu(string name, string id, PackIconKind icon, bool sync = false)
-            {
-                Name = name;
-                ID = id;
-                Icon = icon;
-                Sync = sync;
-            }
-        }
+            #region 通用字符串
+            private static string NormalAddress(string name) => @"\Xaml\" + name + @".xaml";
+            #endregion
 
-        readonly List<List<Menu>> MenuItems = new List<List<Menu>>()
-        {
-            new List<Menu>()
+            #region 属性
+            public string ID { get; set; }
+
+            public string Text { get; set; }
+            public PackIconKind Icon { get; set; }
+
+            public string XamlFileAddress { get; set; }
+            public bool Sync { get; set; }
+            public bool IsCollapsed { get; set; }
+            public bool IsCheckedWhenInit { get; set; }
+            #endregion
+
+            #region 构造函数
+            public Menu(string id, string text, PackIconKind icon, string xamlFileAddress = null)
             {
-                new Menu("主页","Home",PackIconKind.HomeOutline),
-            },
-            new List<Menu>()
+                ID = id;
+                Text = text;
+                Icon = icon;
+                if (xamlFileAddress != null)
+                {
+                    XamlFileAddress = xamlFileAddress;
+                }
+                else
+                {
+                    XamlFileAddress = NormalAddress(id);
+                }
+            }
+            #endregion
+
+            #region 存储列表
+            public static readonly List<List<Menu>> MenuItems = new List<List<Menu>>()
             {
-                new Menu("连续作战","MB",PackIconKind.MotionPlay,true),
-                //new Menu("RogueLike","RogueLike",PackIconKind.GamepadRoundUp),
-                new Menu("信息流终端","Message",PackIconKind.AndroidMessages,false),
-                new Menu("寻访记录查询","UserData_Gacha",PackIconKind.AccountCheck),
-                new Menu("SCHT控制台","SCHT",PackIconKind.ThermostatAuto,false),
-                //new Menu("材料计算器","MaterialCalc",PackIconKind.Material),
-                new Menu("SCHT","SCHTRunning",PackIconKind.ThermostatAuto,true),
-            },
-            new List<Menu>()
+                new List<Menu>()
+                {
+                    new Menu("Home", "主页", PackIconKind.HomeOutline)
+                    {
+                        IsCheckedWhenInit= true,
+                    },
+                },
+                new List<Menu>()
+                {
+                    new Menu("MB", "连续作战", PackIconKind.MotionPlay)
+                    {
+                        Sync = true
+                    },
+                    //new Menu("RogueLike","RogueLike",PackIconKind.GamepadRoundUp),
+                    new Menu("Message","信息流终端",PackIconKind.AndroidMessages),
+                    new Menu("UserData_Gacha", "寻访记录查询",PackIconKind.AccountCheck),
+                    new Menu("SCHT", "SCHT控制台",PackIconKind.ThermostatAuto),
+                    //new Menu("材料计算器","MaterialCalc",PackIconKind.Material),
+                    new Menu("SCHTRunning", "SCHT运行时", PackIconKind.ThermostatAuto)
+                    {
+                        IsCollapsed = true,
+                        Sync = true
+                    },
+                },
+                new List<Menu>()
+                {
+                    new Menu("Setting","设置",PackIconKind.Settings),
+    #if DEBUG
+                    new Menu("Test","Test",PackIconKind.TestTube),
+    #endif
+                },
+            };
+            #endregion
+
+            #region UI
+            public Control.SelectButton GetControl()
             {
-                new Menu("设置","Setting",PackIconKind.Settings),
-#if DEBUG
-                new Menu("Test","Test",PackIconKind.TestTube),
-#endif
-            },
-        };
+                return new Control.SelectButton()
+                {
+                    Text = this.Text,
+                    Icon = this.Icon,
+                    IsHaveProgressBar = false
+                };
+            }
+            #endregion
+        }
         #endregion
-        #region 切页
-        public Frame ThisFrame = null;
-        #endregion
+
         #region 动画
         ThicknessAnimation FrameThicknessAnimation = new ThicknessAnimation()
         {
@@ -76,81 +120,78 @@ namespace ArkHelper.Xaml
         {
             InitializeComponent();
 
-            #region 侧栏菜单
-
-            var style = (System.Windows.Style)FindResource("RadioButtonDock");
-            //装载菜单资源
-            foreach (List<Menu> menuList in MenuItems)
+            #region 装载侧栏菜单
+            foreach (List<Menu> menuList in Menu.MenuItems)
             {
                 int index = 0;
                 foreach (Menu menu in menuList)
                 {
-                    var rb = new RadioButton()
-                    {
-                        Name = menu.ID,
-                        Tag = menu.Icon.ToString(),
-                        ContentStringFormat = menu.Name,
-                        Style = style,
-                    };
-                    if (index == 0) rb.Margin = new Thickness(0, 15, 0, 0);
-                    if (menu.ID == "Home") rb.IsChecked = true;
-                    if (menu.ID == "SCHTRunning") rb.Visibility = Visibility.Collapsed;
-                    rb.Click += Navigate_event;
+                    var menuUIControl = menu.GetControl();
+                    if (index == 0) menuUIControl.Margin = new Thickness(0, 15, 0, 0);
+                    else menuUIControl.Margin = new Thickness(0,2,0,0);
 
-                    FuncList.Children.Add(rb);
+                    if (menu.IsCheckedWhenInit)
+                    {
+                        menuUIControl.IsChecked = true;
+                        Navigate(menu);
+                    }
+                    if (menu.IsCollapsed) menuUIControl.Visibility = Visibility.Collapsed;
+
+                    menuUIControl.Click += Navigate_event;
+                    menuUIControl.Tag = menu;
+
+                    FuncList.Children.Add(menuUIControl);
                     index++;
                 }
             }
-            Navigate("Home");
             #endregion
 
+            #region 处理ArkHelperArg
             if (App.mainArg.Target == "MainWindow")
             {
                 if (App.mainArg.Arg == ArkHelperDataStandard.ArkHelperArg.ArgKind.Navigate)
                 {
-                    Navigate(App.mainArg.ArgContent);
-                    foreach (RadioButton rb in FuncList.Children)
+                    foreach (var menuList in Menu.MenuItems)
                     {
-                        if (rb.Name == App.mainArg.ArgContent)
+                        Navigate(
+                            menuList.Find(t => t.ID == App.mainArg.ArgContent)
+                            );
+                    }
+                    foreach (Control.SelectButton control in FuncList.Children)
+                    {
+                        if ((control.Tag as Menu).ID == App.mainArg.ArgContent)
                         {
-                            rb.Visibility = Visibility.Visible;
-                            rb.IsChecked = true;
-                            //if (rb.Name == "SCHTRunning") FuncList.IsEnabled = false;
+                            control.Visibility = Visibility.Visible;
+                            control.IsChecked = true;
                             break;
                         }
                     }
                 }
                 App.mainArg.Dispose();
             }
+            #endregion
         }
 
         #region 导航
-        private void Navigate(string page)
+        private Frame ShowingFrame = null;
+        private class FrameConfig
         {
-            //判断需要切换的page是否需要独立frame
-            bool needIndependentFrame = false;
-            foreach (var menua in MenuItems)
-            {
-                foreach (var menub in menua)
-                {
-                    if (page == menub.ID)
-                    {
-                        needIndependentFrame = menub.Sync;
-                        goto end;
-                    }
-                }
-            }
-        end:;
+            public Menu ShowingPage { get; set; }
+            public FrameConfig(Menu menu) { ShowingPage = menu; }
+        }
+        private void Navigate(Menu menu)
+        {
+            //需要切换的page是否需要独立frame
+            bool needIndependentFrame = menu.Sync;
 
-
-            if (ThisFrame != null)
+            if (ShowingFrame != null)
             {
-                if (ThisFrame.Tag.ToString() == page)
+                if ((ShowingFrame.Tag as FrameConfig).ShowingPage == menu)
                 {
                     return;
                 }
-                //隐藏当前frame
-                ThisFrame.Visibility = Visibility.Collapsed;
+                else
+                ShowingFrame.Visibility = Visibility.Collapsed;//隐藏当前frame
             }
 
             if (needIndependentFrame)
@@ -160,9 +201,9 @@ namespace ArkHelper.Xaml
                 foreach (var eachInFramegrid in framegrid.Children)
                 {
                     var _eachInFramegrid = (Frame)eachInFramegrid;
-                    if (_eachInFramegrid.Tag.ToString() == page)
+                    if ((_eachInFramegrid.Tag as FrameConfig).ShowingPage == menu)
                     {
-                        ThisFrame = _eachInFramegrid;
+                        ShowingFrame = _eachInFramegrid;
                         ChildrenHaveFrameInNeed = true;
                         _eachInFramegrid.Visibility = Visibility.Visible;
                         break;
@@ -171,7 +212,7 @@ namespace ArkHelper.Xaml
                 //没有就自建，有就visible出来
                 if (ChildrenHaveFrameInNeed)
                 {
-                    ThisFrame.Visibility = Visibility.Visible;
+                    ShowingFrame.Visibility = Visibility.Visible;
                 }
                 else
                 {
@@ -180,25 +221,25 @@ namespace ArkHelper.Xaml
                     {
                         NavigationUIVisibility = System.Windows.Navigation.NavigationUIVisibility.Hidden,
                         Visibility = Visibility.Visible,
-                        Tag = page
+                        Tag = new FrameConfig(menu)
                     };
                     //更换
-                    ThisFrame = newFrame;
+                    ShowingFrame = newFrame;
                     //frame导航到专有页面
-                    newFrame.Navigate(new Uri(@"\Xaml\" + page + ".xaml", UriKind.RelativeOrAbsolute));
+                    newFrame.Navigate(new Uri(menu.XamlFileAddress, UriKind.RelativeOrAbsolute));
                     //加进framegrid里
                     framegrid.Children.Add(newFrame);
                 }
-                frame.Navigate(new Uri(@"\Xaml\" + "Home" + ".xaml", UriKind.RelativeOrAbsolute));
-                Animation(ThisFrame);
+                PublicFrame.Navigate(new Uri(menu.XamlFileAddress, UriKind.RelativeOrAbsolute));
+                Animation(ShowingFrame);
             }
             else
             {
-                ThisFrame = frame;
-                frame.Visibility = Visibility.Visible;
-                frame.Navigate(new Uri(@"\Xaml\" + page + ".xaml", UriKind.RelativeOrAbsolute));
-                frame.Tag = page;
-                Animation(frame);
+                ShowingFrame = PublicFrame;
+                PublicFrame.Visibility = Visibility.Visible;
+                PublicFrame.Navigate(new Uri(menu.XamlFileAddress, UriKind.RelativeOrAbsolute));
+                PublicFrame.Tag = new FrameConfig(menu);
+                Animation(PublicFrame);
             }
             void Animation(Frame frameForAni)
             {
@@ -209,12 +250,9 @@ namespace ArkHelper.Xaml
                 }
             }
         }
-
         private void Navigate_event(object sender, RoutedEventArgs e)
         {
-            RadioButton Navigate_button_clicked = sender as RadioButton;
-            var _name = Navigate_button_clicked.Name;
-            Navigate(_name);
+            Navigate((sender as Control.SelectButton).Tag as Menu);
             WithSystem.GarbageCollect();
         }
 
