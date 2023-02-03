@@ -13,7 +13,7 @@
       mc:Ignorable="d">
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel>
-            <akhc:Title Icon="AccountCheck" Text="RHODES ISLAND™ 人事部寻访记录查询" />
+            <akhc:Title Icon="AccountCheck" Text="RHODES ISLAND（TM） 人事部寻访记录查询" />
             <WrapPanel HorizontalAlignment="Center">
                 <Border Name="Oauth"
                         Background="AliceBlue"
