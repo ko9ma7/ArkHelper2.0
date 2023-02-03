@@ -51,7 +51,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>bin\ArkHelper\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -371,6 +371,7 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <Resource Include="Asset\Font\SourceHanSansCN-Medium.ttf" />
     <None Include="app.config" />
@@ -460,7 +461,8 @@ for /f "tokens=*" %25%25i in ('dir "$(TargetDir)\*.dll" /b') do copy "%25%25i" "
 for /f "tokens=*" %25%25i in ('dir "$(TargetDir)\*.dll" /b') do del "%25%25i" /q
 rmdir "$(TargetDir)\dll\x86" /s /q
 del "$(TargetDir)\dll\x64\opencv_videoio_ffmpeg455_64.dll" /q
-if $(ConfigurationName) == Release (for /f "tokens=*" %25%25i in ('dir "$(TargetDir)\*.pdb" /b') do del "%25%25i" /q)</PostBuildEvent>
+if $(ConfigurationName) == Release (for /f "tokens=*" %25%25i in ('dir "$(TargetDir)\*.pdb" /b') do del "%25%25i" /q)
+if $(ConfigurationName) == Release copy $(ProjectDir)\Doc\User\使用方法.txt $(ProjectDir)\bin\使用方法.txt</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>rmdir /s /q $(TargetDir)\dll</PreBuildEvent>
