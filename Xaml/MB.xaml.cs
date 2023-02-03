@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using Point = System.Drawing.Point;
 using Windows.Devices.PointOfService;
 using ArkHelper.Modules.MB;
+using Windows.ApplicationModel.Core;
 
 namespace ArkHelper
 {
@@ -59,44 +60,98 @@ namespace ArkHelper
         }
         #endregion
 
-        #region binding
-        DateTime _DStartTime = DateTime.Now;
-        DateTime DStartTime
+        #region data
+        DateTime _startTime;
+        DateTime startTime
         {
-            get { return _DStartTime; }
+            get
+            {
+                return _startTime;
+            }
             set
             {
-                _DStartTime = value;
-                Application.Current.Dispatcher.Invoke(() => data_begin_text.Text = value.ToString("g"));
+                _startTime = value;
+                monitor_module_start_text.Text = value.ToString("g");
             }
         }
-        int _Dtime = 0;
-        int Dtime
+
+        int _alreadyDone;
+        int alreadyDone
         {
-            get { return _Dtime; }
-            set { _Dtime = value; Application.Current.Dispatcher.Invoke(() => data_progress_alreadyT.Text = value.ToString("g")); }
+            get
+            {
+                return _alreadyDone;
+            }
+            set
+            {
+                _alreadyDone = value;
+                monitor_module_progress_up.Text = value.ToString();
+            }
         }
-        int _DT = 0;
-        int DT
+
+        int _aim;
+        int aim
         {
-            get { return _DT; }
-            set { _DT = value; data_progress_T.Text = value + ""; }
+            get
+            {
+                return _aim;
+            }
+            set
+            {
+                _aim = value;
+                monitor_module_progress_down.Text = (value > 0) ? value.ToString() : "-";
+            }
         }
-        private void reactNext(MBImplementation.NextArg nextArg)
+
+        void InitDataAndFreshUIToInitStatus()
+        {
+            startTime = DateTime.Now;
+            aim = 0;
+            alreadyDone = 0;
+        }
+
+        void FreshDataWhenStart()
+        {
+            startTime = DateTime.Now;
+            if (uimode == UIMode.MBCore_time || uimode == UIMode.SXYS_time)
+            {
+                monitor_module_end.Visibility= Visibility.Visible;
+            }
+            else
+            {
+                monitor_module_end.Visibility = Visibility.Collapsed;
+                aim = 0;
+            }
+            alreadyDone = 0;
+            monitor_module_speed_text.Text = "-";
+            monitor_module_end_text.Text = "-";
+        }
+
+        private enum UIMode
+        {
+            MBCore_san, MBCore_time, SXYS, SXYS_time
+        }
+        private UIMode uimode;
+
+        private void FreshDataAndFreshMonitor(MBImplementation.NextArg nextArg)
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
-                Dtime += 1;
-                if (data_speed_text.Text == "--" && Dtime == 1)
+                alreadyDone++;
+
+                double speed;
+                DateTime end;
+
+                TimeSpan UsingTime = DateTime.Now - startTime;
+                speed = UsingTime.TotalSeconds/alreadyDone;
+                end = startTime + TimeSpan.FromSeconds(speed*aim);
+
+                monitor_module_speed_text.Text = speed.ToString("0.00");
+                if (uimode == UIMode.MBCore_time || uimode == UIMode.SXYS_time)
                 {
-                    TimeSpan UsingTime = DateTime.Now - DStartTime;
-                    data_speed_text.Text = UsingTime.TotalSeconds.ToString("0.00");
-                    if (uimode == UIMode.time || uimode == UIMode.SXYS_time)
-                    {
-                        var endtime = DStartTime + new TimeSpan(UsingTime.Ticks * DT);
-                        data_end_text.Text = endtime.ToString("g");
-                    }
+                    monitor_module_end_text.Text = end.ToString("g");
                 }
+
             });
         }
         #endregion
@@ -105,11 +160,13 @@ namespace ArkHelper
         public MB()
         {
             InitializeComponent();
+            InitDataAndFreshUIToInitStatus();
+            mode_san.IsChecked = true;
             Task.Run(() =>
             {
                 for (; ; )
                 {
-                    if (ADB.CheckADBCanUsed(new List<string>() { "MB"}))
+                    if (ADB.CheckADBCanUsed(new List<string>() { "MB" }))
                     {
                         Application.Current.Dispatcher.Invoke(() =>
                         {
@@ -130,11 +187,7 @@ namespace ArkHelper
                 }
             });
         }
-        private enum UIMode
-        {
-            san, time, SXYS, SXYS_time
-        }
-        private UIMode uimode;
+
         #endregion
 
         #region 逻辑
@@ -146,13 +199,13 @@ namespace ArkHelper
                 stopevent();
             }
             else
-            START_MISSION();
+                START_MISSION();
 
         }
         private void START_MISSION()
         {
             ADB.RegisterADBUsing("MB");
-            IsBattling= true;
+            IsBattling = true;
 
             //用于选择作战方式的参数
 
@@ -166,18 +219,15 @@ namespace ArkHelper
             //判断模式
             if ((bool)mode_san.IsChecked)
             {
-                uimode = UIMode.san;
+                uimode = UIMode.MBCore_san;
                 mode = MBCore.ModeType.san;
-                data_end.Visibility = Visibility.Collapsed;
-                data_progress_T.Text = "--";
             }
             if ((bool)mode_time.IsChecked)
             {
-                uimode = UIMode.time;
+                uimode = UIMode.MBCore_time;
                 mode = MBCore.ModeType.time;
                 time = Convert.ToInt32(times_setting.Text);
-                DT = time;
-                data_end.Visibility = Visibility.Visible;
+                aim = time;
             }
             if ((bool)mode_SXYS.IsChecked)
             {
@@ -186,13 +236,10 @@ namespace ArkHelper
                 {
                     uimode = UIMode.SXYS_time;
                     time_sxys = Convert.ToInt32(SXYS_time.Text);
-                    data_end.Visibility = Visibility.Visible;
-                    DT = time_sxys;
+                    aim = time_sxys;
                 }
                 else
                 {
-                    data_progress_T.Text = "--";
-                    data_end.Visibility = Visibility.Collapsed;
                 }
             }
 
@@ -201,22 +248,19 @@ namespace ArkHelper
             logreport.Visibility = Visibility.Visible;
             battle_setting_wrappanel.IsEnabled = false;
 
-            DStartTime = DateTime.Now;
-            data_speed_text.Text = "--";
-            data_end_text.Text = "--";
-            Dtime = 0;
+            FreshDataWhenStart();
 
             CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
-            var run = new Thread(()=>
+            var run = new Thread(() =>
             {
                 var startTime = DateTime.Now;//启动时间
                 int alreadyTime = 0;
 
-                if (uimode == UIMode.san || uimode == UIMode.time)
+                if (uimode == UIMode.MBCore_san || uimode == UIMode.MBCore_time)
                 {
                     var battleMB = new MBCore(mode: mode, time: time, allowToRecoverSantiy: false);
                     battleMB.MessageUpdated += Show;
-                    battleMB.MoveToNext += reactNext;
+                    battleMB.MoveToNext += FreshDataAndFreshMonitor;
                     var result = battleMB.Run();
 
                     if (result.Type == MBCoreResult.ResultType.Succeed)
@@ -248,7 +292,7 @@ namespace ArkHelper
                 {
                     var battleSXYS = new SXYS(time_sxys);
                     battleSXYS.MessageUpdated += Show;
-                    battleSXYS.MoveToNext += reactNext;
+                    battleSXYS.MoveToNext += FreshDataAndFreshMonitor;
 
                     var result = battleSXYS.Run();
                     if (result.Type == SXYSResult.ResultType.Succeed)
@@ -345,7 +389,7 @@ namespace ArkHelper
                 start_button_icon.Kind = MaterialDesignThemes.Wpf.PackIconKind.Play;
                 battle_setting_wrappanel.IsEnabled = true;
             });
-            
+
             ADB.UnregisterADBUsing("MB");
         }
         private delegate void STOP();

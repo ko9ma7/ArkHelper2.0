@@ -166,9 +166,11 @@ namespace ArkHelper.Xaml
                 {
                     foreach (var menuList in Menu.MenuItems)
                     {
-                        Navigate(
-                            menuList.Find(t => t.ID == App.mainArg.ArgContent)
-                            );
+                        var menu = menuList.Find(t => t.ID == App.mainArg.ArgContent);
+                        if (menu != null)
+                        {
+                            Navigate(menu);
+                        }
                     }
                     foreach (Control.SelectButton control in FuncList.Children)
                     {
@@ -243,7 +245,7 @@ namespace ArkHelper.Xaml
                     //加进framegrid里
                     framegrid.Children.Add(newFrame);
                 }
-                PublicFrame.Navigate(new Uri(menu.XamlFileAddress, UriKind.RelativeOrAbsolute));
+                PublicFrame.Navigate(new Uri("\\Xaml\\Home.xaml", UriKind.RelativeOrAbsolute));
                 Animation(ShowingFrame);
             }
             else

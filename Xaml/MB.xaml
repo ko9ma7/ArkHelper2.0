@@ -229,34 +229,41 @@
                     <Border d:Visibility="Visible" Visibility="{Binding ElementName=logreport, Path=Visibility}">
                         <StackPanel Name="monitor">
                             <akhc:ChapterTitle Icon="ChartDonut" Text="实时作战监测系统：回传报告" />
+                            
                             <WrapPanel Margin="2.5" Orientation="Vertical">
 
-                                <WrapPanel Name="data_begin">
+                                <WrapPanel Name="monitor_module_start">
                                     <materialDesign:PackIcon Kind="TimerPlayOutline" />
-                                    <TextBlock Name="data_begin_text" FontSize="{StaticResource p}">--</TextBlock>
-                                </WrapPanel>
-
-                                <WrapPanel Name="data_progress">
-                                    <materialDesign:PackIcon Kind="ProgressCheck" />
-                                    <TextBlock FontSize="{StaticResource p}">
-                                        <Run Name="data_progress_alreadyT" />
-                                        /<Run Name="data_progress_T" />
+                                    <TextBlock Name="monitor_module_start_text">
+                                        2023/2/2 10:10
                                     </TextBlock>
                                 </WrapPanel>
 
-                                <WrapPanel Name="data_speed">
-                                    <materialDesign:PackIcon Kind="Speedometer" />
-                                    <TextBlock FontSize="{StaticResource p}">
-                                        <Run Name="data_speed_text" />
-                                        秒/次</TextBlock>
+                                <WrapPanel Name="monitor_module_progress">
+                                    <materialDesign:PackIcon Kind="ProgressCheck" />
+                                    <TextBlock>
+                                        <Run Name="monitor_module_progress_up" Text="0" />
+                                        /
+                                        <Run Name="monitor_module_progress_down" Text="0" />
+                                    </TextBlock>
                                 </WrapPanel>
 
-                                <WrapPanel Name="data_end">
+                                <WrapPanel Name="monitor_module_speed">
+                                    <materialDesign:PackIcon Kind="Speedometer" />
+                                    <TextBlock>
+                                        <Run Name="monitor_module_speed_text" Text="0" />
+                                        秒/次
+                                    </TextBlock>
+                                </WrapPanel>
+
+                                <WrapPanel Name="monitor_module_end">
                                     <materialDesign:PackIcon Kind="TimerStopOutline" />
-                                    <TextBlock FontSize="{StaticResource p}">
-                                        预计<Run Name="data_end_text" /></TextBlock>
+                                    <TextBlock>
+                                        预计
+                                        <Run Name="monitor_module_end_text" Text="2023/2/2 10:10" /></TextBlock>
                                 </WrapPanel>
                             </WrapPanel>
+                            
                             <StackPanel.Resources>
                                 <Style TargetType="materialDesign:PackIcon">
                                     <Setter Property="Width" Value="20" />
@@ -267,6 +274,10 @@
                                 <Style TargetType="WrapPanel">
                                     <Setter Property="Orientation" Value="Horizontal" />
                                     <Setter Property="Margin" Value="0,4" />
+                                </Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="FontFamily" Value="{StaticResource SourceHan}"/>
+                                    <Setter Property="FontSize" Value="{StaticResource p}"/>
                                 </Style>
                             </StackPanel.Resources>
 
@@ -302,7 +313,7 @@
                 Cursor="Hand"
                 Style="{StaticResource MaterialDesignIconButton}"
                 ToolTip="开始/停止作战指挥">
-                <materialDesign:PackIcon Name="start_button_icon" Kind="Fencing" />
+                <materialDesign:PackIcon Name="start_button_icon" Kind="Play" />
             </Button>
         </StackPanel>
     </Grid>

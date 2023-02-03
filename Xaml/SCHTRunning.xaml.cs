@@ -683,6 +683,7 @@ namespace ArkHelper.Pages.OtherList
                 UnitInited:;
                     MBCore MB = new MBCore(mode: MBCore.ModeType.san);
                     MB.MessageUpdated += Info;
+                    MB.Run();
 
                     Akhcmd("shell input tap 299 46", "菜单", 1);
                     Akhcmd("shell input tap 103 305", "首页", 3);
