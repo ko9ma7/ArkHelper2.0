@@ -475,7 +475,7 @@ namespace ArkHelper.Pages
                 //new Pages.Message.User(ArkHelperDataStandard.MessageSource.weibo, "7784464307") //test
             };
 
-            for (; ; WithSystem.Wait(60000))
+            for (; ; Thread.Sleep(60000))
             {
                 foreach (User user in UserList)
                 {

@@ -207,7 +207,7 @@ namespace ArkHelper
                 while (true)
                 {
                     int _t = 1000;
-                    WithSystem.Wait(_t);
+                    Thread.Sleep(_t);
                     App.SaveData();
                 }
             });
@@ -218,14 +218,14 @@ namespace ArkHelper
                 while (true)
                 {
                     ADB.Connect();
-                    WithSystem.Wait(2000);
+                    Thread.Sleep(2000);
                 }
             });
             Task adbCheck = Task.Run(() =>
             {
                 while (true)
                 {
-                    WithSystem.Wait(5000);
+                    Thread.Sleep(5000);
                     if (App.Data.simulator.HeartbeatTest) ADB.ADBHeartbeatTest();
                 }
             });
@@ -233,7 +233,7 @@ namespace ArkHelper
             #region SCHT等待
             Task SCHT = Task.Run(() =>
             {
-                for (; ; WithSystem.Wait(1000))
+                for (; ; Thread.Sleep(1000))
                 {
                     bool isTimeEq(DateTime selTime)
                     {

@@ -183,7 +183,7 @@ namespace ArkHelper
                             error.Visibility = start_button.Visibility;
                         });
                     }
-                    WithSystem.Wait(1000);
+                    Thread.Sleep(1000);
                 }
             });
         }
@@ -273,17 +273,17 @@ namespace ArkHelper
                         if (result.Type == MBCoreResult.ResultType.Error_NotDetectACheckpoint)
                         {
                             Show("未检测到关卡信息界面 /请切换至关卡信息界面", Output.InfoKind.Warning);
-                            WithSystem.Wait(3000);
+                            Thread.Sleep(3000);
                         }
                         if (result.Type == MBCoreResult.ResultType.Error_AutoDeployNotAvailable)
                         {
                             Show("代理指挥不可用 /请换一个关卡", Output.InfoKind.Warning);
-                            WithSystem.Wait(3000);
+                            Thread.Sleep(3000);
                         }
                         if (result.Type == MBCoreResult.ResultType.Error_UndefinedError)
                         {
                             Show("发生未知错误 /请重启ArkHelper重试", Output.InfoKind.Error);
-                            WithSystem.Wait(3000);
+                            Thread.Sleep(3000);
                         }
                         MISSION_END();
                     }
@@ -305,17 +305,17 @@ namespace ArkHelper
                         if (result.Type == SXYSResult.ResultType.Error_NotDetectACheckpoint)
                         {
                             Show("错误 /请切换至生息演算界面", Output.InfoKind.Warning);
-                            WithSystem.Wait(3000);
+                            Thread.Sleep(3000);
                         }
                         if (result.Type == SXYSResult.ResultType.Error_LastTimeNotEnd)
                         {
                             Show("错误 /请结束上次生息演算", Output.InfoKind.Warning);
-                            WithSystem.Wait(3000);
+                            Thread.Sleep(3000);
                         }
                         if (result.Type == SXYSResult.ResultType.Error_UndefinedError)
                         {
                             Show("发生未知错误 /请重启ArkHelper重试", Output.InfoKind.Error);
-                            WithSystem.Wait(3000);
+                            Thread.Sleep(3000);
                         }
                         MISSION_END();
                     }

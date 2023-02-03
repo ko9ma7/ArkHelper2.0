@@ -837,7 +837,7 @@ namespace ArkHelper
             for (; ; )
             {
                 while (ADB.ConnectedInfo == null)
-                    WithSystem.Wait(4000);
+                    Thread.Sleep(4000);
                 try
                 {
                     using (var testOK = new ADB.Screenshot())
@@ -847,7 +847,7 @@ namespace ArkHelper
                 }
                 catch
                 {
-                    WithSystem.Wait(4000);
+                    Thread.Sleep(4000);
                     continue;
                 }
                 break;
@@ -944,7 +944,7 @@ namespace ArkHelper
             {
                 Task.Run(() =>
                 {
-                    WithSystem.Wait(20000);
+                    Thread.Sleep(20000);
                     Dispose();
                 });
             }
@@ -1592,7 +1592,7 @@ namespace ArkHelper
             //挂个线程
             Task task = Task.Run(() =>
             {
-                WithSystem.Wait(3000);
+                Thread.Sleep(3000);
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
                 GC.Collect();
