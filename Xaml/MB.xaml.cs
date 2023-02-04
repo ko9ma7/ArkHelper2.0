@@ -251,7 +251,6 @@ namespace ArkHelper
 
             FreshDataWhenStart();
 
-            CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
             var run = new Thread(() =>
             {
                 var startTime = DateTime.Now;//启动时间

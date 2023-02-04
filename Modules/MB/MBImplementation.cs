@@ -326,10 +326,12 @@ namespace ArkHelper.Modules.MB
             for (; ; )
             {
                 WithSystem.Wait(5000);
-                if (!PictureProcess.ColorCheck(77, 70, "#8C8C8C", 1341, 62, "#FFFFFF"))
+                using (var sc = new ADB.Screenshot())
                 {
-                    WithSystem.Wait(4500);
-                    break;
+                    if (sc.ColorPick(77, 70) != "#8C8C8C" && sc.ColorPick(1341,62) != "#FFFFFF")
+                    {
+                        break;
+                    }
                 }
             }
 
