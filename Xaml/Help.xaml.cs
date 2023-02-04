@@ -10,12 +10,12 @@ namespace ArkHelper.Xaml
         public Help()
         {
             InitializeComponent();
-            if (ADB.ConnectedInfo != null)
+            /*if (ADB.ConnectedInfo != null)
             {
                 simulator_name.Text = ADB.ConnectedInfo.Name;
                 simulator_ip.Text = "127.0.0.1:" + ADB.ConnectedInfo.Port;
                 simulator_im.Text = ADB.ConnectedInfo.IM;
-            }
+            }*/
             foreach(PinnedData.Simulator.SimuInfo simuInfos in PinnedData.Simulator.Support)
             {
                 simulator_support.Text +="\n"+" · "+ simuInfos.Name;

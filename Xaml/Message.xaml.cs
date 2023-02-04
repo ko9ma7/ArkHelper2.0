@@ -518,7 +518,7 @@ namespace ArkHelper.Pages
                 Messages.Sort();
                 ////if (messages.Count > 20) { messages.RemoveRange(19, messages.Count - 19); }
 
-                try { MessageInited(); } catch { }
+                MessageInited?.Invoke();
 
                 firstUpdate = false;
             }

@@ -97,7 +97,7 @@ namespace ArkHelper.Pages.OtherList
                 var starttime = DateTime.Now;//开始时间
 
                 //模拟器未启动则启动
-                if (ADB.ConnectedInfo == null)
+                if (Modules.Connect.ConnectionInfo.Device == null)
                 {
                     Info("正在启动神经网络依托平台...");
                     Process.Start(Address.dataExternal + @"\simulator.lnk");
@@ -769,7 +769,7 @@ namespace ArkHelper.Pages.OtherList
                 void End()
                 {
                     //结束
-                    WithSystem.KillSimulator();
+                    WithSystem.KillSimulator(Modules.Connect.ConnectionInfo.Connections.First(t=>t.Value).Key);
                     Info("正在关闭模拟器神经网络依托平台...");
                     Info("系统任务运行完毕");
                     new ToastContentBuilder()

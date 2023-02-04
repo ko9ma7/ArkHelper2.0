@@ -92,6 +92,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.Management" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
@@ -111,6 +112,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Modules\Connect\ADBConnector.cs" />
+    <Compile Include="Modules\Connect\ADBInteraction.cs" />
     <Compile Include="Modules\MB\MBImplementation.cs" />
     <Compile Include="Style\Control\AKHcpiCard.xaml.cs">
       <DependentUpon>AKHcpiCard.xaml</DependentUpon>
@@ -454,6 +457,8 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>taskkill /f /t /im adb.exe
+taskkill /f /t /im adb.exe
+taskkill /f /t /im adb.exe
 rmdir /s /q $(TargetDir)\external
 md $(TargetDir)\external
 xcopy $(ProjectDir)\external $(TargetDir)\external /s /e

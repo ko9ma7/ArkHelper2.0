@@ -1,4 +1,5 @@
-﻿using ArkHelper.Pages;
+﻿using ArkHelper.Modules.Connect;
+using ArkHelper.Pages;
 using ArkHelper.Xaml;
 using Microsoft.Toolkit.Uwp.Notifications;
 using System;
@@ -116,6 +117,7 @@ namespace ArkHelper
         public static void ExitApp()
         {
             notifyIcon.Visible = false;
+            ADBInteraction.KillAllAdbProcessesWithShell();
 
             App.SaveData();
             Output.CloseTextStream();
@@ -215,19 +217,15 @@ namespace ArkHelper
             #region 启动ADB连接
             Task adbConnect = Task.Run(() =>
             {
-                while (true)
+                ADBStarter.Start();
+                Connector.IPConnectionChange += (simu, ble) =>
                 {
-                    ADB.Connect();
-                    Thread.Sleep(2000);
-                }
-            });
-            Task adbCheck = Task.Run(() =>
-            {
-                while (true)
-                {
-                    Thread.Sleep(5000);
-                    if (App.Data.simulator.HeartbeatTest) ADB.ADBHeartbeatTest();
-                }
+                    new ToastContentBuilder()
+                    .AddArgument("kind", "ADB")
+                    .AddText("提示")
+                    .AddText("已" + (ble?"取得":"失去") + "与" + (simu as ConnectionInfo.SimuInfo).Name + "的连接")
+                    .Show();
+                };
             });
             #endregion
             #region SCHT等待

@@ -38,7 +38,7 @@ namespace ArkHelper.Xaml
             listenBtn.IsEnabled = false;
             Task.Run(() =>
             {
-                while (!ADB.CheckADBCanUsed())
+                while (!ADB.CheckADBCanUse())
                     Thread.Sleep(2000);
                 Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -265,7 +265,7 @@ namespace ArkHelper.Xaml
         {
             StartInfo = new ProcessStartInfo
             {
-                FileName = Address.adb,
+                FileName = Address.ADB,
                 WindowStyle = ProcessWindowStyle.Hidden,
                 UseShellExecute = false,
                 RedirectStandardOutput = true,

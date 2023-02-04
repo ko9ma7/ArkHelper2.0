@@ -19,6 +19,7 @@ using Point = System.Drawing.Point;
 using Windows.Devices.PointOfService;
 using ArkHelper.Modules.MB;
 using Windows.ApplicationModel.Core;
+using System.Linq;
 
 namespace ArkHelper
 {
@@ -166,7 +167,7 @@ namespace ArkHelper
             {
                 for (; ; )
                 {
-                    if (ADB.CheckADBCanUsed(new List<string>() { "MB" }))
+                    if (ADB.CheckADBCanUse(new List<string>() { "MB" }))
                     {
                         Application.Current.Dispatcher.Invoke(() =>
                         {
@@ -361,7 +362,7 @@ namespace ArkHelper
                     }
                     if (after_action == "closeSimulator")
                     {
-                        WithSystem.KillSimulator();
+                        WithSystem.KillSimulator(Modules.Connect.ConnectionInfo.Connections.First(t => t.Value).Key);
                         Show("正在关闭模拟器...");
                     }
                     if (after_action == "shutdown") { WithSystem.Shutdown(); }
