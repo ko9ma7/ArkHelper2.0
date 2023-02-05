@@ -14,7 +14,7 @@ using System.Windows.Documents;
 using Newtonsoft.Json;
 using static ArkHelper.ArkHelperDataStandard;
 using Windows.Media.Protection.PlayReady;
-using ArkHelper.Style.Control;
+using ArkHelper.Xaml.Control;
 using System.Threading;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
 using System.Threading.Tasks;
@@ -106,7 +106,7 @@ namespace ArkHelper.Xaml
             foreach (var a in aa)
             {
                 num++;
-                var ab = new Style.Control.AKHcpiCard(a) { Num = num };
+                var ab = new Xaml.Control.AKHcpiCard(a) { Num = num };
                 cardList.Children.Add(ab);
             }
         }
@@ -126,12 +126,12 @@ namespace ArkHelper.Xaml
         private void _create(object sender, RoutedEventArgs e)
         {
             edit = false;
-            //cardList.Children.Add(new Style.Control.AKHcpiCard() { Num = 1 });
+            //cardList.Children.Add(new Xaml.Control.AKHcpiCard() { Num = 1 });
             changeVis();
         }
         private void add(object sender, RoutedEventArgs e)
         {
-            var aa = new Style.Control.AKHcpiCard();
+            var aa = new Xaml.Control.AKHcpiCard();
             aa.Num = cardList.Children.Count + 1;
             cardList.Children.Add(aa);
         }

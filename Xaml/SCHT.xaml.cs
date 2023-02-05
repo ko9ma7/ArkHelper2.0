@@ -4,7 +4,7 @@ using System;
 using ArkHelper.Xaml;
 using System.IO;
 using MaterialDesignThemes.Wpf;
-using ArkHelper.Style.Control;
+using ArkHelper.Xaml.Control;
 using Microsoft.Win32;
 
 namespace ArkHelper.Pages.OtherList

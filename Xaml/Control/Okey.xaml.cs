@@ -1,13 +1,13 @@
 ﻿using System.Windows.Controls;
 
-namespace ArkHelper.Style.Control
+namespace ArkHelper.Xaml.Control
 {
     /// <summary>
     /// Title.xaml 的交互逻辑
     /// </summary>
-    public partial class Title : UserControl
+    public partial class OK : UserControl
     {
-        public Title()
+        public OK()
         {
             InitializeComponent();
             this.DataContext = this;
@@ -15,6 +15,5 @@ namespace ArkHelper.Style.Control
 
         public string Text { get; set; }
 
-        public MaterialDesignThemes.Wpf.PackIconKind Icon { get; set; } = MaterialDesignThemes.Wpf.PackIconKind.About;
     }
 }

@@ -13,22 +13,21 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace ArkHelper.Style.Control
+namespace ArkHelper.Xaml.Control
 {
     /// <summary>
-    /// ChapterTitle.xaml 的交互逻辑
+    /// SimuSupport.xaml 的交互逻辑
     /// </summary>
-    public partial class ChapterTitle : UserControl
+    public partial class SimuSupport : UserControl
     {
-        public ChapterTitle()
+        public SimuSupport()
         {
             InitializeComponent();
-            this.DataContext = this;
+            foreach (ArkHelper.PinnedData.Simulator.SimuInfo simulator in ArkHelper.PinnedData.Simulator.Support)
+            {
+                text.Text += simulator.Name + " ";
+            }
+
         }
-
-        public string Text { get; set; }
-
-        public MaterialDesignThemes.Wpf.PackIconKind Icon { get; set; } = MaterialDesignThemes.Wpf.PackIconKind.About;
-
     }
 }

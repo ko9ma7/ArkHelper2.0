@@ -13,19 +13,22 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace ArkHelper.Style.Control
+namespace ArkHelper.Xaml.Control
 {
     /// <summary>
-    /// RoundImageWithTwoTexts.xaml 的交互逻辑
+    /// ChapterTitle.xaml 的交互逻辑
     /// </summary>
-    public partial class RoundImageWithTwoTexts : UserControl
+    public partial class ChapterTitle : UserControl
     {
-        public RoundImageWithTwoTexts(string ImageUri,string texta,string textb)
+        public ChapterTitle()
         {
             InitializeComponent();
-            image.Source = new BitmapImage(new Uri(ImageUri));
-            text1.Text = texta;
-            text2.Text = textb;
+            this.DataContext = this;
         }
+
+        public string Text { get; set; }
+
+        public MaterialDesignThemes.Wpf.PackIconKind Icon { get; set; } = MaterialDesignThemes.Wpf.PackIconKind.About;
+
     }
 }

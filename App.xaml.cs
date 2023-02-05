@@ -217,13 +217,15 @@ namespace ArkHelper
             #region 启动ADB连接
             Task adbConnect = Task.Run(() =>
             {
+                foreach (var simu in App.Data.simulator.customs)
+                    ConnectionInfo.Connections.Add(simu,new ConnectionInfo.ConnectStatus());
                 ADBStarter.Start();
                 Connector.IPConnectionChange += (simu, ble) =>
                 {
                     new ToastContentBuilder()
                     .AddArgument("kind", "ADB")
                     .AddText("提示")
-                    .AddText("已" + (ble?"取得":"失去") + "与" + (simu as ConnectionInfo.SimuInfo).Name + "的连接")
+                    .AddText("已" + (ble.Connected?"取得":"失去") + "与" + (simu as ConnectionInfo.SimuInfo).Name + "的连接")
                     .Show();
                 };
             });

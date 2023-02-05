@@ -14,7 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace ArkHelper.Style.Control
+namespace ArkHelper.Xaml.Control
 {
     /// <summary>
     /// SimuSelect.xaml 的交互逻辑

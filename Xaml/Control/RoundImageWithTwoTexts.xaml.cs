@@ -13,21 +13,19 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace ArkHelper.Style.Control
+namespace ArkHelper.Xaml.Control
 {
     /// <summary>
-    /// SimuSupport.xaml 的交互逻辑
+    /// RoundImageWithTwoTexts.xaml 的交互逻辑
     /// </summary>
-    public partial class SimuSupport : UserControl
+    public partial class RoundImageWithTwoTexts : UserControl
     {
-        public SimuSupport()
+        public RoundImageWithTwoTexts(string ImageUri,string texta,string textb)
         {
             InitializeComponent();
-            foreach (ArkHelper.PinnedData.Simulator.SimuInfo simulator in ArkHelper.PinnedData.Simulator.Support)
-            {
-                text.Text += simulator.Name + " ";
-            }
-
+            image.Source = new BitmapImage(new Uri(ImageUri));
+            text1.Text = texta;
+            text2.Text = textb;
         }
     }
 }

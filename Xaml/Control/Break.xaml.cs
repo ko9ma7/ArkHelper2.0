@@ -1,6 +1,6 @@
 ﻿using System.Windows.Controls;
 
-namespace ArkHelper.Style.Control
+namespace ArkHelper.Xaml.Control
 {
     /// <summary>
     /// Break.xaml 的交互逻辑

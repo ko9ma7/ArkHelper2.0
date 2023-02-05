@@ -479,7 +479,9 @@ namespace ArkHelper.Pages
             {
                 foreach (User user in UserList)
                 {
-                    var _updMsgList = user.UpdateMessage().FindAll(
+                    List<ArkHelperMessage> _updMsgList_ = new List<ArkHelperMessage>();
+                    _updMsgList_ = user.UpdateMessage();
+                    var _updMsgList = _updMsgList_.FindAll(
                         t =>
                         !Messages.Exists(u => u.ID == t.ID)
                         && !t.Text.Contains("对本次抽奖进行监督，结果公正有效。公示链接：")
@@ -521,6 +523,7 @@ namespace ArkHelper.Pages
                 MessageInited?.Invoke();
 
                 firstUpdate = false;
+            End:;
             }
         });
         private delegate void MessageInitPointer();

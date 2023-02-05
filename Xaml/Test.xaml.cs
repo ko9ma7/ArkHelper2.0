@@ -93,6 +93,7 @@ namespace ArkHelper.Xaml
             {
                 foreach(var a in f) Console.WriteLine(a.ToString());
             };*/
+            var a = JsonSerializer.Serialize(new Modules.Connect.ConnectionInfo.SimuInfo("ss", "ss", 55, "ss") { ReadOnly = true});
         }
     }
 }

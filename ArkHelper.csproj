@@ -114,36 +114,39 @@
     </ApplicationDefinition>
     <Compile Include="Modules\Connect\ADBConnector.cs" />
     <Compile Include="Modules\Connect\ADBInteraction.cs" />
+    <Compile Include="Modules\Connect\XAML\ConnectionCard.xaml.cs">
+      <DependentUpon>ConnectionCard.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Modules\Connect\XAML\ConnectionController.xaml.cs">
+      <DependentUpon>ConnectionController.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Modules\MB\MBImplementation.cs" />
-    <Compile Include="Style\Control\AKHcpiCard.xaml.cs">
+    <Compile Include="Xaml\Control\AKHcpiCard.xaml.cs">
       <DependentUpon>AKHcpiCard.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Style\Control\Break.xaml.cs">
+    <Compile Include="Xaml\Control\Break.xaml.cs">
       <DependentUpon>Break.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Style\Control\ChapterTitle.xaml.cs">
-      <DependentUpon>ChapterTitle.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Style\Control\CustomSimulator.xaml.cs">
-      <DependentUpon>CustomSimulator.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Style\Control\RoundImageWithTwoTexts.xaml.cs">
+    <Compile Include="Xaml\Control\RoundImageWithTwoTexts.xaml.cs">
       <DependentUpon>RoundImageWithTwoTexts.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Style\Control\SimuSelect.xaml.cs">
+    <Compile Include="Xaml\Control\SimuSelect.xaml.cs">
       <DependentUpon>SimuSelect.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Style\Control\SimuSupport.xaml.cs">
+    <Compile Include="Xaml\Control\SimuSupport.xaml.cs">
       <DependentUpon>SimuSupport.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Style\Control\Okey.xaml.cs">
+    <Compile Include="Xaml\Control\Okey.xaml.cs">
       <DependentUpon>Okey.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Style\Control\Title.xaml.cs">
+    <Compile Include="Xaml\Control\Title.xaml.cs">
       <DependentUpon>Title.xaml</DependentUpon>
     </Compile>
     <Compile Include="Xaml\akhcpiMaker.xaml.cs">
       <DependentUpon>akhcpiMaker.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Xaml\Control\ChapterTitle.xaml.cs">
+      <DependentUpon>ChapterTitle.xaml</DependentUpon>
     </Compile>
     <Compile Include="Xaml\Control\SelectButton.xaml.cs">
       <DependentUpon>SelectButton.xaml</DependentUpon>
@@ -197,47 +200,51 @@
     <Compile Include="Xaml\Widget\UnreadMessage.xaml.cs">
       <DependentUpon>UnreadMessage.xaml</DependentUpon>
     </Compile>
+    <Page Include="Modules\Connect\XAML\ConnectionCard.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Modules\Connect\XAML\ConnectionController.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Style\ControlStyle.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Style\Control\AKHcpiCard.xaml">
+    <Page Include="Xaml\Control\AKHcpiCard.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Style\Control\Break.xaml">
+    <Page Include="Xaml\Control\Break.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Style\Control\ChapterTitle.xaml">
+    <Page Include="Xaml\Control\RoundImageWithTwoTexts.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Style\Control\CustomSimulator.xaml">
+    <Page Include="Xaml\Control\SimuSelect.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Style\Control\RoundImageWithTwoTexts.xaml">
+    <Page Include="Xaml\Control\SimuSupport.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Style\Control\SimuSelect.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Style\Control\SimuSupport.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Style\Control\Okey.xaml">
+    <Page Include="Xaml\Control\Okey.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Style\Control\Title.xaml">
+    <Page Include="Xaml\Control\Title.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Xaml\akhcpiMaker.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Xaml\Control\ChapterTitle.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -466,6 +473,8 @@ for /f "tokens=*" %25%25i in ('dir "$(TargetDir)\*.dll" /b') do copy "%25%25i" "
 for /f "tokens=*" %25%25i in ('dir "$(TargetDir)\*.dll" /b') do del "%25%25i" /q
 rmdir "$(TargetDir)\dll\x86" /s /q
 del "$(TargetDir)\dll\x64\opencv_videoio_ffmpeg455_64.dll" /q
+del "$(TargetDir)\dll\OpenCvSharpExtern.dll" /q
+del "$(TargetDir)\dll\opencv_videoio_ffmpeg460_64.dll" /q
 if $(ConfigurationName) == Release (for /f "tokens=*" %25%25i in ('dir "$(TargetDir)\*.pdb" /b') do del "%25%25i" /q)
 if $(ConfigurationName) == Release copy $(ProjectDir)\Doc\User\使用方法.txt $(ProjectDir)\bin\使用方法.txt</PostBuildEvent>
   </PropertyGroup>

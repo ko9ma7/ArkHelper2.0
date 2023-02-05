@@ -361,7 +361,7 @@ namespace ArkHelper
                     }
                     if (after_action == "closeSimulator")
                     {
-                        WithSystem.KillSimulator(Modules.Connect.ConnectionInfo.Connections.First(t => t.Value).Key);
+                        WithSystem.KillSimulator(Modules.Connect.ConnectionInfo.Connections.First(t => t.Value.Connected).Key);
                         Show("正在关闭模拟器...");
                     }
                     if (after_action == "shutdown") { WithSystem.Shutdown(); }

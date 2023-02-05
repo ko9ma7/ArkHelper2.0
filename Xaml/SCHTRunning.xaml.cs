@@ -769,7 +769,7 @@ namespace ArkHelper.Pages.OtherList
                 void End()
                 {
                     //结束
-                    WithSystem.KillSimulator(Modules.Connect.ConnectionInfo.Connections.First(t=>t.Value).Key);
+                    WithSystem.KillSimulator(Modules.Connect.ConnectionInfo.Connections.First(t=>t.Value.Connected).Key);
                     Info("正在关闭模拟器神经网络依托平台...");
                     Info("系统任务运行完毕");
                     new ToastContentBuilder()

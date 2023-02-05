@@ -262,15 +262,7 @@ namespace ArkHelper
             public Simulator simulator { get; set; } = new Simulator();
             public class Simulator
             {
-                public Custom custom { get; set; } = new Custom();
-                public class Custom
-                {
-                    public bool status { get; set; } = false;
-                    public int port { get; set; } = 0;
-                    public string im { get; set; } = "";
-                    public string externalCMD { get; set; } = "";
-                }
-                public bool HeartbeatTest { get; set; } = false;
+                public List<ConnectionInfo.SimuInfo> customs { get; set; } = new List<ConnectionInfo.SimuInfo>();
             }
 
             public SCHT scht { get; set; } = new SCHT();
@@ -692,6 +684,15 @@ namespace ArkHelper
             CMD(@"shell rm -f /sdcard/DCIM/" + name); //删除
             //输出
             return address + "\\" + name;
+        }
+
+        /// <summary>
+        /// 启动明日方舟
+        /// </summary>
+        /// <param name="serverID">游戏ID</param>
+        public static void StartArknights(string serverID)
+        {
+            ADB.CMD("shell am start -n " + GetGamePackageName(serverID) + "/com.u8.sdk.U8UnityContext");
         }
 
         /// <summary>
