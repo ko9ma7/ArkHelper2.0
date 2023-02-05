@@ -233,7 +233,7 @@ namespace ArkHelper.Modules.Connect.XAML
             TextBox textBox = new TextBox()
             {
                 Width = 200,
-                Text = "adb "
+                Text = ""
             };
             Button button = new Button()
             {
