@@ -109,6 +109,11 @@ namespace ArkHelper.Pages.OtherList
 
         private void SimulatorConnectionControl_btn_Click(object sender, RoutedEventArgs e)
         {
+            if (ADB.CheckIfADBUsing())
+            {
+                MessageBox.Show("任务执行时不能管理连接状态");
+                return;
+            }
             bool _have = false;
             foreach (Window win in Application.Current.Windows)
             {
