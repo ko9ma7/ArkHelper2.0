@@ -222,7 +222,7 @@ namespace ArkHelper.Modules.Connect.XAML
         private void Button_Click_2(object sender, RoutedEventArgs e)
         {
             if (ConnectionInfo.Device == null) return;
-            var cmd = "";
+            string cmd = null;
             var win = new Window()
             {
                 Title = "请输入指令",
@@ -252,6 +252,7 @@ namespace ArkHelper.Modules.Connect.XAML
 
             win.ShowDialog();
 
+            if (cmd != null)
             Task.Run(() =>
             {
                 MessageBox.Show(ADB.CMD(cmd), "返回的结果");
