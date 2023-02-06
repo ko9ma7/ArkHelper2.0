@@ -8,6 +8,7 @@ using MaterialDesignThemes.Wpf;
 using System.Windows.Media.Animation;
 using ArkHelper.Pages;
 using Windows.ApplicationModel.Contacts.DataProvider;
+using ArkHelper.Pages.OtherList;
 
 namespace ArkHelper.Xaml
 {
@@ -93,7 +94,8 @@ namespace ArkHelper.Xaml
                 {
                     Text = this.Text,
                     Icon = this.Icon,
-                    IsHaveProgressBar = false
+                    IsHaveProgressBar = false,
+                    IsProgressBarStatic = true,
                 };
             }
             #endregion
@@ -131,7 +133,7 @@ namespace ArkHelper.Xaml
         {
             InitializeComponent();
 
-            this.SizeChanged += (s,e) => SwitchFold(this.Width <= 864);
+            this.SizeChanged += (s, e) => SwitchFold(this.Width <= 864);
 
             #region 装载侧栏菜单
             foreach (List<Menu> menuList in Menu.MenuItems)
@@ -183,6 +185,52 @@ namespace ArkHelper.Xaml
                     }
                 }
                 App.mainArg.Dispose();
+            }
+            #endregion
+
+            #region 监控pgb改变
+            //MB
+            MB.BattleStatusChangeEvent += (s, e) =>
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    var _btn = SearchMenu("MB");
+                    _btn.IsHaveProgressBar = e;
+                });
+            };
+            SCHTRunning.StatusChanged += (s, e) =>
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    var _btn = SearchMenu("SCHTRunning");
+                    _btn.IsHaveProgressBar = e;
+                });
+            };
+            MB.ProgressChangeEvent += (s, e) =>
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    var _btn = SearchMenu("MB");
+                    if (e == 0)
+                    {
+                        _btn.IsProgressBarStatic = false;
+                    }
+                    else
+                    {
+                        _btn.IsProgressBarStatic = true;
+                    }
+                    _btn.ProgressBarValue = e;
+                });
+            };
+            Control.SelectButton SearchMenu(string id)
+            {
+                foreach (var menuList in FuncList.Children)
+                {
+                    var btn = menuList as Control.SelectButton;
+                    var tag = btn.Tag as Menu;
+                    if (tag.ID == id) return btn;
+                }
+                return null;
             }
             #endregion
         }

@@ -20,6 +20,7 @@ using Windows.Devices.PointOfService;
 using ArkHelper.Modules.MB;
 using Windows.ApplicationModel.Core;
 using System.Linq;
+using Newtonsoft.Json.Linq;
 
 namespace ArkHelper
 {
@@ -87,6 +88,7 @@ namespace ArkHelper
             {
                 _alreadyDone = value;
                 monitor_module_progress_up.Text = value.ToString();
+                FreshPGB();
             }
         }
 
@@ -104,19 +106,47 @@ namespace ArkHelper
             }
         }
 
+        private bool _isBattling = false;
+        private bool IsBattling
+        {
+            get { return _isBattling; }
+            set
+            {
+                if (_isBattling != value)
+                {
+                    _isBattling = value;
+                    BattleStatusChangeEvent?.Invoke(this, value);
+                    FreshPGB();
+                }
+            }
+        }
+        public static event EventHandler<bool> BattleStatusChangeEvent;
+        public static event EventHandler<int> ProgressChangeEvent;
+
         void InitDataAndFreshUIToInitStatus()
         {
             startTime = DateTime.Now;
-            aim = 0;
+            aim = 1;
             alreadyDone = 0;
         }
-
+        void FreshPGB()
+        {
+            if (uimode == UIMode.MBCore_time || uimode == UIMode.SXYS_time)
+            {
+                float pgbV = (alreadyDone * 1.0f / aim) * 100;
+                ProgressChangeEvent?.Invoke(this, (int)pgbV);
+            }
+            else
+            {
+                ProgressChangeEvent?.Invoke(this, 0);
+            }
+        }
         void FreshDataWhenStart()
         {
             startTime = DateTime.Now;
             if (uimode == UIMode.MBCore_time || uimode == UIMode.SXYS_time)
             {
-                monitor_module_end.Visibility= Visibility.Visible;
+                monitor_module_end.Visibility = Visibility.Visible;
             }
             else
             {
@@ -144,8 +174,8 @@ namespace ArkHelper
                 DateTime end;
 
                 TimeSpan UsingTime = DateTime.Now - startTime;
-                speed = UsingTime.TotalSeconds/alreadyDone;
-                end = startTime + TimeSpan.FromSeconds(speed*aim);
+                speed = UsingTime.TotalSeconds / alreadyDone;
+                end = startTime + TimeSpan.FromSeconds(speed * aim);
 
                 monitor_module_speed_text.Text = speed.ToString("0.00");
                 if (uimode == UIMode.MBCore_time || uimode == UIMode.SXYS_time)
@@ -192,7 +222,6 @@ namespace ArkHelper
         #endregion
 
         #region 逻辑
-        private bool IsBattling = false;
         private void start(object sender, RoutedEventArgs e)
         {
             if (IsBattling)

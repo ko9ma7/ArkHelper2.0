@@ -96,6 +96,8 @@ namespace ArkHelper.Pages.OtherList
             {
                 var starttime = DateTime.Now;//开始时间
 
+                StatusChanged?.Invoke(this, true);
+
                 //模拟器未启动则启动
                 if (Modules.Connect.ConnectionInfo.Device == null)
                 {
@@ -789,6 +791,7 @@ namespace ArkHelper.Pages.OtherList
 
             void UIEnd(bool NewWindow = false)
             {
+                StatusChanged?.Invoke(this, false);
                 ADB.UnregisterADBUsing("SCHTRunning");
                 Application.Current.Dispatcher.Invoke(() => (Window.GetWindow(this)).Close());
                 App.OKtoOpenSCHT = true;
@@ -804,5 +807,7 @@ namespace ArkHelper.Pages.OtherList
         {
             stopevent();
         }
+
+        public static event EventHandler<bool> StatusChanged;
     }
 }
