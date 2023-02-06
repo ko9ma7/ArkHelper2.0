@@ -31,6 +31,7 @@ using Windows.Storage.Streams;
 using ArkHelper.Modules.Connect;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 using Point = System.Drawing.Point;
+using static ArkHelper.ArkHelperDataStandard.Data.SCHT;
 
 namespace ArkHelper
 {
@@ -254,6 +255,29 @@ namespace ArkHelper
         public static DateTime GetDateTimeFromDateAndTime(DateTime date, DateTime time)
         {
             return new DateTime(date.Year, date.Month, date.Day, time.Hour, time.Minute, time.Second);
+        }
+
+        /// <summary>
+        /// 获取游戏刷新时间
+        /// </summary>
+        /// <param name="id">游戏区服</param>
+        /// <returns></returns>
+        public static int GetGameFreshTime(string id)
+        {
+            int freshTime;
+            switch (id)
+            {
+                default:
+                    freshTime = 4;
+                    break;
+                case "JP":
+                    freshTime = 4 - 1;
+                    break;
+                case "EN":
+                    freshTime = 4 + 15;
+                    break;
+            }
+            return freshTime;
         }
 
         #region 配置数据

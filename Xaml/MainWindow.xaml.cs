@@ -203,6 +203,8 @@ namespace ArkHelper.Xaml
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     var _btn = SearchMenu("SCHTRunning");
+                    _btn.IsProgressBarStatic = false;
+                    _btn.ProgressBarValue = 0;
                     _btn.IsHaveProgressBar = e;
                 });
             };
