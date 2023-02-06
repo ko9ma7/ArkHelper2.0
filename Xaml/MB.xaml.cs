@@ -236,6 +236,7 @@ namespace ArkHelper
         {
             ADB.RegisterADBUsing("MB");
             IsBattling = true;
+            Show("连续作战启动");
 
             //用于选择作战方式的参数
 
@@ -284,6 +285,26 @@ namespace ArkHelper
             {
                 var startTime = DateTime.Now;//启动时间
                 int alreadyTime = 0;
+
+                var server = ADB.GetCurrentGameKind();
+                var freshTime = ArkHelperDataStandard.GetGameFreshTime(server);
+                Task.Run(() =>
+                {
+                    bool startIsFreshHour = false;
+                    if (DateTime.Now.Hour == freshTime) { startIsFreshHour = true; }
+
+                    while (true)
+                    {
+                        if (!IsBattling) { break; }
+                        Thread.Sleep(3000);
+                        if (DateTime.Now.Hour == freshTime && !startIsFreshHour)
+                        {
+                            stopevent();
+                            Show("处于游戏刷新时间，正在自动退出", Output.InfoKind.Warning);
+                            break;
+                        }
+                    }
+                });
 
                 if (uimode == UIMode.MBCore_san || uimode == UIMode.MBCore_time)
                 {
