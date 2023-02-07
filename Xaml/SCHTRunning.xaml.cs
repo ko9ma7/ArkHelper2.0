@@ -27,6 +27,7 @@ using System.Drawing;
 using Point = System.Drawing.Point;
 using ArkHelper.Modules.MB;
 using System.Security.Claims;
+using ArkHelper.Modules.Connect;
 
 namespace ArkHelper.Pages.OtherList
 {

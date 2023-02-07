@@ -124,8 +124,8 @@ namespace ArkHelper.Modules.Connect
             while (true)
             {
                 Looping = true;
-                if (ConnectionInfo.Connections.Values.Count(t => t.Connected) != 0
-                    && !ADB.CheckIfADBUsing())
+                if (/*ConnectionInfo.Connections.Values.Count(t => t.Connected) != 0
+                    && */!ADB.CheckIfADBUsing())
                 {
                     string output = ADBInteraction.GetOutput("devices");
 

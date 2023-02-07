@@ -243,6 +243,7 @@ namespace ArkHelper
             //用于MBCore的参数
             MBCore.ModeType mode = MBCore.ModeType.san;
             int time = -1;
+            bool recover = false;
 
             //用于生息演算的参数
             int time_sxys = -1;
@@ -259,6 +260,7 @@ namespace ArkHelper
                 mode = MBCore.ModeType.time;
                 time = Convert.ToInt32(times_setting.Text);
                 aim = time;
+                recover = (bool)times_setting_recover.IsChecked;
             }
             if ((bool)mode_SXYS.IsChecked)
             {
@@ -308,7 +310,7 @@ namespace ArkHelper
 
                 if (uimode == UIMode.MBCore_san || uimode == UIMode.MBCore_time)
                 {
-                    var battleMB = new MBCore(mode: mode, time: time, allowToRecoverSantiy: false);
+                    var battleMB = new MBCore(mode: mode, time: time, allowToRecoverSantiy: recover);
                     battleMB.MessageUpdated += Show;
                     battleMB.MoveToNext += FreshDataAndFreshMonitor;
                     var result = battleMB.Run();
@@ -424,8 +426,11 @@ namespace ArkHelper
 
             stopevent = () =>
             {
-                run.Abort();
-                MISSION_END();
+                if (IsBattling)
+                {
+                    run.Abort();
+                    MISSION_END();
+                }
             };
 
             run.Start();

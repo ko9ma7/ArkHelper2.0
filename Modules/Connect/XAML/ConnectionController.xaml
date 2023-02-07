@@ -163,7 +163,7 @@
                         若模拟器已连接，但操作设备选择列表为空，请重新启动模拟器。<LineBreak />
                         <Run Text="      " />
                         请不要在ArkHelper运行时启动其它的ADB实例，这会对彼此造成干扰。您应在完全关闭ArkHelper后再使用其它的ADB实例。<LineBreak />
-                        <Run Text="       " />
+                        <Run Text="      " />
                         ArkHelperADB使用的端口号为5037，当这个端口被其它应用占用时，连接会出错。</TextBlock>
 
                 </StackPanel>

@@ -136,5 +136,10 @@ namespace ArkHelper.Pages.OtherList
                 window.Show();
             }
         }
+
+        private void address_Click(object sender, RoutedEventArgs e)
+        {
+            Process.Start(Address.programData);
+        }
     }
 }

@@ -74,7 +74,7 @@ namespace ArkHelper
             }
         }
 
-        public static Data Current = new Data("2.0.1.0", "local", false, Data.VersionType.beta);
+        public static Data Current = new Data("2.0.1.1", "local", false, Data.VersionType.beta);
 
         /// <summary>
         /// 更新
@@ -1562,6 +1562,9 @@ namespace ArkHelper
             Process[] _pr = Process.GetProcessesByName(simuInfo.IM);
             var pr = _pr[0];
             pr.Kill();
+
+            ADBServerStatus.KillServer();
+            ADBServerStatus.StartServer();
             //ADB.ConnectedInfo = null;
         }
 

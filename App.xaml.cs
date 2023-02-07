@@ -163,14 +163,7 @@ namespace ArkHelper
             #region 托盘和后台
             NotifyIconMenu = (ContextMenu)FindResource("NotifyIconMenu"); //右键菜单
             App.notifyIcon.MouseClick += NotifyClick; //绑定事件
-            #endregion
-
-            #region 更新
-            Task update = Task.Run(() =>
-            {
-                //Version.Update.Search();
-            });
-            #endregion
+            #endregion            
 
             PinnedData.Server.Load();//fu
 

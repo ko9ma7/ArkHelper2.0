@@ -256,8 +256,8 @@ namespace ArkHelper.Modules.MB
                     case 0:
                         if (ann_cardAlreadyUsed < Ann_cardToUse)
                         {
-                            ADB.Tap(1146, 666);
                             Info("指令：启用全权委托");
+                            ADB.Tap(1146, 666);
                             WithSystem.Wait(500);
                             UseCard();
                         }
@@ -269,8 +269,8 @@ namespace ArkHelper.Modules.MB
                     case 1:
                         if (ann_cardAlreadyUsed >= Ann_cardToUse)
                         {
-                            ADB.Tap(1146, 666);
                             Info("指令：禁用全权委托");
+                            ADB.Tap(1146, 666);
                             WithSystem.Wait(500);
                             NotUseCard();
                         }
@@ -288,8 +288,8 @@ namespace ArkHelper.Modules.MB
 
         //开始行动
         beginTask:;
-            ADB.Tap(1266, 753);
             Info("指令：开始行动");
+            ADB.Tap(1266, 753);
             WithSystem.Wait(3500);
 
             using (ADB.Screenshot screenshot = new ADB.Screenshot())
@@ -307,7 +307,7 @@ namespace ArkHelper.Modules.MB
                     //次数模式恢复理智
                     if (Mode == ModeType.time)
                     {
-                        if (AllowToRecoverSantiy) goto MBend;
+                        if (!AllowToRecoverSantiy) goto MBend;
                         Info("指令：使用理智恢复物恢复理智");
                         ADB.Tap(1224, 648);//点对号
                         WithSystem.Wait(3000);
@@ -316,8 +316,8 @@ namespace ArkHelper.Modules.MB
                     }
                 }
             }
-            ADB.Tap(1258, 717);//开始行动（红）
             Info("指令：开始行动");
+            ADB.Tap(1258, 717);//开始行动（红）
 
             //已进本，等待出本
             Info("代理指挥作战运行中");
@@ -355,8 +355,8 @@ namespace ArkHelper.Modules.MB
                 }
                 void Touch(int waitTime = 4000)
                 {
-                    ADB.Tap(1204, 290); //点击空白
                     Info("指令：退出作战");
+                    ADB.Tap(1204, 290); //点击空白
                     WithSystem.Wait(waitTime);
                 }
             }
