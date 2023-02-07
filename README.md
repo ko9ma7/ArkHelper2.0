@@ -2,16 +2,18 @@
 ## 概述
 ArkHelper是一个适用于明日方舟的游戏助手。
 
-## 开发者指引
-### 源码编译
-1.     git clone https://github.com/ArkHelper/ArkHelper2.0
-1. 使用VS打开.sln文件
-### 注
-1.项目目录中的external文件夹在生成时会自动拷贝到生成文件夹，作为软件运行的必要文件。
-### 错误处理
-1.源码修改后生成失败？  
-可能是adb进程未完全停止，重新生成即可。
-
-
 ## 支持平台
-- Windows
+Windows
+
+## 群聊
+
+
+## 开发
+[开发者文档](/Doc/Developer/DevelopDocs/ArkHelper%E5%BC%80%E5%8F%91%E8%80%85%E6%96%87%E6%A1%A3.md)  
+ArkHelper开发者中心：691404720
+
+## 关于ArkHelper
+[开放源代码许可](/Doc/%E5%BC%80%E6%94%BE%E6%BA%90%E4%BB%A3%E7%A0%81%E8%AE%B8%E5%8F%AF.md)
+[用户协议](/Doc/EULA.md)
+[隐私政策](/Doc/ArkHelper%E9%9A%90%E7%A7%81%E6%94%BF%E7%AD%96.md)
+

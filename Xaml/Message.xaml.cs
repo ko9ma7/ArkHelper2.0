@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
+using System.Linq.Expressions;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text.Json;
 using System.Threading;
@@ -47,7 +48,15 @@ namespace ArkHelper.Pages
                 {
                     // 微博
                     case ArkHelperDataStandard.MessageSource.weibo:
-                        JsonElement _userinfo = Net.GetFromApi("https://m.weibo.cn/api/container/getIndex?type=uid&value=" + UID).GetProperty("data").GetProperty("userInfo");
+                    st:;
+                        JsonElement __userinfo = Net.GetFromApi("https://m.weibo.cn/api/container/getIndex?type=uid&value=" + UID);
+                        JsonElement _userinfo;
+                        try
+                        {
+                            _userinfo = __userinfo.GetProperty("data").GetProperty("userInfo");
+                        }
+                        catch { goto st; }
+
                         Avatar = _userinfo.GetProperty("profile_image_url").GetString();
                         Name = _userinfo.GetProperty("screen_name").GetString();
                         break;
@@ -128,6 +137,7 @@ namespace ArkHelper.Pages
                         {
                             User = this
                         };
+                        _aa.Dispose();
                         back.Add(_aaaa);
                         break;
                 }
@@ -144,6 +154,10 @@ namespace ArkHelper.Pages
                     }
                 }
                 GC.Collect();
+                Output.Log("=>" + ID + " is updating message", "Message");
+                string _ = "";
+                foreach (var __ in back) _ += __.ID + ",";
+                Output.Log("=>" + "{" + _ + "}", "Message");
                 return back;
             }
         }
@@ -163,20 +177,16 @@ namespace ArkHelper.Pages
                 public string Small { get; set; }
                 public string Link { get; set; }
                 public MediaType Type { get; set; }
-                public int Height { get; set; }
-                public int Width { get; set; }
                 public enum MediaType
                 {
                     photo,
                     video
                 }
-                public Media(string viewPic, string link, MediaType type, int height, int width)
+                public Media(string viewPic, string link, MediaType type)
                 {
                     Small = viewPic;
                     Link = link;
                     Type = type;
-                    Height = height;
-                    Width = width;
                 }
                 public Media() { }
             }
@@ -218,6 +228,7 @@ namespace ArkHelper.Pages
                             int _c = response.IndexOf(@"""status""");
                             response = response.Substring(_c, response.LastIndexOf(",") - _c);
                             response = "{" + response + "}";
+                            client.Dispose();
                         }
                         catch
                         {
@@ -253,7 +264,8 @@ namespace ArkHelper.Pages
                         string link = Text.Substring(_herfAddress + 6, Text.IndexOf(@"""", _herfAddress + 10) - _herfAddress - 6);
 
                         if (!link.Contains(@"m.weibo.cn/p")
-                            && !link.Contains(@"m.weibo.cn/search"))
+                            && !link.Contains(@"m.weibo.cn/search")
+                            && !link.Contains(@"lottery.media.weibo.com"))
                         {
                             var _decodeResult = HttpUtility.UrlDecode(link.Replace("https://weibo.cn/sinaurl?u=", ""));
                             Links.Add(_decodeResult);
@@ -266,11 +278,9 @@ namespace ArkHelper.Pages
                     {
                         Text = Text.Replace("<br />", "\n");
                         int _lef = Text.IndexOf("<");
-                        try
-                        {
+                        if (_lef != -1)
                             Text = Text.Remove(_lef, Text.IndexOf(">") - _lef + 1); //换行
-                        }
-                        catch { }
+
                     }
                     Text = System.Net.WebUtility.HtmlDecode(Text);//从html反转义
 
@@ -297,7 +307,7 @@ namespace ArkHelper.Pages
                         foreach (var item in pics)
                         {
                             var _large = item.GetProperty("large");
-                            var _size = _large.GetProperty("geo");
+                            /*var _size = _large.GetProperty("geo");
                             int _hei = 0;
                             int _wid = 0;
                             var hej = _size.GetProperty("height");
@@ -311,9 +321,9 @@ namespace ArkHelper.Pages
                             {
                                 _hei = hej.GetInt32();
                                 _wid = wij.GetInt32();
-                            }
+                            }*/
                             string url = _large.GetProperty("url").GetString();
-                            Medias.Add(new Media(null, url, Media.MediaType.photo, _hei, _wid));
+                            Medias.Add(new Media(null, url, Media.MediaType.photo));
                         }
                     }
                     else
@@ -447,8 +457,7 @@ namespace ArkHelper.Pages
         #endregion
 
         #region 更新消息
-        static ArrayList UserList;
-        static bool firstUpdate = true;
+        private static bool firstUpdate = true;
         public static Task MessageInit = new Task(() =>
         {
             UserList = new ArrayList
@@ -466,64 +475,70 @@ namespace ArkHelper.Pages
                 //new Pages.Message.User(ArkHelperDataStandard.MessageSource.weibo, "7784464307") //test
             };
 
-            for (; ; Thread.Sleep(20000))
+            for (; ; Thread.Sleep(60000))
             {
-                var createat = DateTime.Now;
-                if (!firstUpdate) createat = Messages[0].CreateAt;
-
                 foreach (User user in UserList)
                 {
-                    foreach (ArkHelperMessage message in user.UpdateMessage())
-                    {
-                        //加入消息池
-                        if (!Messages.Exists(mes => mes.ID == message.ID))
-                            if (!message.Text.Contains("对本次抽奖进行监督，结果公正有效。公示链接："))
-                                if ((DateTime.Now - message.CreateAt) < new TimeSpan(60, 0, 0, 0, 0))
+                    List<ArkHelperMessage> _updMsgList_ = new List<ArkHelperMessage>();
+                    _updMsgList_ = user.UpdateMessage();
+                    var _updMsgList = _updMsgList_.FindAll(
+                        t =>
+                        !Messages.Exists(u => u.ID == t.ID)
+                        && !t.Text.Contains("对本次抽奖进行监督，结果公正有效。公示链接：")
+                        && (DateTime.Now - t.CreateAt) < new TimeSpan(60, 0, 0, 0, 0)
+                        );
+                    Messages.AddRange(_updMsgList);
+                    if (!firstUpdate)
+                        foreach (var message in _updMsgList)
+                        {
+                            //消息更新通知
+                            ToastContentBuilder Toast = new ToastContentBuilder();
+                            Toast.AddArgument("kind", "Message");
+                            Toast.AddText(user.Name + "发布了新的动态");
+                            Toast.AddText(message.Text);
+                            Toast.AddCustomTimeStamp(message.CreateAt);
+                            if (message.Medias.Count > 0)
+                            {
+                                var me = message.Medias[0];
+                                switch (me.Type)
                                 {
-                                    Messages.Add(message);
-
-                                    //更新通知
-                                    if (!firstUpdate)
-                                    {
-                                        ToastContentBuilder Toast = new ToastContentBuilder();
-                                        Toast.AddArgument("kind", "Message");
-                                        Toast.AddText(user.Name + "发布了新的动态");
-                                        Toast.AddText(message.Text);
-                                        Toast.AddCustomTimeStamp(message.CreateAt);
-
-                                        if (message.Medias.Count > 0)
-                                        {
-                                            var me = message.Medias[0];
-                                            switch (me.Type)
-                                            {
-                                                case ArkHelperMessage.Media.MediaType.photo:
-                                                    Toast.AddHeroImage(new Uri(me.Link));
-                                                    break;
-                                                case ArkHelperMessage.Media.MediaType.video:
-                                                    Toast.AddHeroImage(new Uri(me.Small));
-                                                    break;
-                                            }
-                                        }
-
-                                        Toast.Show(tag =>
-                                        {
-                                            tag.Tag = "Message";
-                                        });
-                                    }
+                                    case ArkHelperMessage.Media.MediaType.photo:
+                                        Toast.AddHeroImage(new Uri(me.Link));
+                                        break;
+                                    case ArkHelperMessage.Media.MediaType.video:
+                                        Toast.AddHeroImage(new Uri(me.Small));
+                                        break;
                                 }
-                    }
+                            }
+                            Toast.Show(tag => { tag.Tag = "Message"; });
+
+                            //加入未读列表
+                            if (!unreadMessages.ContainsKey(user)) unreadMessages.Add(user, new List<ArkHelperMessage>());
+                            unreadMessages[user].Add(message);
+                        }
                 }
                 Messages.Sort();
                 ////if (messages.Count > 20) { messages.RemoveRange(19, messages.Count - 19); }
 
-                try { MessageInited(); } catch { }
+                MessageInited?.Invoke();
 
                 firstUpdate = false;
+            End:;
             }
         });
-        static List<ArkHelperMessage> Messages = new List<ArkHelperMessage>();
-        public delegate void MessageInitPointer();
-        public static event MessageInitPointer MessageInited;
+        private delegate void MessageInitPointer();
+        private static event MessageInitPointer MessageInited;
+        #endregion
+
+        #region 接口
+        public static List<ArkHelperMessage> GetAllMessages()
+        {
+            return Messages;
+        }
+        public static Dictionary<User, List<ArkHelperMessage>> GetAllUnreadMessages()
+        {
+            return unreadMessages;
+        }
         #endregion
 
         #region 页面更新
@@ -534,8 +549,8 @@ namespace ArkHelper.Pages
             ReadyToInitFromBlank();
             if (!firstUpdate) InitFromList();
         }
-        public int AlreadyInitedCards = 0;
-        public List<DateTime> DTList = new List<DateTime>();
+        private int AlreadyInitedCards = 0;
+        private List<DateTime> DTList = new List<DateTime>();
         private void ReadyToInitFromBlank()
         {
             if (App.Data.message.status)
@@ -799,7 +814,10 @@ namespace ArkHelper.Pages
         }
         #endregion
 
-        #region 图片
+        #region 存储
+        private static ArrayList UserList;
+        private static List<ArkHelperMessage> Messages = new List<ArkHelperMessage>();
+
         private List<BitmapImage> UserAvatarList = new List<BitmapImage>();
         Image GetUserAvatar(User user)
         {
@@ -834,7 +852,6 @@ namespace ArkHelper.Pages
 
             return avatar;
         }
-
         private List<BitmapImage> BitmapImageList = new List<BitmapImage>();
         BitmapImage GetBitmapImage(string absoluteUri)
         {
@@ -850,6 +867,8 @@ namespace ArkHelper.Pages
 
             return bitImage;
         }
+
+        private static Dictionary<User, List<ArkHelperMessage>> unreadMessages = new Dictionary<User, List<ArkHelperMessage>>();
 
         #endregion
         #region 页面响应
@@ -940,6 +959,7 @@ namespace ArkHelper.Pages
         private void Page_Unloaded(object sender, RoutedEventArgs e)
         {
             MessageInited -= InitFromList;
+            unreadMessages.Clear();
         }
         #endregion
     }

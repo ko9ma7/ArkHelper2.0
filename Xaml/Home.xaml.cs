@@ -17,6 +17,7 @@ namespace ArkHelper.Xaml
     /// </summary>
     public partial class Home : Page
     {
+        public static bool FirstCheckUpdate = true;
         Dictionary<string, int[]> materialDic = new Dictionary<string, int[]>()
         {
             {"作战记录",new int[]{ 1,2,3,4,5,6,7 } },
@@ -48,7 +49,7 @@ namespace ArkHelper.Xaml
             UpdateTime();
             time_welcome.Text = DateTime.Now.ToString("tt");
             Widget1.Navigate(new Uri(@"\Xaml\Widget\" + "SCHTStatus" + ".xaml", UriKind.RelativeOrAbsolute));
-            Widget2.Navigate(new Uri(@"\Xaml\Widget\" + "ArkHelperSuggestion" + ".xaml", UriKind.RelativeOrAbsolute));
+            Widget2.Navigate(new Uri(@"\Xaml\Widget\" + "UnreadMessage" + ".xaml", UriKind.RelativeOrAbsolute));
 
             DateTime dateTime = DateTime.Now;
             if (dateTime.Hour < 4) { dateTime = DateTime.Now.AddDays(-1); PushNewMessage("数据将于凌晨 4:00刷新", "Refresh"); }
@@ -84,7 +85,7 @@ namespace ArkHelper.Xaml
                 PushNewMessage("开始使用SCHT系统","Message", null, "点击左侧“SCHT控制台”，了解更多信息。");
             }
 
-            new Task(() =>
+            var supd = new Task(() =>
             {
                 var a = Version.Update.SearchNewestRelease();
                 if (a.VersionNumber > Version.Current.VersionNumber)
@@ -98,7 +99,9 @@ namespace ArkHelper.Xaml
                     Process.Start(handleUpdateURL);
                     App.ExitApp();
                 }
-            }).Start();
+                FirstCheckUpdate = false;
+            });
+            if (FirstCheckUpdate) supd.Start();
         }
 
         private void UpdateTime()

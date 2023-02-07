@@ -14,7 +14,10 @@ using System.Windows.Documents;
 using Newtonsoft.Json;
 using static ArkHelper.ArkHelperDataStandard;
 using Windows.Media.Protection.PlayReady;
-using ArkHelper.Style.Control;
+using ArkHelper.Xaml.Control;
+using System.Threading;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
+using System.Threading.Tasks;
 
 namespace ArkHelper.Xaml
 {
@@ -31,7 +34,18 @@ namespace ArkHelper.Xaml
         {
             InitializeComponent();
             changeVis(false);
-
+            exebtn.IsEnabled = false;
+            listenBtn.IsEnabled = false;
+            Task.Run(() =>
+            {
+                while (!ADB.CheckADBCanUse())
+                    Thread.Sleep(2000);
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    exebtn.IsEnabled = true;
+                    listenBtn.IsEnabled = true;
+                });
+            });
         }
 
         void changeVis(bool edit = true)
@@ -41,12 +55,17 @@ namespace ArkHelper.Xaml
                 file.Visibility = Visibility.Collapsed;
                 editArea.Visibility = Visibility.Visible;
                 savebtn.Visibility = Visibility.Visible;
+                exebtn.Visibility = Visibility.Visible;
+                listenBtn.Visibility = Visibility.Visible;
             }
             else
             {
                 file.Visibility = Visibility.Visible;
                 editArea.Visibility = Visibility.Collapsed;
                 savebtn.Visibility = Visibility.Collapsed;
+                exebtn.Visibility = Visibility.Collapsed;
+                listenBtn.Visibility = Visibility.Collapsed;
+
             }
         }
         private class MessageFromADB
@@ -57,33 +76,6 @@ namespace ArkHelper.Xaml
             {
                 time = DateTime.Now;
                 msg = str;
-            }
-        }
-        private void StartListening()
-        {
-            Process adb = new Process()
-            {
-                StartInfo = new ProcessStartInfo
-                {
-                    FileName = Address.adb,
-                    WindowStyle = ProcessWindowStyle.Normal,
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    CreateNoWindow = false,
-                    Arguments = "shell getevent"
-                }
-            };
-            adb.OutputDataReceived += Process_OutputDataReceived;
-            adb.Start();
-            adb.BeginOutputReadLine();
-        }
-        List<MessageFromADB> messages = new List<MessageFromADB>();
-        private void Process_OutputDataReceived(object sender, DataReceivedEventArgs e)
-        {
-            string msg = e.Data as string;
-            if (msg != "" && msg.Contains(@"/dev/input/event5:"))
-            {
-                messages.Add(new MessageFromADB(msg));
             }
         }
 
@@ -114,7 +106,7 @@ namespace ArkHelper.Xaml
             foreach (var a in aa)
             {
                 num++;
-                var ab = new Style.Control.AKHcpiCard(a) { Num = num };
+                var ab = new Xaml.Control.AKHcpiCard(a) { Num = num };
                 cardList.Children.Add(ab);
             }
         }
@@ -134,12 +126,12 @@ namespace ArkHelper.Xaml
         private void _create(object sender, RoutedEventArgs e)
         {
             edit = false;
-            cardList.Children.Add(new Style.Control.AKHcpiCard() { Num = 1 });
+            //cardList.Children.Add(new Xaml.Control.AKHcpiCard() { Num = 1 });
             changeVis();
         }
         private void add(object sender, RoutedEventArgs e)
         {
-            var aa = new Style.Control.AKHcpiCard();
+            var aa = new Xaml.Control.AKHcpiCard();
             aa.Num = cardList.Children.Count + 1;
             cardList.Children.Add(aa);
         }
@@ -147,12 +139,7 @@ namespace ArkHelper.Xaml
         private void save(object sender, RoutedEventArgs e)
         {
             JObject Jo = new JObject();
-            List<string> list = new List<string>();
-
-            foreach (var item in cardList.Children)
-            {
-                list.Add(item.ToString());
-            }
+            List<string> list = getString();
 
             var liststring = Newtonsoft.Json.JsonConvert.SerializeObject(list);
             Jo.Add("content", JsonConvert.DeserializeObject<JArray>(liststring));
@@ -185,13 +172,28 @@ namespace ArkHelper.Xaml
             this.Close();
         }
 
+        private List<string> getString()
+        {
+            List<string> list = new List<string>();
+
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                foreach (var item in cardList.Children)
+                {
+                    list.Add(item.ToString());
+                }
+            });
+
+            return list;
+        }
+
         private void del(int num)
         {
             var target = cardList.Children[num - 1];
             //删除
             cardList.Children.Remove(target);
             int a = 1;
-            foreach(var item in cardList.Children)
+            foreach (var item in cardList.Children)
             {
                 (item as AKHcpiCard).Num = a;
                 a++;
@@ -207,7 +209,7 @@ namespace ArkHelper.Xaml
             //var targetDown = cardList.Children[num];
 
             cardList.Children.Remove(target);
-            if (up) cardList.Children.Insert(num-2, (target as AKHcpiCard));
+            if (up) cardList.Children.Insert(num - 2, (target as AKHcpiCard));
             if (!up) cardList.Children.Insert(num, target);
 
             int a = 1;
@@ -229,5 +231,178 @@ namespace ArkHelper.Xaml
             AKHcpiCard.delEvent -= del;
             AKHcpiCard.moveEvent -= move;
         }
+
+        public static void Exe(List<string> strings)
+        {
+            foreach (var akhcmd in strings)
+            {
+                new AKHcmd(akhcmd).RunCmd();
+            }
+        }
+
+        private async void exebtn_Click(object sender, RoutedEventArgs e)
+        {
+            ADB.RegisterADBUsing("akhcpiMaker_exe");
+            exebtn.IsEnabled = false;
+            listenBtn.IsEnabled = false;
+            Task exe = new Task(() =>
+            {
+                Exe(getString());
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    exebtn.IsEnabled = true;
+                    listenBtn.IsEnabled = true;
+                });
+            });
+            exe.Start();
+            await exe;
+            ADB.UnregisterADBUsing("akhcpiMaker_exe");
+
+        }
+
+        #region 监听ADB
+        Process process = new Process()
+        {
+            StartInfo = new ProcessStartInfo
+            {
+                FileName = Address.ADB,
+                WindowStyle = ProcessWindowStyle.Hidden,
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                CreateNoWindow = true,
+                Arguments = "shell getevent"
+            }
+        };
+        List<List<string>> eventsForAll = new List<List<string>>();
+        List<TimeSpan> timesDuring = new List<TimeSpan>();
+        List<TimeSpan> timesSwipe = new List<TimeSpan>();
+        bool listening = false;
+        void StartListening()
+        {
+            ADB.RegisterADBUsing("akhcpiMaker_Listen");
+            listening = true;
+            process.Start();
+            process.BeginOutputReadLine();
+            process.OutputDataReceived += Process_OutputDataReceived;
+
+            recordIcon.Kind = MaterialDesignThemes.Wpf.PackIconKind.Stop;
+            exebtn.IsEnabled = false;
+        }
+
+        void EndListening()
+        {
+            listening = false;
+            process.CancelOutputRead();
+            process.Kill();
+
+            recordIcon.Kind = MaterialDesignThemes.Wpf.PackIconKind.Record;
+            exebtn.IsEnabled = true;
+
+            eventsForAll.RemoveAll(t => t.Count == 0);
+            if (eventsForAll.Count == 0)
+            {
+                Clear(); return;
+            }
+            timesDuring.RemoveAt(0);
+            List<AKHcmd> ret = new List<AKHcmd>();
+            int indexInList = 0;
+            foreach (var a in eventsForAll)
+            {
+                a.RemoveAll(
+                    t =>
+                    t.Contains("0000 0000 00000000")
+                    || t == ""
+                    || t.Contains("0003 0039 ffffffff"));
+
+                var _ = a.Find(t => t.Contains("0035")).Split(' ');
+                int x1 = Convert.ToInt32(_[_.Length - 1], 16) - 1;
+
+                var __ = a.Find(t => t.Contains("0036")).Split(' ');
+                int y1 = Convert.ToInt32(__[__.Length - 1], 16) - 1;
+
+                var ___ = a.FindLast(t => t.Contains("0035")).Split(' ');
+                int x2 = Convert.ToInt32(___[___.Length - 1], 16) - 1;
+
+                var ____ = a.FindLast(t => t.Contains("0036")).Split(' ');
+                int y2 = Convert.ToInt32(____[____.Length - 1], 16) - 1;
+
+
+                int waittime = (indexInList == timesDuring.Count) ? 2 : (int)timesDuring[indexInList].TotalSeconds + 1;
+                if (x1 == x2 && y1 == y2)
+                {
+                    ret.Add(
+                        new AKHcmd("shell input tap " + x1 + " " + y1, waitTime: waittime)
+                        );
+                }
+                else
+                {
+                    ret.Add(
+                        new AKHcmd("shell input swipe " + x1 + " " + y1 + " " + x2 + " " + y2 + " " + (int)timesSwipe[indexInList].TotalMilliseconds, waitTime: waittime)
+                        );
+                }
+                indexInList++;
+            }
+
+            int num = 1;
+            foreach (var a in ret)
+            {
+                var c = new AKHcpiCard(a.ToString());
+                c.Num = num;
+                cardList.Children.Add(c);
+                num++;
+            }
+
+            Clear();
+            ADB.UnregisterADBUsing("akhcpiMaker_Listen");
+
+
+            void Clear()
+            {
+                eventsForAll.Clear();
+                timesDuring.Clear();
+                timesSwipe.Clear();
+            }
+        }
+
+        bool isPressed = false;
+        List<string> _eventsDuringEveryTime = new List<string>();
+        DateTime time = DateTime.Now;
+        private void Process_OutputDataReceived(object sender, DataReceivedEventArgs e)
+        {
+            if (!listening) return;
+            var cmd = e.Data;
+            if (cmd.Contains("0001 014a 00000001"))//keyDown
+            {
+                isPressed = true;
+                timesDuring.Add(DateTime.Now - time);
+                time = DateTime.Now;
+            }
+            else
+            {
+                if (cmd.Contains("0001 014a 00000000"))//keyUp
+                {
+                    isPressed = false;
+                    timesSwipe.Add(DateTime.Now - time);
+                    time = DateTime.Now;
+                    var list = new List<string>();
+                    list.AddRange(_eventsDuringEveryTime);
+                    eventsForAll.Add(list);
+                    _eventsDuringEveryTime.Clear();
+                }
+                else
+                {
+                    if (isPressed)
+                    {
+                        _eventsDuringEveryTime.Add(e.Data);
+                    }
+                }
+            }
+        }
+        private void listenBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (!listening) StartListening();
+            else EndListening();
+        }
+        #endregion
     }
 }

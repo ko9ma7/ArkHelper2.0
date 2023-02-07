@@ -1,4 +1,5 @@
-﻿using ArkHelper.Pages;
+﻿using ArkHelper.Modules.Connect;
+using ArkHelper.Pages;
 using ArkHelper.Xaml;
 using Microsoft.Toolkit.Uwp.Notifications;
 using System;
@@ -33,8 +34,17 @@ namespace ArkHelper
         }
         public static void LoadData()
         {
-            App.Data = JsonSerializer.Deserialize<Data>(File.ReadAllText(Address.config));
-            if (true) ;
+            try
+            {
+                App.Data = JsonSerializer.Deserialize<Data>(File.ReadAllText(Address.config));
+            }
+            catch
+            {
+                App.Data = new Data();
+            }
+            //if (true) ;
+
+            if (Version.Current.Type != Version.Data.VersionType.realese) App.Data.arkHelper.debug = true ;
 
             App.Data.scht.ct.times.Sort();
             App.Data.scht.ct.forceTimes.Sort();
@@ -45,7 +55,11 @@ namespace ArkHelper
             {
                 File.Create(Address.config).Dispose();
             }
-            File.WriteAllText(Address.config, JsonSerializer.Serialize(App.Data));
+            try
+            {
+                File.WriteAllText(Address.config, JsonSerializer.Serialize(App.Data));
+            }
+            catch { }
         }
         #endregion
 
@@ -103,8 +117,10 @@ namespace ArkHelper
         public static void ExitApp()
         {
             notifyIcon.Visible = false;
+            ADBInteraction.KillAllAdbProcessesWithShell();
 
             App.SaveData();
+            Output.CloseTextStream();
             Process.GetCurrentProcess().Kill();
             Current.Shutdown();
         }
@@ -147,16 +163,13 @@ namespace ArkHelper
             #region 托盘和后台
             NotifyIconMenu = (ContextMenu)FindResource("NotifyIconMenu"); //右键菜单
             App.notifyIcon.MouseClick += NotifyClick; //绑定事件
-            #endregion
-
-            #region 更新
-            Task update = Task.Run(() =>
-            {
-                //Version.Update.Search();
-            });
-            #endregion
+            #endregion            
 
             PinnedData.Server.Load();//fu
+
+#if DEBUG
+            App.Data.arkHelper.debug = true;
+#endif
 
             if (!File.Exists(Address.config)) //配置文件缺失
             {
@@ -165,30 +178,49 @@ namespace ArkHelper
                 var win = new NewUser();
                 win.ShowDialog();
             }
-            try
+            if (!File.Exists(Address.config)) //配置文件缺失
+            {
+                Current.Shutdown();
+            }
+            else
             {
                 App.LoadData();
                 OpenMainWindow();
                 notifyIcon.Visible = true;
             }
-            catch
-            {
-                Current.Shutdown();
-            }
+
+            Output.Log("ArkHelper Startup,ver=" + Version.Current.ToString() + ",currentDirectory=" + Address.akh + ",dataDirectory=" + Address.data);
 
             #region 启动message装载
 
             if (Data.message.status)
                 MessageInit.Start();
             #endregion
-            #region 启动ADB连接
-            Task adbConnect = Task.Run(() =>
+            #region 按频率持续保存配置
+            Task SaveDataBg = Task.Run(() =>
             {
                 while (true)
                 {
-                    ADB.Connect();
-                    Thread.Sleep(3000);
+                    int _t = 1000;
+                    Thread.Sleep(_t);
+                    App.SaveData();
                 }
+            });
+            #endregion
+            #region 启动ADB连接
+            Task adbConnect = Task.Run(() =>
+            {
+                foreach (var simu in App.Data.simulator.customs)
+                    ConnectionInfo.Connections.Add(simu,new ConnectionInfo.ConnectStatus());
+                ADBStarter.Start();
+                Connector.IPConnectionChange += (simu, ble) =>
+                {
+                    new ToastContentBuilder()
+                    .AddArgument("kind", "ADB")
+                    .AddText("提示")
+                    .AddText("已" + (ble.Connected?"取得":"失去") + "与" + (simu as ConnectionInfo.SimuInfo).Name + "的连接")
+                    .Show();
+                };
             });
             #endregion
             #region SCHT等待

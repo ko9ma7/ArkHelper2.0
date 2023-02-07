@@ -157,7 +157,7 @@ namespace ArkHelper.Xaml
                 tokenobText.Text = "输入错误，请重新输入......";
                 Task.Run(() =>
                 {
-                    Thread.Sleep(2000);
+                    WithSystem.Wait(2000);
                     Application.Current.Dispatcher.Invoke(() =>
                     {
                         if (tokenobText.Text.ToString() == "输入错误，请重新输入......")

@@ -14,6 +14,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Security.Policy;
 using System.Security.RightsManagement;
 using System.Text.Json;
@@ -27,8 +28,10 @@ using Windows.ApplicationModel.Activation;
 using Windows.ApplicationModel.Appointments;
 using Windows.Security.Cryptography.Core;
 using Windows.Storage.Streams;
+using ArkHelper.Modules.Connect;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 using Point = System.Drawing.Point;
+using static ArkHelper.ArkHelperDataStandard.Data.SCHT;
 
 namespace ArkHelper
 {
@@ -64,9 +67,14 @@ namespace ArkHelper
 
                 VersionNumber = 1000 * getInt(0) + 100 * getInt(1) + 10 * getInt(2) + 1 * getInt(3);
             }
+
+            public override string ToString()
+            {
+                return Version + Type;
+            }
         }
 
-        public static Data Current = new Data("2.0.0.0", "local", false, Data.VersionType.realese);
+        public static Data Current = new Data("2.0.1.1", "local", false, Data.VersionType.beta);
 
         /// <summary>
         /// 更新
@@ -156,6 +164,11 @@ namespace ArkHelper
     public static class ArkHelperDataStandard
     {
         /// <summary>
+        /// ArkHelper消息委托
+        /// </summary>
+        public delegate void ArkHelperMessage(string content,Output.InfoKind infoKind);
+
+        /// <summary>
         /// 截图名称获取
         /// </summary>
         /// <returns>四位数年+两位数月+两位数日+两位数时分秒+三位毫秒+“.png”</returns>
@@ -227,7 +240,7 @@ namespace ArkHelper
         /// 获取星期在中文中对应的下标
         /// </summary>
         /// <param name="week"></param>
-        /// <returns>对于星期日，返回6；否则返回x（其中x为“星期”后的数字）</returns>
+        /// <returns>对于星期日，返回6；否则返回x-1（其中x为“星期”后的数字）</returns>
         public static int GetWeekSubInChinese(System.DayOfWeek week)
         {
             var _wek = (int)week - 1;
@@ -244,19 +257,36 @@ namespace ArkHelper
             return new DateTime(date.Year, date.Month, date.Day, time.Hour, time.Minute, time.Second);
         }
 
+        /// <summary>
+        /// 获取游戏刷新时间
+        /// </summary>
+        /// <param name="id">游戏区服</param>
+        /// <returns></returns>
+        public static int GetGameFreshTime(string id)
+        {
+            int freshTime;
+            switch (id)
+            {
+                default:
+                    freshTime = 4;
+                    break;
+                case "JP":
+                    freshTime = 4 - 1;
+                    break;
+                case "EN":
+                    freshTime = 4 + 15;
+                    break;
+            }
+            return freshTime;
+        }
+
         #region 配置数据
         public class Data
         {
             public Simulator simulator { get; set; } = new Simulator();
             public class Simulator
             {
-                public Custom custom { get; set; } = new Custom();
-                public class Custom
-                {
-                    public bool status { get; set; } = false;
-                    public int port { get; set; } = 0;
-                    public string im { get; set; } = "";
-                }
+                public List<ConnectionInfo.SimuInfo> customs { get; set; } = new List<ConnectionInfo.SimuInfo>();
             }
 
             public SCHT scht { get; set; } = new SCHT();
@@ -271,6 +301,7 @@ namespace ArkHelper
                     public class Cp
                     {
                         public string unit { get; set; } = "LS";
+                        public string cp { get; set; } = "auto";
                     }
 
                     public Ann ann { get; set; } = new Ann();
@@ -280,12 +311,30 @@ namespace ArkHelper
                         public string select { get; set; } = "TT";
                         public bool customTime { get; set; } = false;
                         public int[] time { get; set; } = new int[7] { 0, 0, 0, 0, 0, 0, 0 }; //周一为每周的第一天
+                        public bool allowToUseCard { get; set; } = false;
                     }
 
                     public Server server { get; set; } = new Server();
                     public class Server
                     {
                         public string id { get; set; } = "CO";
+                        public Login login { get; set; } = new Login();
+                        public class Login
+                        {
+                            public bool status { get; set; } = false;
+                            public string account { get; set; } = "";
+                            public string password { get; set; } = "";
+                        }
+                    }
+
+                    public Control control { get; set; } = new Control();
+                    public class Control
+                    {
+                        public bool usingUAVToSpeedUpProduction { get; set; } = true;
+                        public bool buyThingsInShop { get; set; } = true;
+                        public bool clue { get; set; } = true;
+                        public bool changeOperatorWork { get; set; } = false;
+                        public List<string> operatorsNotToUse { get; set; } = new List<string>();
                     }
                 }
                 public bool showHelper { get; set; } = false;
@@ -315,6 +364,15 @@ namespace ArkHelper
             {
                 public bool pure { get; set; } = false;
                 public bool debug { get; set; } = false;
+                public double waitTimeMu { get; set; } = 1.0;
+                public Output.InfoKind logOutputKind { get; set; } = Output.InfoKind.Infomational;
+            }
+
+            public Beta beta { get; set; } = new Beta();
+            public class Beta
+            {
+                public bool status { get; set; } = false;
+                public List<SCHT.SCHTData> ms { get; set; } = new List<SCHT.SCHTData>();
             }
         }
         #endregion
@@ -368,7 +426,7 @@ namespace ArkHelper
             for (int i = 1; i <= ForTimes; i++)
             {
                 if (ADBcmd != null) ADB.CMD(ADBcmd);
-                Thread.Sleep(WaitTime * 1000);
+                WithSystem.Wait(WaitTime * 1000);
             }
         }
 
@@ -386,106 +444,125 @@ namespace ArkHelper
     /// <summary>
     /// ADB
     /// </summary>
-    public class ADB
+    public static class ADB
     {
-        public static PinnedData.Simulator.SimuInfo ConnectedInfo = null;//= new PinnedData.Simulator.SimuInfo();
+        public enum ADBCommandRunningType 
+        { 
+            ViaADB_Clog,
+            ViaCLI_Clog,
+            ViaCLI
+        }
+
+        private static List<string> UsingADBProcess = new List<string>();
 
         /// <summary>
-        /// process
+        /// 检查ADB是否可用
         /// </summary>
-        public static Process process = new Process()
+        /// <param name="exceptModules">排除指定模块列表</param>
+        /// <returns>若ADB可用，则返回true，否则返回false</returns>
+        public static bool CheckADBCanUse(List<string> exceptModules = null)
         {
-            StartInfo = new ProcessStartInfo
+            if (ConnectionInfo.Device == null) return false;
+            return !CheckIfADBUsing(exceptModules);
+        }
+
+        /// <summary>
+        /// 检查ADB是否被占用
+        /// </summary>
+        /// <param name="exceptModules"></param>
+        /// <returns></returns>
+        public static bool CheckIfADBUsing(List<string> exceptModules = null)
+        {
+            if (UsingADBProcess.Count != 0)
             {
-                FileName = Address.adb,
-                WindowStyle = ProcessWindowStyle.Hidden,
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                CreateNoWindow = true,
+                if (exceptModules == null)
+                {
+                    return true;
+                }
+                else
+                {
+                    foreach (var excMod in exceptModules)
+                    {
+                        if (UsingADBProcess.Exists(t => t != excMod)) return true;
+                    }
+                    return false;
+                }
             }
-        };
+            else
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 注册建立ADB使用
+        /// </summary>
+        /// <param name="module">注册模块</param>
+        /// <returns></returns>
+        public static bool RegisterADBUsing(string module)
+        {
+            Output.Log("=>Register ADB from " + module, "ADB");
+            if (UsingADBProcess.Exists(t => t == module))
+            {
+                Output.Log("=>Register Error." + module + " already exists.", "ADB", Output.InfoKind.Error);
+                return false;
+            }
+            UsingADBProcess.Add(module);
+            Output.Log("=>Registered " + module + ".", "ADB");
+            return true;
+        }
+
+        /// <summary>
+        /// 取消注册ADB使用
+        /// </summary>
+        /// <param name="module">取消注册模块</param>
+        /// <returns></returns>
+        public static void UnregisterADBUsing(string module)
+        {
+            Output.Log("=>Unregister ADB from " + module, "ADB");
+            UsingADBProcess.Remove(module);
+            Output.Log("=>Unregistered " + module + ".", "ADB");
+        }
 
         /// <summary>
         /// 指令
         /// </summary>
         /// <param name="cmd">指令</param>
         /// <returns>adb的返回结果</returns>
-        public static string CMD(string cmd)
+        public static string CMD(string cmd,ADBCommandRunningType runningType = ADBCommandRunningType.ViaADB_Clog)
         {
-            //cmd
-            process.StartInfo.Arguments = cmd;
-            if (true) Output.Log(cmd, "ADB");
+            Output.Log(cmd,"ADB");
 
-            //启动命令并读取结果
-            string end = "";
-            if (!cmd.Contains("connect") && ConnectedInfo == null)
+            if (ConnectionInfo.Device == null)
             {
-                System.Windows.Application.Current.Dispatcher.Invoke(() =>
-                {
-                    //WithSystem.Message("模拟器连接断开", "请启动或重启模拟器");
-                });
-                end = "[Bad Connect]";
-                if (true) Output.Log("=>" + end, "ADB");
-                throw new BadConnectException();
+                Output.Log("=>ADB device not found","ADB",Output.InfoKind.Error);
+                return "";
             }
-            else
+
+            cmd = "-s " + ConnectionInfo.Device + " " + cmd;
+            string result = "";
+            switch (runningType)
             {
-                process.Start();
-                end = process.StandardOutput.ReadToEnd();
-                //log结果
-                if (true) Output.Log("=>" + end.Replace("\n", "[linebreak]").Replace("\r", ""), "ADB");
-                //等待退出
-                process.WaitForExit();
-                //log退出
-                if (true) Output.Log("=>" + "Exited", "ADB");
+                case ADBCommandRunningType.ViaADB_Clog:
+                default:
+                    result = ADBInteraction.GetOutput(cmd);
+                    break;
+                case ADBCommandRunningType.ViaCLI:
+                    ADBInteraction.Execute(cmd);
+                    break;
+                case ADBCommandRunningType.ViaCLI_Clog:
+                    ADBInteraction.ExecuteClogViaCLI(cmd);
+                    break;
+
             }
+
+            //log结果
+            Output.Log("=>" + result.Replace("\n", "[br]").Replace("\r", ""), "ADB");
 
             //返回结果
-            return end;
+            return result;
         }
 
-        /// <summary>
-        /// 连接模拟器
-        /// </summary>
-        public static void Connect()
-        {
-            //判断标示的模拟器是否运行，若否 则清空连接信息重连
-            if (ConnectedInfo != null)
-            {
-                if (Process.GetProcessesByName(ConnectedInfo.IM).Length == 0)
-                {
-                    ConnectedInfo = null;
-                    Output.Log("Simulator Lost Connection");
-                }
-                else
-                    return;
-            }
-
-            //尝试遍历寻找在线的模拟器
-            PinnedData.Simulator.SimuInfo ConnectThis = new PinnedData.Simulator.SimuInfo();
-            if (App.Data.simulator.custom.status)
-            {
-                if (Process.GetProcessesByName(App.Data.simulator.custom.im).Length != 0)
-                    ConnectThis = new PinnedData.Simulator.SimuInfo("custom", "自定义", App.Data.simulator.custom.port, App.Data.simulator.custom.im);
-                else return;
-            }
-            else
-            {
-                foreach (PinnedData.Simulator.SimuInfo info in PinnedData.Simulator.Support)
-                    if (Process.GetProcessesByName(info.IM).Length != 0)
-                    {
-                        ConnectThis = info;
-                        break;
-                    }
-                    else return;
-            }
-
-            //等待模拟器端守护进程响应连接
-            if (CMD("connect " + "127.0.0.1:" + ConnectThis.Port).Contains("connected"))
-                ConnectedInfo = ConnectThis;
-        }
-
-        #region 点击
         /// <summary>
         /// adb点击
         /// </summary>
@@ -503,9 +580,98 @@ namespace ArkHelper
         {
             CMD("shell input tap " + x + " " + y);
         }
-        #endregion
+        /// <summary>
+        /// adb点击
+        /// <br></br>
+        /// 自动等待图片匹配点出现并点击匹配到的第一个坐标。
+        /// <br></br>
+        /// 请谨慎使用errorTime=-1，有阻塞线程的风险！
+        /// </summary>
+        /// <param name="picture">图片模板地址</param>
+        /// <param name="errorTime">等待次数，为负数时无限等待。请谨慎使用无限等待，有阻塞线程的风险！</param>
+        /// <param name="opencv_errorCon">调用pictopoint传入容差</param>
+        /// <returns>若成功地点击了坐标，返回true，否则false</returns>
+        public static bool Tap(string picture,int errorTime = 5,double opencv_errorCon = 0.8)
+        {
+            var _pot = WaitPicture(picture, errorTime, opencv_errorCon);
+            if (_pot.Count == 0) return false;
+            ADB.Tap(_pot[0]);
+            return true;
+        }
 
-        #region 滑动
+        /// <summary>
+        /// 等待图片匹配点出现
+        /// </summary>
+        /// <param name="picture">图片模板地址</param>
+        /// <param name="errorTime">等待次数，为负数时无限等待。请谨慎使用无限等待，有阻塞线程的风险！</param>
+        /// <param name="opencv_errorCon">调用pictopoint传入容差</param>
+        public static List<Point> WaitPicture(string picture, int errorTime = 5, double opencv_errorCon = 0.8)
+        {
+            for(; ; )
+            {
+                errorTime--;
+                using (var screenshot = new Screenshot())
+                {
+                    var _pot = screenshot.PicToPoint(picture, opencv_errorCon: opencv_errorCon);
+                    if (_pot.Count != 0)
+                    {
+                        return _pot;
+                    }
+                }
+                WithSystem.Wait(200);
+                if (errorTime == 0) return new List<Point>();
+            }
+        }
+
+        /// <summary>
+        /// 等待所有图片匹配点出现
+        /// </summary>
+        /// <param name="pictures">图片地址</param>
+        /// <param name="errorTime">等待次数，为负数时无限等待。请谨慎使用无限等待，有阻塞线程的风险！</param>
+        /// <param name="opencv_errorCon">调用pictopoint传入容差</param>
+        /// <returns>成功true，失败false</returns>
+        public static bool WaitAllPicture(List<string> pictures, int errorTime = 5, double opencv_errorCon = 0.8)
+        {
+            for(; ; )
+            {
+                errorTime--;
+                using (var screenshot = new Screenshot())
+                {
+                    bool res = true;
+                    foreach(var pic in pictures)
+                        if(screenshot.PicToPoint(pic, opencv_errorCon: opencv_errorCon).Count == 0) res = true;
+                    if (res) return res;
+                }
+                WithSystem.Wait(200);
+                if (errorTime == 0) return false;
+            }
+        }
+        
+        /// <summary>
+        /// 等待其一图片匹配点出现
+        /// </summary>
+        /// <param name="pictures">图片地址</param>
+        /// <param name="errorTime">等待次数，为负数时无限等待。请谨慎使用无限等待，有阻塞线程的风险！</param>
+        /// <param name="opencv_errorCon">调用pictopoint传入容差</param>
+        /// <returns>匹配到的第一个点。否则返回(0,0)</returns>
+        public static Point WaitOnePicture(List<string> pictures, int errorTime = 5, double opencv_errorCon = 0.8)
+        {
+            for(; ; )
+            {
+                errorTime--;
+                using (var screenshot = new Screenshot())
+                {
+                    foreach(var pic in pictures)
+                    {
+                        var a = screenshot.PicToPoint(pic, opencv_errorCon: opencv_errorCon);
+                        if (a.Count != 0) return a[0];
+                    }
+                }
+                WithSystem.Wait(200);
+                if (errorTime == 0) return new Point();
+            }
+        }
+
         /// <summary>
         /// adb滑动
         /// </summary>
@@ -528,7 +694,6 @@ namespace ArkHelper
         {
             CMD("shell input swipe " + x1 + " " + y1 + " " + x2 + " " + y2 + time);
         }
-        #endregion
 
         /// <summary>
         /// 简单截图
@@ -543,6 +708,15 @@ namespace ArkHelper
             CMD(@"shell rm -f /sdcard/DCIM/" + name); //删除
             //输出
             return address + "\\" + name;
+        }
+
+        /// <summary>
+        /// 启动明日方舟
+        /// </summary>
+        /// <param name="serverID">游戏ID</param>
+        public static void StartArknights(string serverID)
+        {
+            ADB.CMD("shell am start -n " + GetGamePackageName(serverID) + "/com.u8.sdk.U8UnityContext");
         }
 
         /// <summary>
@@ -609,13 +783,13 @@ namespace ArkHelper
         }
 
         /// <summary>
-        /// 等待模拟器运行
+        /// 等待模拟器变为可交互状态
         /// </summary>
         public static void WaitingSimulator()
         {
             for (; ; )
             {
-                while (ADB.ConnectedInfo == null)
+                while (ConnectionInfo.Device == null)
                     Thread.Sleep(4000);
                 try
                 {
@@ -626,9 +800,9 @@ namespace ArkHelper
                 }
                 catch
                 {
+                    Thread.Sleep(4000);
                     continue;
                 }
-                Thread.Sleep(1000);
                 break;
             }
         }
@@ -638,16 +812,14 @@ namespace ArkHelper
             public class ScreenshotNotAvailableException : NullReferenceException
             {
             }
-            private string Location { get; set; }
+            public string Location { get; set; }
             private Bitmap ImgBitmap { get; set; }
             public Screenshot()
             {
                 string name = ArkHelperDataStandard.Screenshot;
                 string address = Address.Cache.main;
-                CMD(@"shell screencap -p /sdcard/DCIM/" + name); //截图
-                CMD(@"pull /sdcard/DCIM/" + name + " " + address); //pull
-                CMD(@"shell rm -f /sdcard/DCIM/" + name); //删除
                 Location = address + @"\" + name;
+                CMD("exec-out screencap -p > " + Location,ADBCommandRunningType.ViaCLI_Clog);
                 //DisposeAfterTime();
             }
             public void Save(string address, string name)
@@ -680,13 +852,30 @@ namespace ArkHelper
 
             public List<Point> PicToPoint(string smallimg, double errorCon = 0.7, int errorRange = 16, int num = 50, double opencv_errorCon = 0.8)
             {
-                if (!File.Exists(smallimg)) { return new List<Point>(); }
+                Output.Log("=>from " + smallimg, "PicToPoint");
+
+                if (!File.Exists(smallimg))
+                {
+                    Output.Log("=>[image not exist]", "PicToPoint", Output.InfoKind.Error);
+                    return new List<Point>();
+                }
 
                 /*//初始化图像类
                 InitBitmap();
                 var smallBM = new Bitmap(smallimg);
                 return PictureProcess.PicToPoint.GetPointUsingNative(this.ImgBitmap, smallBM, errorCon, errorRange, num);*/
-                return PictureProcess.PicToPoint.GetPointUsingOpenCV(this.Location, smallimg, errorCon: opencv_errorCon);
+
+                var a = PictureProcess.PicToPoint.GetPointUsingOpenCV(this.Location, smallimg, errorCon: opencv_errorCon);
+
+                //log
+                string _end = "";
+                foreach (var _pot in a)
+                {
+                    _end = _end + _pot.ToString();
+                }
+                Output.Log("=>" + _end, "PicToPoint");
+
+                return a;
             }
             private void InitBitmap()
             {
@@ -760,13 +949,6 @@ namespace ArkHelper
             #endregion
 
         }
-
-        #region 报故
-        public class BadConnectException : Exception
-        {
-            public BadConnectException() : base("丢失模拟器连接") { }
-        }
-        #endregion
     }
 
     /// <summary>
@@ -782,8 +964,23 @@ namespace ArkHelper
         /// <returns>16进制点颜色</returns>
         public static string[] ColorPick(string img, params int[] param)
         {
+            Output.Log("from " + img, "ColorPick");
+            string _ = "";
+            foreach (int i in param)
+            {
+                _ += i.ToString() + ",";
+            }
+            Output.Log(_, "ColorPick");
+
             if (param.Length % 2 != 0)
             {
+                Output.Log("=>[Num of param is not an odd]", "ColorPick", Output.InfoKind.Error);
+                return new string[0];
+            }
+
+            if (!File.Exists(img))
+            {
+                Output.Log("=>[image not exist]", "ColorPick", Output.InfoKind.Error);
                 return new string[0];
             }
 
@@ -796,8 +993,15 @@ namespace ArkHelper
                     _bitmap.GetPixel(param[i * 2], param[i * 2 + 1])
                     );
             }
-
             _bitmap.Dispose();
+
+            string __ = "";
+            foreach (string i in _strings)
+            {
+                __ += i.ToString() + ",";
+            }
+            Output.Log("=>" + __, "ColorPick");
+
             return _strings;
         }
 
@@ -1107,7 +1311,11 @@ namespace ArkHelper
         /// <summary>
         /// adb
         /// </summary>
-        public readonly static string adb = akhExternal + @"\adb.exe";
+        public readonly static string ADBEnvironment = akhExternal;
+        /// <summary>
+        /// adb
+        /// </summary>
+        public readonly static string ADB = ADBEnvironment + @"\adb.exe";
 
         //静态字段 地址
         public readonly static string github = @"https://github.com/ArkHelper/ArkHelper2.0";
@@ -1165,26 +1373,47 @@ namespace ArkHelper
             Emergency
         }
 
+        private static StreamWriter outputStream;
+        private static string activeFile = "";
         private static void Text(string content, string file)
         {
             if (File.Exists(file)) { } else { File.Create(file).Close(); } //检查有无该文件，无就创建
-            StreamWriter output_stream = new StreamWriter(file, true) { AutoFlush = true }; //启动写入流
-            output_stream.WriteLine(content);
-            output_stream.Close();
+            if (activeFile != file)
+            {
+                activeFile = file;
+                outputStream = new StreamWriter(file, true) { AutoFlush = true };
+            }
+            outputStream.WriteLine(content);
+        }
+
+        public static void CloseTextStream()
+        {
+            try
+            {
+                outputStream.Close();
+            }
+            catch
+            {
+
+            }
         }
 
         //方法 日志输出
         // 参数：输出内容，操作模块，日志级别
         public static void Log(string content, string module = "ArkHelper", InfoKind infokind = InfoKind.Infomational)
         {
-            if (!App.Data.arkHelper.debug) return;
-            Text(DateTime.Now.ToString("s")
+            if (!App.Data.arkHelper.debug || App.Data.arkHelper.logOutputKind > infokind) return;
+            string text = DateTime.Now.ToString("s")
                 + " "
                 + "[" + module + "]"
                 + " "
                 + "[" + infokind.ToString() + "]"
                 + " "
-                + content
+                + content;
+#if DEBUG
+            Console.WriteLine(text);
+#endif
+            Text(text
                 , ArkHelperDataStandard.Log
                 );
         }
@@ -1204,7 +1433,7 @@ namespace ArkHelper
             {
                 new SimuInfo("MuMu", "MuMu模拟器", 7555, "NemuPlayer"),
                 new SimuInfo("BlueStacks", "蓝叠模拟器", 5555, "HD-Player"),
-                new SimuInfo("LDplayer", "雷电模拟器", 5555, "dnplayer"),
+                new SimuInfo("dnplayer", "雷电模拟器", 5555, "dnplayer"),
                 new SimuInfo("MEMU", "逍遥模拟器", 21503, "MEmu"),
                 new SimuInfo("NOX", "夜神模拟器", 62001, "Nox"),
                 new SimuInfo("WSA", "WSA", 58526, "WSAClient"),
@@ -1215,18 +1444,20 @@ namespace ArkHelper
                 public string Name { get; set; }
                 public int Port { get; set; }
                 public string IM { get; set; }
-                public SimuInfo(string id, string name, int port, string im)
+                public string ExternalCMD { get; set; }
+                public SimuInfo(string id, string name, int port, string im , string externalCmd="")
                 {
                     ID = id;
                     Name = name;
                     Port = port;
                     IM = im;
+                    ExternalCMD= externalCmd;
                 }
                 public SimuInfo() { }
 
                 public override string ToString()
                 {
-                    return ID + Name + Port + " " + IM;
+                    return ID + ":" + Name + "(" + IM + "," + Port + ")";
                 }
             }
         }
@@ -1250,8 +1481,8 @@ namespace ArkHelper
                 dataSheet.Rows.Add("CB", "明日方舟", "明日方舟（国服，CN，bilibili）", "com.hypergryph.arknights.bilibili");
                 dataSheet.Rows.Add("JP", "アークナイツ", "アークナイツ（日服，JP，悠星网络）", "com.YoStarJP.Arknights");
                 dataSheet.Rows.Add("EN", "Arknights", "Arknights（英服，EN，悠星网络）", "com.YoStarEN.Arknights");
-                dataSheet.Rows.Add("KR", "명일방주", "명일방주（韩服，KR，悠星网络）", "com.YoStarKR.Arknights");
-                dataSheet.Rows.Add("TW", "明日方舟", "明日方舟（台服，TW，龙成网络）", "tw.txwy.and.arknights");
+                //dataSheet.Rows.Add("KR", "명일방주", "명일방주（韩服，KR，悠星网络）", "com.YoStarKR.Arknights");
+                //dataSheet.Rows.Add("TW", "明日方舟", "明日方舟（台服，TW，龙成网络）", "tw.txwy.and.arknights");
             }
         }
     }
@@ -1326,12 +1557,15 @@ namespace ArkHelper
         /// <summary>
         /// 关闭模拟器进程
         /// </summary>
-        public static void KillSimulator()
+        public static void KillSimulator(ConnectionInfo.SimuInfo simuInfo)
         {
-            Process[] _pr = Process.GetProcessesByName(ADB.ConnectedInfo.IM);
+            Process[] _pr = Process.GetProcessesByName(simuInfo.IM);
             var pr = _pr[0];
             pr.Kill();
-            ADB.ConnectedInfo = null;
+
+            ADBServerStatus.KillServer();
+            ADBServerStatus.StartServer();
+            //ADB.ConnectedInfo = null;
         }
 
         /// <summary>
@@ -1362,6 +1596,13 @@ namespace ArkHelper
         public static void Sleep()
         {
             WithSystem.Cmd("rundll32.exe powrprof.dll,SetSuspendState 0,1,0");
+        }
+
+        public static void Wait(double ms)
+        {
+            var slp = ms * App.Data.arkHelper.waitTimeMu;
+            //Output.Log("sleep " + slp,"Wait");
+            Thread.Sleep((int)slp);
         }
     }
 
@@ -1398,20 +1639,24 @@ namespace ArkHelper
         /// <returns>json</returns>
         public static JsonElement GetFromApi(string url)
         {
+            int num = 0;
         start:;
+            string ret = "{}";
+            var request = new RestRequest { Method = Method.Get };
             try
             {
                 //API
-                var client = new RestClient(url);
-                var request = new RestRequest { Method = Method.Get };
-                var response = client.Get(request);
-                var _result = JsonSerializer.Deserialize<JsonElement>(response.Content);
-                return _result;
+                using (var client = new RestClient(url))
+                {
+                    ret = client.Get(request).Content;
+                }
             }
             catch
             {
-                goto start;
+                num++;
+                if (num < 3) goto start;
             }
+            return JsonSerializer.Deserialize<JsonElement>(ret);
         }
     }
 

@@ -1,7 +1,7 @@
 ﻿<Page x:Class="ArkHelper.Pages.OtherList.Setting"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:akhc="clr-namespace:ArkHelper.Style.Control"
+      xmlns:akhc="clr-namespace:ArkHelper.Xaml.Control"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:local="clr-namespace:ArkHelper.Pages.OtherList"
       xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
@@ -46,19 +46,24 @@
                                Grid.Column="1"
                                VerticalAlignment="Center"
                                Style="{StaticResource object}">
-                        <Button Margin="0,0,0,0"
+                        <Button Margin="0,0,0,5"
                                 HorizontalAlignment="Left"
                                 Click="Button_Click"
                                 Content="更换模拟器快捷方式"
                                 Style="{StaticResource MaterialDesignOutlinedButton}" />
-                        <akhc:CustomSimulator />
+                        <Button Name="SimulatorConnectionControl_btn"
+                                Margin="0,0,0,5"
+                                HorizontalAlignment="Left"
+                                Click="SimulatorConnectionControl_btn_Click"
+                                Content="设备连接管理"
+                                Style="{StaticResource MaterialDesignOutlinedButton}" />
 
                     </WrapPanel>
 
                     <StackPanel Grid.Row="1"
-                                Visibility="Collapsed"
                                 Grid.Column="0"
-                                Style="{StaticResource title}">
+                                Style="{StaticResource title}"
+                                Visibility="Collapsed">
                         <akhc:Break />
                         <TextBlock FontSize="{StaticResource h1}">
                             后台纯净
@@ -66,8 +71,8 @@
                     </StackPanel>
                     <StackPanel Grid.Row="1"
                                 Grid.Column="1"
-                                Visibility="Collapsed"
-                                Style="{StaticResource title}">
+                                Style="{StaticResource title}"
+                                Visibility="Collapsed">
                         <akhc:Break />
                         <ToggleButton x:Name="pure"
                                       Margin="0,8,0,0"
@@ -115,10 +120,6 @@
                                 Style="{StaticResource title}">
                         <akhc:Break />
 
-                        <TextBlock FontSize="{StaticResource p}">
-                            <Hyperlink Click="Hyperlink_github">开源仓库地址</Hyperlink>
-                        </TextBlock>
-
                         <!--<TextBlock FontSize="{StaticResource h2}">发送反馈</TextBlock>-->
                         <TextBlock FontSize="{StaticResource p}">
                             <Hyperlink Click="Hyperlink_github_issue">在GitHub中发送反馈</Hyperlink>
@@ -126,20 +127,46 @@
                         </TextBlock>
 
                         <!--<TextBlock FontSize="{StaticResource h2}">ArkHelper文档</TextBlock>-->
+
+
                         <TextBlock FontSize="{StaticResource p}">
                             <Hyperlink Click="Hyperlink_EULA">《ArkHelper最终用户许可协议》</Hyperlink>
                             <Hyperlink Click="Hyperlink_PriPol">《ArkHelper隐私政策》</Hyperlink>
                         </TextBlock>
+                        <WrapPanel>
+                            <TextBlock Margin="0,0,0,0"
+                                       FontSize="{StaticResource p}"
+                                       Foreground="Gray">
+                                Debug模式
+                            </TextBlock>
+                            <ToggleButton Name="debug"
+                                          Height="15"
+                                          Margin="5,0,0,0"
+                                          Click="ToggleButton_Click"
+                                          ToolTip="在Debug模式下，ArkHelper会输出日志供调试用。" />
+                        </WrapPanel>
+                        <akhc:Break Margin="0,10,0,10" />
+                        <TextBlock FontSize="{StaticResource p}">
+                            <Hyperlink Click="Hyperlink_github">项目地址</Hyperlink>
+                            <Hyperlink Click="Hyperlink_github">开放源代码许可</Hyperlink>
+                        </TextBlock>
 
                         <WrapPanel HorizontalAlignment="Left">
                             <TextBlock FontSize="{StaticResource p}" Foreground="Gray">
-                            <Run>数据保存位置：</Run>
-                            <Run Name="address">测试地址</Run>
+                                <Run>版本号：</Run>
+                                <Run Name="ver">测试版本号</Run>
                             </TextBlock>
-                            <TextBlock Margin="8,0,0,0" FontSize="{StaticResource p}" Foreground="Gray">Debug模式</TextBlock>
-                            <ToggleButton Height="15" Margin="5,0,0,0" Click="ToggleButton_Click"/>
+                            <TextBlock Margin="10,0,0,0"
+                                       FontSize="{StaticResource p}"
+                                       Foreground="Gray">
+                                <Run>数据保存位置：</Run>
+                                <Hyperlink Click="address_Click">
+                                    <Run Name="address">测试地址</Run>
+                                </Hyperlink>
+                            </TextBlock>
+
                         </WrapPanel>
-                        
+
                     </StackPanel>
 
                 </Grid>
