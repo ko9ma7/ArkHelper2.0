@@ -34,7 +34,7 @@ namespace ArkHelper.Xaml.Widget
             {
                 foreach(var m in a)
                 {
-                    var b = new Style.Control.RoundImageWithTwoTexts(m.Key.Avatar, m.Key.Name, "更新了" + m.Value.Count + "条新消息")
+                    var b = new Xaml.Control.RoundImageWithTwoTexts(m.Key.Avatar, m.Key.Name, "更新了" + m.Value.Count + "条新消息")
                     {
                         Margin = new Thickness(5),
                     };

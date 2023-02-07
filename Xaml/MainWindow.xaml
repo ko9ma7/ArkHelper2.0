@@ -36,7 +36,7 @@
                         Click="SwitchFold"
                         Style="{StaticResource MaterialDesignIconForegroundButton}"
                         ToolTip="折叠侧边栏"
-                        Visibility="Collapsed">
+                        Visibility="Visible">
                     <materialDesign:PackIcon x:Name="SwitchFoldBtnIcon"
                                              Width="30"
                                              Height="30"
@@ -47,9 +47,9 @@
 
         <Grid Name="framegrid" Grid.Column="1">
             <!--  页面  -->
-            <Frame x:Name="frame"
+            <Frame x:Name="PublicFrame"
                    NavigationUIVisibility="Hidden"
-                   Tag="通用" />
+                   Tag="Public" />
         </Grid>
 
     </Grid>

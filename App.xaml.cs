@@ -1,4 +1,5 @@
-﻿using ArkHelper.Pages;
+﻿using ArkHelper.Modules.Connect;
+using ArkHelper.Pages;
 using ArkHelper.Xaml;
 using Microsoft.Toolkit.Uwp.Notifications;
 using System;
@@ -41,7 +42,7 @@ namespace ArkHelper
             {
                 App.Data = new Data();
             }
-            if (true) ;
+            //if (true) ;
 
             if (Version.Current.Type != Version.Data.VersionType.realese) App.Data.arkHelper.debug = true ;
 
@@ -116,6 +117,7 @@ namespace ArkHelper
         public static void ExitApp()
         {
             notifyIcon.Visible = false;
+            ADBInteraction.KillAllAdbProcessesWithShell();
 
             App.SaveData();
             Output.CloseTextStream();
@@ -161,14 +163,7 @@ namespace ArkHelper
             #region 托盘和后台
             NotifyIconMenu = (ContextMenu)FindResource("NotifyIconMenu"); //右键菜单
             App.notifyIcon.MouseClick += NotifyClick; //绑定事件
-            #endregion
-
-            #region 更新
-            Task update = Task.Run(() =>
-            {
-                //Version.Update.Search();
-            });
-            #endregion
+            #endregion            
 
             PinnedData.Server.Load();//fu
 
@@ -207,7 +202,7 @@ namespace ArkHelper
                 while (true)
                 {
                     int _t = 1000;
-                    WithSystem.Wait(_t);
+                    Thread.Sleep(_t);
                     App.SaveData();
                 }
             });
@@ -215,25 +210,23 @@ namespace ArkHelper
             #region 启动ADB连接
             Task adbConnect = Task.Run(() =>
             {
-                while (true)
+                foreach (var simu in App.Data.simulator.customs)
+                    ConnectionInfo.Connections.Add(simu,new ConnectionInfo.ConnectStatus());
+                ADBStarter.Start();
+                Connector.IPConnectionChange += (simu, ble) =>
                 {
-                    ADB.Connect();
-                    WithSystem.Wait(2000);
-                }
-            });
-            Task adbCheck = Task.Run(() =>
-            {
-                while (true)
-                {
-                    WithSystem.Wait(5000);
-                    if (App.Data.simulator.HeartbeatTest) ADB.ADBHeartbeatTest();
-                }
+                    new ToastContentBuilder()
+                    .AddArgument("kind", "ADB")
+                    .AddText("提示")
+                    .AddText("已" + (ble.Connected?"取得":"失去") + "与" + (simu as ConnectionInfo.SimuInfo).Name + "的连接")
+                    .Show();
+                };
             });
             #endregion
             #region SCHT等待
             Task SCHT = Task.Run(() =>
             {
-                for (; ; WithSystem.Wait(1000))
+                for (; ; Thread.Sleep(1000))
                 {
                     bool isTimeEq(DateTime selTime)
                     {

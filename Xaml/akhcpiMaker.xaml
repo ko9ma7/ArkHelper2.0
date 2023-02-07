@@ -1,7 +1,7 @@
 ﻿<Window x:Class="ArkHelper.Xaml.akhcpiMaker"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:akhc="clr-namespace:ArkHelper.Style.Control"
+        xmlns:akhc="clr-namespace:ArkHelper.Xaml.Control"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:local="clr-namespace:ArkHelper.Xaml"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
@@ -65,17 +65,29 @@
                     <WrapPanel Name="editArea"
                                HorizontalAlignment="Center"
                                Orientation="Vertical">
-                        <WrapPanel Name="cardList"
-                                   HorizontalAlignment="Center"
-                                   Orientation="Vertical" />
-                        <Button Margin="0,10,0,20"
-                                HorizontalAlignment="Center"
-                                Background="{DynamicResource MaterialDesignTextFieldBoxBackground}"
-                                Click="add"
-                                Style="{StaticResource MaterialDesignIconButton}"
-                                ToolTip="新增">
-                            <materialDesign:PackIcon Kind="Add" />
-                        </Button>
+                        <WrapPanel HorizontalAlignment="Center" Orientation="Vertical">
+                            <TextBlock Margin="0,0,0,10"
+                                       HorizontalAlignment="Center"
+                                       FontSize="{StaticResource h2}">
+                                从游戏主界面<LineBreak />
+                                经过以下步骤</TextBlock>
+                            <WrapPanel Name="cardList"
+                                       HorizontalAlignment="Center"
+                                       Orientation="Vertical" />
+                            <Button Margin="0,10,0,10"
+                                    HorizontalAlignment="Center"
+                                    Background="{DynamicResource MaterialDesignTextFieldBoxBackground}"
+                                    Click="add"
+                                    Style="{StaticResource MaterialDesignIconButton}"
+                                    ToolTip="新增">
+                                <materialDesign:PackIcon Kind="Add" />
+                            </Button>
+                            <TextBlock Margin="0,0,0,30"
+                                       HorizontalAlignment="Center"
+                                       FontSize="{StaticResource h2}">
+                                到达关卡详情界面
+                            </TextBlock>
+                        </WrapPanel>
                     </WrapPanel>
 
                 </WrapPanel>
@@ -88,9 +100,9 @@
                    VerticalAlignment="Bottom"
                    Orientation="Vertical">
             <Button x:Name="listenBtn"
+                    Margin="0,0,0,20"
                     Background="{DynamicResource MaterialDesignTextFieldBoxBackground}"
                     Click="listenBtn_Click"
-                    Margin="0,0,0,20"
                     Style="{StaticResource MaterialDesignIconButton}"
                     ToolTip="录制">
                 <materialDesign:PackIcon Name="recordIcon" Kind="Record" />

@@ -28,8 +28,10 @@ using Windows.ApplicationModel.Activation;
 using Windows.ApplicationModel.Appointments;
 using Windows.Security.Cryptography.Core;
 using Windows.Storage.Streams;
+using ArkHelper.Modules.Connect;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 using Point = System.Drawing.Point;
+using static ArkHelper.ArkHelperDataStandard.Data.SCHT;
 
 namespace ArkHelper
 {
@@ -72,7 +74,7 @@ namespace ArkHelper
             }
         }
 
-        public static Data Current = new Data("2.0.1.0", "local", false, Data.VersionType.beta);
+        public static Data Current = new Data("2.0.1.1", "local", false, Data.VersionType.beta);
 
         /// <summary>
         /// 更新
@@ -162,6 +164,11 @@ namespace ArkHelper
     public static class ArkHelperDataStandard
     {
         /// <summary>
+        /// ArkHelper消息委托
+        /// </summary>
+        public delegate void ArkHelperMessage(string content,Output.InfoKind infoKind);
+
+        /// <summary>
         /// 截图名称获取
         /// </summary>
         /// <returns>四位数年+两位数月+两位数日+两位数时分秒+三位毫秒+“.png”</returns>
@@ -250,21 +257,36 @@ namespace ArkHelper
             return new DateTime(date.Year, date.Month, date.Day, time.Hour, time.Minute, time.Second);
         }
 
+        /// <summary>
+        /// 获取游戏刷新时间
+        /// </summary>
+        /// <param name="id">游戏区服</param>
+        /// <returns></returns>
+        public static int GetGameFreshTime(string id)
+        {
+            int freshTime;
+            switch (id)
+            {
+                default:
+                    freshTime = 4;
+                    break;
+                case "JP":
+                    freshTime = 4 - 1;
+                    break;
+                case "EN":
+                    freshTime = 4 + 15;
+                    break;
+            }
+            return freshTime;
+        }
+
         #region 配置数据
         public class Data
         {
             public Simulator simulator { get; set; } = new Simulator();
             public class Simulator
             {
-                public Custom custom { get; set; } = new Custom();
-                public class Custom
-                {
-                    public bool status { get; set; } = false;
-                    public int port { get; set; } = 0;
-                    public string im { get; set; } = "";
-                    public string externalCMD { get; set; } = "";
-                }
-                public bool HeartbeatTest { get; set; } = false;
+                public List<ConnectionInfo.SimuInfo> customs { get; set; } = new List<ConnectionInfo.SimuInfo>();
             }
 
             public SCHT scht { get; set; } = new SCHT();
@@ -424,50 +446,51 @@ namespace ArkHelper
     /// </summary>
     public static class ADB
     {
-        public static PinnedData.Simulator.SimuInfo ConnectedInfo = null;//= new PinnedData.Simulator.SimuInfo();
-        private static List<string> UsingADBProcess = new List<string>();
+        public enum ADBCommandRunningType 
+        { 
+            ViaADB_Clog,
+            ViaCLI_Clog,
+            ViaCLI
+        }
 
-        /// <summary>
-        /// process
-        /// </summary>
-        public static Process process = new Process()
-        {
-            StartInfo = new ProcessStartInfo
-            {
-                FileName = Address.adb,
-                WindowStyle = ProcessWindowStyle.Hidden,
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                CreateNoWindow = true,
-            }
-        };
+        private static List<string> UsingADBProcess = new List<string>();
 
         /// <summary>
         /// 检查ADB是否可用
         /// </summary>
         /// <param name="exceptModules">排除指定模块列表</param>
         /// <returns>若ADB可用，则返回true，否则返回false</returns>
-        public static bool CheckADBCanUsed(List<string> exceptModules = null)
+        public static bool CheckADBCanUse(List<string> exceptModules = null)
         {
-            if (ADB.ConnectedInfo == null) return false;
+            if (ConnectionInfo.Device == null) return false;
+            return !CheckIfADBUsing(exceptModules);
+        }
+
+        /// <summary>
+        /// 检查ADB是否被占用
+        /// </summary>
+        /// <param name="exceptModules"></param>
+        /// <returns></returns>
+        public static bool CheckIfADBUsing(List<string> exceptModules = null)
+        {
             if (UsingADBProcess.Count != 0)
             {
                 if (exceptModules == null)
                 {
-                    return false;
+                    return true;
                 }
                 else
                 {
                     foreach (var excMod in exceptModules)
                     {
-                        if (UsingADBProcess.Exists(t => t != excMod)) return false;
+                        if (UsingADBProcess.Exists(t => t != excMod)) return true;
                     }
-                    return true;
+                    return false;
                 }
             }
             else
             {
-                return true;
+                return false;
             }
         }
 
@@ -506,112 +529,38 @@ namespace ArkHelper
         /// </summary>
         /// <param name="cmd">指令</param>
         /// <returns>adb的返回结果</returns>
-        public static string CMD(string cmd)
+        public static string CMD(string cmd,ADBCommandRunningType runningType = ADBCommandRunningType.ViaADB_Clog)
         {
-            //启动命令并读取结果
-            string end;
-            if (ConnectedInfo == null)
-            {
-                if (true) Output.Log("=>" + "[Operating with bad connection]", "ADB", Output.InfoKind.Warning);
-            }
-            else
-            {
-                cmd =" " + ConnectedInfo.ExternalCMD + " " + cmd;
-            }
-            //cmd
-            if (true) Output.Log(cmd, "ADB");
-            process.StartInfo.Arguments = cmd;
-            process.Start();
-            end = process.StandardOutput.ReadToEnd();
-            //log结果
-            if (true) Output.Log("=>" + end.Replace("\n", "[br]").Replace("\r", ""), "ADB");
-            //等待退出
-            process.WaitForExit();
-            //log退出
-            if (true) Output.Log("=>" + "Exited", "ADB");
+            Output.Log(cmd,"ADB");
 
+            if (ConnectionInfo.Device == null)
+            {
+                Output.Log("=>ADB device not found","ADB",Output.InfoKind.Error);
+                return "";
+            }
+
+            cmd = "-s " + ConnectionInfo.Device + " " + cmd;
+            string result = "";
+            switch (runningType)
+            {
+                case ADBCommandRunningType.ViaADB_Clog:
+                default:
+                    result = ADBInteraction.GetOutput(cmd);
+                    break;
+                case ADBCommandRunningType.ViaCLI:
+                    ADBInteraction.Execute(cmd);
+                    break;
+                case ADBCommandRunningType.ViaCLI_Clog:
+                    ADBInteraction.ExecuteClogViaCLI(cmd);
+                    break;
+
+            }
+
+            //log结果
+            Output.Log("=>" + result.Replace("\n", "[br]").Replace("\r", ""), "ADB");
 
             //返回结果
-            return end;
-        }
-
-        /// <summary>
-        /// 连接模拟器
-        /// </summary>
-        public static void Connect()
-        {
-            if (ConnectedInfo != null) return;
-
-            //尝试遍历寻找在线的模拟器
-            PinnedData.Simulator.SimuInfo ConnectThis = new PinnedData.Simulator.SimuInfo();
-            if (App.Data.simulator.custom.status)
-            {
-                if (Process.GetProcessesByName(App.Data.simulator.custom.im).Length != 0)
-                    ConnectThis = new PinnedData.Simulator.SimuInfo("custom", "自定义模拟器", App.Data.simulator.custom.port, App.Data.simulator.custom.im,App.Data.simulator.custom.externalCMD);
-                else return;
-            }
-            else
-            {
-                foreach (PinnedData.Simulator.SimuInfo info in PinnedData.Simulator.Support)
-                    if (Process.GetProcessesByName(info.IM).Length != 0)
-                    {
-                        ConnectThis = info;
-                        goto Connect;
-                    }
-                return;
-            }
-
-        Connect:;
-            //等待模拟器端守护进程响应连接
-            CMD("kill-server");
-            if (CMD("connect " + "127.0.0.1:" + ConnectThis.Port).Contains("connected"))
-            {
-                ConnectedInfo = ConnectThis;
-                Output.Log("Made Connection With " + ConnectedInfo.ToString(), "ADB");
-                new ToastContentBuilder()
-                .AddArgument("kind", "ADB")
-                .AddText("提示")
-                .AddText("已与" + ConnectedInfo.Name + "取得连接")
-                .Show();
-            }
-        }
-
-        /// <summary>
-        /// 检查ADB连接有效性
-        /// </summary>
-        public static void ADBHeartbeatTest()
-        {
-            void Clear(string reason)
-            {
-                Output.Log("Lost Simulator Connection Beacuse " + reason, "ADB", Output.InfoKind.Warning);
-                new ToastContentBuilder()
-                    .AddArgument("kind", "ADB")
-                    .AddText("提示")
-                    .AddText("已失去与" + ConnectedInfo.Name + "的连接")
-                    .Show();
-                ConnectedInfo = null;
-            }
-            //检验连接有效性，若否 则清空连接信息重连
-            Output.Log("ADB Heartbeat Testing", "ADB");
-            if (ConnectedInfo != null)
-            {
-                if (!ADB.CheckADBCanUsed()) return;
-                Output.Log("ADB Now Connect:" + ConnectedInfo.ToString(), "ADB");
-                if (Process.GetProcessesByName(ConnectedInfo.IM).Length == 0)
-                {
-                    Clear("No Simulator Window");
-                }
-                else if (!CMD("get-state").Contains("device"))
-                {
-                    Clear("No Status");
-                }
-                else
-                    return;
-            }
-            else
-            {
-                Output.Log("ADB Now Connect:" + "null", "ADB");
-            }
+            return result;
         }
 
         /// <summary>
@@ -762,6 +711,15 @@ namespace ArkHelper
         }
 
         /// <summary>
+        /// 启动明日方舟
+        /// </summary>
+        /// <param name="serverID">游戏ID</param>
+        public static void StartArknights(string serverID)
+        {
+            ADB.CMD("shell am start -n " + GetGamePackageName(serverID) + "/com.u8.sdk.U8UnityContext");
+        }
+
+        /// <summary>
         /// 获取当前运行的游戏类型
         /// </summary>
         /// <returns></returns>
@@ -831,8 +789,8 @@ namespace ArkHelper
         {
             for (; ; )
             {
-                while (ADB.ConnectedInfo == null)
-                    WithSystem.Wait(4000);
+                while (ConnectionInfo.Device == null)
+                    Thread.Sleep(4000);
                 try
                 {
                     using (var testOK = new ADB.Screenshot())
@@ -842,7 +800,7 @@ namespace ArkHelper
                 }
                 catch
                 {
-                    WithSystem.Wait(4000);
+                    Thread.Sleep(4000);
                     continue;
                 }
                 break;
@@ -860,10 +818,8 @@ namespace ArkHelper
             {
                 string name = ArkHelperDataStandard.Screenshot;
                 string address = Address.Cache.main;
-                CMD(@"shell screencap -p /sdcard/DCIM/" + name); //截图
-                CMD(@"pull /sdcard/DCIM/" + name + " " + address); //pull
-                CMD(@"shell rm -f /sdcard/DCIM/" + name); //删除
                 Location = address + @"\" + name;
+                CMD("exec-out screencap -p > " + Location,ADBCommandRunningType.ViaCLI_Clog);
                 //DisposeAfterTime();
             }
             public void Save(string address, string name)
@@ -939,7 +895,7 @@ namespace ArkHelper
             {
                 Task.Run(() =>
                 {
-                    WithSystem.Wait(20000);
+                    Thread.Sleep(20000);
                     Dispose();
                 });
             }
@@ -1355,7 +1311,11 @@ namespace ArkHelper
         /// <summary>
         /// adb
         /// </summary>
-        public readonly static string adb = akhExternal + @"\adb.exe";
+        public readonly static string ADBEnvironment = akhExternal;
+        /// <summary>
+        /// adb
+        /// </summary>
+        public readonly static string ADB = ADBEnvironment + @"\adb.exe";
 
         //静态字段 地址
         public readonly static string github = @"https://github.com/ArkHelper/ArkHelper2.0";
@@ -1472,8 +1432,8 @@ namespace ArkHelper
             public static List<SimuInfo> Support = new List<SimuInfo>
             {
                 new SimuInfo("MuMu", "MuMu模拟器", 7555, "NemuPlayer"),
-                new SimuInfo("BlueStacks", "蓝叠模拟器", 5555, "HD-Player","-s emulator-5554"),
-                new SimuInfo("dnplayer", "雷电模拟器", 5555, "dnplayer","-s emulator-5554"),
+                new SimuInfo("BlueStacks", "蓝叠模拟器", 5555, "HD-Player"),
+                new SimuInfo("dnplayer", "雷电模拟器", 5555, "dnplayer"),
                 new SimuInfo("MEMU", "逍遥模拟器", 21503, "MEmu"),
                 new SimuInfo("NOX", "夜神模拟器", 62001, "Nox"),
                 new SimuInfo("WSA", "WSA", 58526, "WSAClient"),
@@ -1587,7 +1547,7 @@ namespace ArkHelper
             //挂个线程
             Task task = Task.Run(() =>
             {
-                WithSystem.Wait(3000);
+                Thread.Sleep(3000);
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
                 GC.Collect();
@@ -1597,11 +1557,14 @@ namespace ArkHelper
         /// <summary>
         /// 关闭模拟器进程
         /// </summary>
-        public static void KillSimulator()
+        public static void KillSimulator(ConnectionInfo.SimuInfo simuInfo)
         {
-            Process[] _pr = Process.GetProcessesByName(ADB.ConnectedInfo.IM);
+            Process[] _pr = Process.GetProcessesByName(simuInfo.IM);
             var pr = _pr[0];
             pr.Kill();
+
+            ADBServerStatus.KillServer();
+            ADBServerStatus.StartServer();
             //ADB.ConnectedInfo = null;
         }
 

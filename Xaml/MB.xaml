@@ -1,7 +1,7 @@
 ﻿<Page x:Class="ArkHelper.MB"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:akhc="clr-namespace:ArkHelper.Style.Control"
+      xmlns:akhc="clr-namespace:ArkHelper.Xaml.Control"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:local="clr-namespace:ArkHelper"
       xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
@@ -11,8 +11,6 @@
       d:Background="White"
       d:DesignHeight="470"
       d:DesignWidth="652"
-      Loaded="Page_Loaded"
-      Unloaded="Page_Unloaded"
       mc:Ignorable="d">
 
     <Grid>
@@ -27,6 +25,13 @@
                         Margin="0,15,0,0"
                         Orientation="Vertical">
 
+                <StackPanel.Resources>
+                    <Style BasedOn="{StaticResource MaterialDesignCheckBox}" TargetType="CheckBox">
+                        <Setter Property="FontSize" Value="14" />
+                    </Style>
+                </StackPanel.Resources>
+
+                <!--  标题栏  -->
                 <Border Width="220"
                         Height="50"
                         Margin="0,0,0,10"
@@ -45,6 +50,7 @@
                     </WrapPanel>
                 </Border>
 
+                <!--  三种模式  -->
                 <RadioButton Name="mode_san"
                              Width="220"
                              Height="55"
@@ -67,7 +73,9 @@
                                      GroupName="BtKind"
                                      Style="{StaticResource RadioButtonDock}"
                                      Tag="Clock" />
-                        <WrapPanel Margin="0,0,0,20" Visibility="{Binding ElementName=mode_time, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <WrapPanel Margin="14,0,0,20"
+                                   Orientation="Vertical"
+                                   Visibility="{Binding ElementName=mode_time, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <!--<materialDesign:PackIcon Width="20"
                                                  Height="20"
                                                  VerticalAlignment="Center"
@@ -75,7 +83,6 @@
                                                  Kind="Clock" />-->
                             <TextBox x:Name="times_setting"
                                      Width="180"
-                                     Margin="14,-10,0,0"
                                      HorizontalAlignment="Center"
                                      VerticalAlignment="Center"
                                      materialDesign:HintAssist.Hint="连续作战次数"
@@ -83,6 +90,14 @@
                                      Foreground="#006493"
                                      Style="{StaticResource MaterialDesignFloatingHintTextBox}"
                                      Text="1" />
+                            <CheckBox x:Name="times_setting_recover" IsChecked="False" Margin="0,10,0,0">
+                                <WrapPanel>
+                                    <TextBlock>理智不足时恢复理智</TextBlock>
+                                    <materialDesign:PackIcon Margin="10,0,0,0"
+                                                             Style="{StaticResource help}"
+                                                             ToolTip="使用理智恢复物顺序：应急理智液&gt;源石&#x0a;理智恢复物不足时会自动停止" />
+                                </WrapPanel>
+                            </CheckBox>
 
                         </WrapPanel>
 
@@ -102,26 +117,18 @@
                                      GroupName="BtKind"
                                      Style="{StaticResource RadioButtonDock}"
                                      Tag="SproutOutline" />
-                        <WrapPanel Margin="0,0,0,20" Visibility="{Binding ElementName=mode_SXYS, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <!--<materialDesign:PackIcon Width="20"
-                                                 Height="20"
-                                                 VerticalAlignment="Center"
-                                                 Foreground="#006493"
-                                                 Kind="Clock" />-->
-                            <WrapPanel Margin="14,0,0,0">
-                                <CheckBox Name="SXYS_time_status" FontSize="14">限制次数</CheckBox>
-                            </WrapPanel>
+                        <WrapPanel Margin="14,0,0,20" Visibility="{Binding ElementName=mode_SXYS, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <CheckBox Name="SXYS_time_status">限制次数</CheckBox>
                             <TextBox x:Name="SXYS_time"
                                      Width="180"
-                                     Margin="14,0,0,0"
                                      HorizontalAlignment="Center"
                                      VerticalAlignment="Center"
                                      materialDesign:HintAssist.Hint="次数"
                                      FontSize="15"
                                      Foreground="#006493"
                                      Style="{StaticResource MaterialDesignFloatingHintTextBox}"
-                                     IsEnabled="{Binding ElementName=SXYS_time_status,Path=IsChecked}"
-                                     Text="5" />
+                                     Text="5"
+                                     Visibility="{Binding ElementName=SXYS_time_status, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
                         </WrapPanel>
 
@@ -192,7 +199,7 @@
                                 <ComboBoxItem Tag="closeSimulator">
                                     <WrapPanel>
                                         <materialDesign:PackIcon Kind="Power" />
-                                        <TextBlock>关闭模拟器</TextBlock>
+                                        <TextBlock>关闭连接的第一个模拟器</TextBlock>
                                     </WrapPanel>
                                 </ComboBoxItem>
                                 <ComboBoxItem Tag="lock">
@@ -221,44 +228,46 @@
                         <StackPanel Orientation="Vertical">
                             <akhc:ChapterTitle Icon="Error" Text="错误" />
                             <TextBlock FontSize="{StaticResource h3}">
-                                ArkHelper没有连接到模拟器或有其它任务在执行，暂时无法进行连续作战。
-                                <LineBreak></LineBreak>
-                                请检查模拟器连接。
-                            </TextBlock>
+                                ArkHelper没有检测到设备或有其它任务在执行，暂时无法进行连续作战。<LineBreak />
+                                请等待并检查模拟器连接。</TextBlock>
                         </StackPanel>
                     </Border>
 
                     <Border d:Visibility="Visible" Visibility="{Binding ElementName=logreport, Path=Visibility}">
                         <StackPanel Name="monitor">
                             <akhc:ChapterTitle Icon="ChartDonut" Text="实时作战监测系统：回传报告" />
+
                             <WrapPanel Margin="2.5" Orientation="Vertical">
 
-                                <WrapPanel Name="data_begin">
+                                <WrapPanel Name="monitor_module_start">
                                     <materialDesign:PackIcon Kind="TimerPlayOutline" />
-                                    <TextBlock Name="data_begin_text" FontSize="{StaticResource p}">--</TextBlock>
-                                </WrapPanel>
-
-                                <WrapPanel Name="data_progress">
-                                    <materialDesign:PackIcon Kind="ProgressCheck" />
-                                    <TextBlock FontSize="{StaticResource p}">
-                                        <Run Name="data_progress_alreadyT" />
-                                        /<Run Name="data_progress_T" />
+                                    <TextBlock Name="monitor_module_start_text">
+                                        2023/2/2 10:10
                                     </TextBlock>
                                 </WrapPanel>
 
-                                <WrapPanel Name="data_speed">
+                                <WrapPanel Name="monitor_module_progress">
+                                    <materialDesign:PackIcon Kind="ProgressCheck" />
+                                    <TextBlock>
+                                        <Run Name="monitor_module_progress_up" Text="0" />
+                                        /<Run Name="monitor_module_progress_down" Text="0" />
+                                    </TextBlock>
+                                </WrapPanel>
+
+                                <WrapPanel Name="monitor_module_speed">
                                     <materialDesign:PackIcon Kind="Speedometer" />
-                                    <TextBlock FontSize="{StaticResource p}">
-                                        <Run Name="data_speed_text" />
+                                    <TextBlock>
+                                        <Run Name="monitor_module_speed_text" Text="0" />
                                         秒/次</TextBlock>
                                 </WrapPanel>
 
-                                <WrapPanel Name="data_end">
+                                <WrapPanel Name="monitor_module_end">
                                     <materialDesign:PackIcon Kind="TimerStopOutline" />
-                                    <TextBlock FontSize="{StaticResource p}">
-                                        预计<Run Name="data_end_text" /></TextBlock>
+                                    <TextBlock>
+                                        预计<Run Name="monitor_module_end_text" Text="2023/2/2 10:10" /></TextBlock>
                                 </WrapPanel>
                             </WrapPanel>
+
                             <StackPanel.Resources>
                                 <Style TargetType="materialDesign:PackIcon">
                                     <Setter Property="Width" Value="20" />
@@ -270,6 +279,10 @@
                                     <Setter Property="Orientation" Value="Horizontal" />
                                     <Setter Property="Margin" Value="0,4" />
                                 </Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="FontFamily" Value="{StaticResource SourceHan}" />
+                                    <Setter Property="FontSize" Value="{StaticResource p}" />
+                                </Style>
                             </StackPanel.Resources>
 
                         </StackPanel>
@@ -278,33 +291,32 @@
                 </StackPanel>
             </Grid>
         </Grid>
-        
-        <StackPanel 
-                    Margin="0,0,64,64"
+
+        <StackPanel Margin="0,0,64,64"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Bottom"
                     Orientation="Horizontal"
                     Visibility="Visible">
-            <TextBlock Margin="0,0,20,0"
-                       Visibility="Collapsed"
-                       x:Name="logreport"
+            <TextBlock x:Name="logreport"
+                       Margin="0,0,20,0"
                        VerticalAlignment="Center"
-                       FontSize="15">
+                       FontSize="15"
+                       Visibility="Collapsed">
                 <Run x:Name="times_textblock" Text=" " />
                 <Run x:Name="log_textblock" />
             </TextBlock>
             <Button x:Name="start_button"
-                IsEnabled="False"
-                Width="48"
-                Height="48"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Bottom"
-                Background="{DynamicResource MaterialDesignTextFieldBoxBackground}"
-                Click="start"
-                Cursor="Hand"
-                Style="{StaticResource MaterialDesignIconButton}"
-                ToolTip="开始/停止作战指挥">
-                <materialDesign:PackIcon Name="start_button_icon" Kind="Fencing" />
+                    Width="48"
+                    Height="48"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Bottom"
+                    Background="{DynamicResource MaterialDesignTextFieldBoxBackground}"
+                    Click="start"
+                    Cursor="Hand"
+                    IsEnabled="False"
+                    Style="{StaticResource MaterialDesignIconButton}"
+                    ToolTip="开始/停止作战指挥">
+                <materialDesign:PackIcon Name="start_button_icon" Kind="Play" />
             </Button>
         </StackPanel>
     </Grid>

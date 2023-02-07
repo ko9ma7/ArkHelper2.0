@@ -1,4 +1,5 @@
-﻿using MaterialDesignThemes.Wpf;
+﻿using ArkHelper.Xaml;
+using MaterialDesignThemes.Wpf;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -89,7 +90,7 @@ namespace ArkHelper.Pages.OtherList
         #endregion
         private void pure_Click(object sender, RoutedEventArgs e) => App.Data.arkHelper.pure = (bool)pure.IsChecked;
 
-        
+
 
         public static string SelectSimu()
         {
@@ -104,6 +105,41 @@ namespace ArkHelper.Pages.OtherList
         private void ToggleButton_Click(object sender, RoutedEventArgs e)
         {
             App.Data.arkHelper.debug = (bool)(sender as ToggleButton).IsChecked;
+        }
+
+        private void SimulatorConnectionControl_btn_Click(object sender, RoutedEventArgs e)
+        {
+            if (ADB.CheckIfADBUsing())
+            {
+                MessageBox.Show("任务执行时不能管理连接状态");
+                return;
+            }
+            bool _have = false;
+            foreach (Window win in Application.Current.Windows)
+            {
+                if (win.Title == "设备连接管理")
+                {
+                    _have = true;
+                    win.WindowState = WindowState.Normal;
+                    win.Activate();
+                }
+            }
+            if(!_have)
+            {
+                Window window = new Window()
+                {
+                    Width = 908,
+                    Height = 555,
+                    Title = "设备连接管理"
+                };
+                window.Content = new ArkHelper.Modules.Connect.XAML.ConnectionController();
+                window.Show();
+            }
+        }
+
+        private void address_Click(object sender, RoutedEventArgs e)
+        {
+            Process.Start(Address.programData);
         }
     }
 }
