@@ -57,7 +57,8 @@ namespace ArkHelper
             }
             try
             {
-                File.WriteAllText(Address.config, JsonSerializer.Serialize(App.Data));
+                var str = JsonSerializer.Serialize(App.Data,new JsonSerializerOptions() { WriteIndented = true});
+                File.WriteAllText(Address.config, str);
             }
             catch { }
         }
