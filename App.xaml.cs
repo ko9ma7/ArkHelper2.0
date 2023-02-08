@@ -198,7 +198,7 @@ namespace ArkHelper
                 MessageInit.Start();
             #endregion
             #region 按频率持续保存配置
-            Task SaveDataBg = Task.Run(() =>
+            Task SaveDataBg = new Task(() =>
             {
                 while (true)
                 {
@@ -209,7 +209,7 @@ namespace ArkHelper
             });
             #endregion
             #region 启动ADB连接
-            Task adbConnect = Task.Run(() =>
+            Task adbConnect = new Task(() =>
             {
                 foreach (var simu in App.Data.simulator.customs)
                     ConnectionInfo.Connections.Add(simu,new ConnectionInfo.ConnectStatus());
@@ -225,7 +225,7 @@ namespace ArkHelper
             });
             #endregion
             #region SCHT等待
-            Task SCHT = Task.Run(() =>
+            Task SCHT = new Task(() =>
             {
                 for (; ; Thread.Sleep(1000))
                 {
@@ -261,6 +261,9 @@ namespace ArkHelper
                 }
             });
             #endregion
+            SaveDataBg.Start();
+            adbConnect.Start();
+            SCHT.Start();
         }
 
         private static void CloseMainWindow()
