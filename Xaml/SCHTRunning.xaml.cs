@@ -825,7 +825,7 @@ namespace ArkHelper.Pages.OtherList
                 }
             });
             SCHT.Start();
-            AllStopEvent += (s,ea) =>
+            AllStopEvent = (s,ea) =>
             {
                 SCHT.Abort();
                 UIEnd(true);

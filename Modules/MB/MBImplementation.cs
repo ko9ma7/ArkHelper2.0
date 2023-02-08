@@ -22,7 +22,7 @@ namespace ArkHelper.Modules.MB
     {
         protected MBImplementationResult()
         {
-            
+
         }
     }
     public class MBImplementation
@@ -30,14 +30,9 @@ namespace ArkHelper.Modules.MB
         public MBImplementation() { }
 
         public event ArkHelperDataStandard.ArkHelperMessage MessageUpdated;
-        protected virtual void OnUpdate(string text,Output.InfoKind infoKind)
+        protected virtual void OnUpdate(string text, Output.InfoKind infoKind)
         {
-            try
-            {
-                MessageUpdated(text, infoKind);
-
-            }
-            catch { }
+            MessageUpdated?.Invoke(text, infoKind);
         }
 
         public class NextArg
@@ -48,15 +43,7 @@ namespace ArkHelper.Modules.MB
         public event NextHandler MoveToNext;
         protected virtual void OnMoveToNext(NextArg arg)
         {
-            try
-            {
-                MoveToNext(arg);
-
-            }
-            catch
-            {
-
-            }
+            MoveToNext.Invoke(arg);
         }
     }
 
@@ -85,7 +72,7 @@ namespace ArkHelper.Modules.MB
         public ResultType Type { get; }
         public MBCoreResult(ResultType resultType, int time = 0)
         {
-            void log(string content,InfoKind infoKind = InfoKind.Infomational)
+            void log(string content, InfoKind infoKind = InfoKind.Infomational)
             {
                 Output.Log(content, "MBCore", infoKind);
             }
@@ -98,7 +85,7 @@ namespace ArkHelper.Modules.MB
             log("--- END ---");
         }
     }
-    public class MBCore:MBImplementation
+    public class MBCore : MBImplementation
     {
         #region 接口
         protected override void OnUpdate(string text, Output.InfoKind infoKind)
@@ -135,8 +122,8 @@ namespace ArkHelper.Modules.MB
         {
             Output.Log(content, "MBCore", infoKind);
         }
-        private void Info(string text, Output.InfoKind infoKind = InfoKind.Infomational)=>OnUpdate(text, infoKind);
-        private void Next()=>OnMoveToNext(new NextArg() { AlreadyTime = alreadyTime});
+        private void Info(string text, Output.InfoKind infoKind = InfoKind.Infomational) => OnUpdate(text, infoKind);
+        private void Next() => OnMoveToNext(new NextArg() { AlreadyTime = alreadyTime });
         #endregion
 
         #region 逻辑
@@ -328,7 +315,7 @@ namespace ArkHelper.Modules.MB
                 WithSystem.Wait(5000);
                 using (var sc = new ADB.Screenshot())
                 {
-                    if (sc.ColorPick(77, 70) != "#8C8C8C" && sc.ColorPick(1341,62) != "#FFFFFF")
+                    if (sc.ColorPick(77, 70) != "#8C8C8C" && sc.ColorPick(1341, 62) != "#FFFFFF")
                     {
                         break;
                     }
@@ -386,9 +373,9 @@ namespace ArkHelper.Modules.MB
         #region 构造
         public MBCore(ModeType mode, int time = -1, bool allowToRecoverSantiy = false, int ann_cardToUse = 0)
         {
-            Mode= mode;
-            Time= time;
-            AllowToRecoverSantiy= allowToRecoverSantiy;
+            Mode = mode;
+            Time = time;
+            AllowToRecoverSantiy = allowToRecoverSantiy;
             Ann_cardToUse = ann_cardToUse;
         }
         #endregion
@@ -421,7 +408,7 @@ namespace ArkHelper.Modules.MB
         public ResultType Type { get; }
         public int Time { get; }
 
-        public SXYSResult(ResultType resultType,int time=0)
+        public SXYSResult(ResultType resultType, int time = 0)
         {
             void log(string content, InfoKind infoKind = InfoKind.Infomational)
             {
@@ -436,7 +423,7 @@ namespace ArkHelper.Modules.MB
             log("--- END ---");
         }
     }
-    public class SXYS:MBImplementation
+    public class SXYS : MBImplementation
     {
         #region 接口
         protected override void OnUpdate(string text, Output.InfoKind infoKind)
@@ -459,8 +446,8 @@ namespace ArkHelper.Modules.MB
         {
             Output.Log(content, "SXYS", infoKind);
         }
-        private void Info(string text, Output.InfoKind infoKind = InfoKind.Infomational)=>OnUpdate(text, infoKind);
-        private void Next()=>OnMoveToNext(new NextArg() { AlreadyTime = exetimes });
+        private void Info(string text, Output.InfoKind infoKind = InfoKind.Infomational) => OnUpdate(text, infoKind);
+        private void Next() => OnMoveToNext(new NextArg() { AlreadyTime = exetimes });
         #endregion
 
         #region 逻辑
@@ -669,7 +656,7 @@ namespace ArkHelper.Modules.MB
         #region 构造
         public SXYS(int time = -1)
         {
-            Time= time;
+            Time = time;
         }
         #endregion
     }
