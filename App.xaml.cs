@@ -244,6 +244,7 @@ namespace ArkHelper
                     //&& false
                     ) goto end;
 
+                    //HACK 校验ADB是否可用后再启动（原进入校验删除）
                     if (isTimeEq(Pages.OtherList.SCHT.GetNextRunTime()))
                     {
                         Data.scht.ct.forceTimes.RemoveAll(dt => isTimeEq(dt));
@@ -265,7 +266,6 @@ namespace ArkHelper
             adbConnect.Start();
             SCHT.Start();
         }
-
         private static void CloseMainWindow()
         {
             foreach (Window window in Application.Current.Windows)
