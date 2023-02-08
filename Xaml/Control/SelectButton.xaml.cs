@@ -25,7 +25,7 @@ namespace ArkHelper.Xaml.Control
     /// <summary>
     /// SelectButton.xaml 的交互逻辑
     /// </summary>
-    public partial class SelectButton : UserControl
+    public partial class SelectButton : CustomRadioButton
     {
         #region 属性
         /// <summary>
@@ -99,29 +99,8 @@ namespace ArkHelper.Xaml.Control
         private int _ProgressBarValue = 0;
 
         /// <summary>
-        /// （手动继承RadioButton）IsChecked
+        /// 是否折叠（不显示文字和ProgressBar）
         /// </summary>
-        public bool IsChecked
-        {
-            get { return _isChecked; }
-            set
-            {
-                _isChecked = value;
-                ChangeStyle();
-                if (this.Parent == null) return;
-                if (value == true)
-                    for (int i = 0; i < VisualTreeHelper.GetChildrenCount(this.Parent); i++)
-                    {
-                        var child = VisualTreeHelper.GetChild(this.Parent, i);
-                        if (child != this)
-                            if (child is SelectButton)
-                                if ((child as SelectButton).IsChecked)
-                                    (child as SelectButton).IsChecked = false;
-                    }
-            }
-        }
-        private bool _isChecked = false;
-
         public bool IsFolded
         {
             get
@@ -160,44 +139,6 @@ namespace ArkHelper.Xaml.Control
         private UIElement _childWhenThisIsPressed;
         */
 
-        #endregion
-
-        #region （手动继承RadioButton）实现_事件_Click
-        public event RoutedEventHandler Click;
-        bool _isPressing = false;
-        /// <summary>
-        /// 在this构造时执行，注册点击事件
-        /// </summary>
-        void BeginListenClickEvent()
-        {
-            this.MouseLeftButtonDown += (o, e) =>
-            {
-                Task.Run(() =>
-                {
-                    Thread.Sleep(500);
-                    _isPressing = false;
-                });
-                _isPressing = true;
-            };
-            this.MouseLeftButtonUp += (o, e) =>
-            {
-                if (_isPressing)
-                {
-#pragma warning disable CS0168 // 声明了变量，但从未使用过
-                    try
-                    {
-                        Click(this, new RoutedEventArgs());
-                    }
-                    catch (NullReferenceException ex)
-                    {
-                        
-                    }
-#pragma warning restore CS0168 // 声明了变量，但从未使用过
-                    IsChecked = true;
-                }
-                _isPressing = false;
-            };
-        }
         #endregion
 
         #region 动画和外观
@@ -289,13 +230,7 @@ namespace ArkHelper.Xaml.Control
 
             DataContext = this;
 
-            /*UIIcon.Kind = Icon;
-            UIText.Text =
-                Text == null ?
-                Text :
-                "";*/
-
-            BeginListenClickEvent();
+            this.IsCheckedChanged += (s, e) => ChangeStyle();
             BeginListenAnimAndStyleEvent();
             ChangeStyle();
         }
