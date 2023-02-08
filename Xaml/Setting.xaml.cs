@@ -114,27 +114,14 @@ namespace ArkHelper.Pages.OtherList
                 MessageBox.Show("任务执行时不能管理连接状态");
                 return;
             }
-            bool _have = false;
-            foreach (Window win in Application.Current.Windows)
+            Window window = new Window()
             {
-                if (win.Title == "设备连接管理")
-                {
-                    _have = true;
-                    win.WindowState = WindowState.Normal;
-                    win.Activate();
-                }
-            }
-            if(!_have)
-            {
-                Window window = new Window()
-                {
-                    Width = 908,
-                    Height = 555,
-                    Title = "设备连接管理"
-                };
-                window.Content = new ArkHelper.Modules.Connect.XAML.ConnectionController();
-                window.Show();
-            }
+                Width = 908,
+                Height = 555,
+                Title = "设备连接管理"
+            };
+            window.Content = new ArkHelper.Modules.Connect.XAML.ConnectionController();
+            window.ShowDialog();
         }
 
         private void address_Click(object sender, RoutedEventArgs e)
