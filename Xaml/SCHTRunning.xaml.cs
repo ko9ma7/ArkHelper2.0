@@ -804,6 +804,10 @@ namespace ArkHelper.Pages.OtherList
                     {
                         thread.Abort();
                     };
+                    AllStopEvent += (s, ea) =>
+                    {
+                        thread.Abort();
+                    };
                     thread.Start();
                     thread.Join();
                 }
@@ -821,7 +825,7 @@ namespace ArkHelper.Pages.OtherList
                 }
             });
             SCHT.Start();
-            AllStopEvent = (s,ea) =>
+            AllStopEvent += (s,ea) =>
             {
                 SCHT.Abort();
                 UIEnd(true);

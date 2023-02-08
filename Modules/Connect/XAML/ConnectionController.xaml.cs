@@ -201,13 +201,9 @@ namespace ArkHelper.Modules.Connect.XAML
         private void DeviceList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             DeviceIsChangingByParent = true;
-            try
+            if (DeviceList.SelectedItem != null)
             {
-                if(!DeviceIsChangingByEvent) ConnectionInfo.Device = (DeviceList.SelectedItem as ListBoxItem).Content.ToString();
-            }
-            catch
-            {
-
+                ConnectionInfo.Device = (DeviceList.SelectedItem as ListBoxItem).Content.ToString();
             }
             DeviceIsChangingByParent = false;
         }
@@ -256,6 +252,15 @@ namespace ArkHelper.Modules.Connect.XAML
             Task.Run(() =>
             {
                 MessageBox.Show(ADB.CMD(cmd), "返回的结果");
+            });
+        }
+
+        private void Button_Click_3(object sender, RoutedEventArgs e)
+        {
+            Task.Run(() =>
+            {
+                ADBServerStatus.KillServer();
+                ADBServerStatus.StartServer();
             });
         }
     }
