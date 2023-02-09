@@ -22,7 +22,7 @@ namespace ArkHelper.Xaml.Control
                 if (_isChecked != value)
                 {
                     _isChecked = value;
-                    IsCheckedChanged?.Invoke(this, new RoutedEventArgs());
+                    IsCheckedChanged?.Invoke(this, value);
                 }
                 
                 if (value == true)
@@ -43,7 +43,10 @@ namespace ArkHelper.Xaml.Control
         #endregion
 
         #region（手动继承RadioButton）实现_事件_IsCheckedChanged
-        public event RoutedEventHandler IsCheckedChanged;
+        /// <summary>
+        /// IsChecked属性改变时间，Arg是改变后的值
+        /// </summary>
+        public event EventHandler<bool> IsCheckedChanged;
         #endregion
 
         #region （手动继承RadioButton）实现_事件_Click
@@ -67,6 +70,7 @@ namespace ArkHelper.Xaml.Control
             {
                 if (isPressed)
                 {
+                    IsChecked = true;
 #pragma warning disable CS0168 // 声明了变量，但从未使用过
                     try
                     {
@@ -77,7 +81,6 @@ namespace ArkHelper.Xaml.Control
 
                     }
 #pragma warning restore CS0168 // 声明了变量，但从未使用过
-                    IsChecked = true;
                 }
                 isPressed = false;
             };

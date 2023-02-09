@@ -1,0 +1,38 @@
+﻿<control:CustomRadioButton x:Class="ArkHelper.Modules.SCHT.Xaml.UnitButton"
+                           xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                           xmlns:control="clr-namespace:ArkHelper.Xaml.Control"
+                           xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                           xmlns:local="clr-namespace:ArkHelper.Modules.SCHT.Xaml"
+                           xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                           x:Name="rootElement"
+                           Width="110"
+                           Height="60"
+                           Loaded="rootElement_Loaded"
+                           Unloaded="rootElement_Unloaded"
+                           mc:Ignorable="d">
+    <Grid>
+        <Border CornerRadius="5" Visibility="Visible" Name="bkgBorder">
+            <Image x:Name="Image">
+                <Image.Clip>
+                    <RectangleGeometry RadiusX="5"
+                                       RadiusY="5"
+                                       Rect="0,0,110,60" />
+                </Image.Clip>
+            </Image>
+        </Border>
+        <Border x:Name="thickBorder"
+                BorderBrush="#DE3f76b2"
+                BorderThickness="2"
+                CornerRadius="4" />
+        <TextBlock HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   d:Text="测试单元"
+                   FontSize="15"
+                   Text="{Binding Text}">
+            <TextBlock.Foreground>
+                <SolidColorBrush Opacity="0.85" Color="#EE000000" />
+            </TextBlock.Foreground>
+        </TextBlock>
+    </Grid>
+</control:CustomRadioButton>

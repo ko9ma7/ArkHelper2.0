@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -121,6 +121,9 @@
       <DependentUpon>ConnectionController.xaml</DependentUpon>
     </Compile>
     <Compile Include="Modules\MB\MBImplementation.cs" />
+    <Compile Include="Modules\SCHT\Xaml\UnitButton.xaml.cs">
+      <DependentUpon>UnitButton.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Xaml\Control\AKHcpiCard.xaml.cs">
       <DependentUpon>AKHcpiCard.xaml</DependentUpon>
     </Compile>
@@ -206,6 +209,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Modules\Connect\XAML\ConnectionController.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Modules\SCHT\Xaml\UnitButton.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

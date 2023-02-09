@@ -6,6 +6,9 @@ using System.IO;
 using MaterialDesignThemes.Wpf;
 using ArkHelper.Xaml.Control;
 using Microsoft.Win32;
+using ArkHelper.Modules.SCHT.Xaml;
+using System.Collections.Generic;
+using System.Drawing;
 
 namespace ArkHelper.Pages.OtherList
 {
@@ -14,6 +17,120 @@ namespace ArkHelper.Pages.OtherList
     {
         bool inited = false;
         ArkHelper.ArkHelperDataStandard.Data.SCHT.SCHTData schtData = App.Data.scht.data;
+
+        private class Unit
+        {
+            public virtual string Name { get; }
+            public virtual string ToolTip { get; }
+            public virtual string ID { get; }
+            /// <summary>
+            /// 背景内容，支持纯色、资源图片地址
+            /// </summary>
+            public virtual object Bkg { get; }
+            //普通Unit构造函数
+            public Unit(string id, string name, string gain)
+            {
+                ID = id;
+                ToolTip = "关卡编号：" + id + "\n" + "掉落物：" + gain;
+                Name = name;
+                if (id.Contains("PR"))
+                {
+                    id = "chips";
+                }
+                Bkg = "/Asset/SCHT/" + id + ".png";
+
+            }
+            //特殊Unit构造函数
+            public Unit(string id, string name = null, string discribe = null, string picLoaction = null, Color picColor = new Color())
+            {
+                ID = id;
+                Name = name ?? "";
+                ToolTip = discribe;
+                if (picLoaction != null)
+                {
+                    Bkg = picLoaction;
+                }
+                else
+                {
+                    Bkg = picColor;
+                }
+            }
+
+            public virtual UnitButton GetBtn()
+            {
+                return new UnitButton()
+                {
+                    Text = Name,
+                    ToolTip = ToolTip,
+                    BKG = Bkg,
+                    Tag = this
+                };
+            }
+
+            public static List<Unit> units = new List<Unit>()
+            {
+                new Unit("LS","战术演习","作战记录"),
+                new Unit("CE","货物运送","龙门币"),
+                new Unit("AP","粉碎防御","采购凭证"),
+                new Unit("SK","资源保障","碳、家具零件"),
+                new Unit("CA","空中威胁","技巧概要"),
+                new Unit("PR-A","固若金汤","医疗、重装芯片"),
+                new Unit("PR-B","摧枯拉朽","术师、狙击芯片"),
+                new Unit("PR-C","势不可当","辅助、先锋芯片"),
+                new Unit("PR-D","身先士卒","特种、近卫芯片"),
+                new Unit("custom","自定义","自定义关卡",picColor: ColorTranslator.FromHtml("#DDDDDD"))
+            };
+        }
+        private class Ann : Unit
+        {
+            public Ann(string id, string name, string type) : base(id, name, type)
+            {
+                ID = id;
+                Name = name;
+                Bkg = "/Asset/SCHT/" + ID + ".png";
+                ToolTip = "类型：" + type;
+            }
+
+            public Ann(string id, string name = null, string discribe = null, string picLoaction = null, Color picColor = default) : base(id, name, discribe, picLoaction, picColor)
+            {
+                ID = id;
+                Name = name ?? "";
+                ToolTip = discribe;
+                if (picLoaction != null)
+                {
+                    Bkg = picLoaction;
+                }
+                else
+                {
+                    Bkg = picColor;
+                }
+            }
+
+            public override UnitButton GetBtn()
+            {
+                return new UnitButton()
+                {
+                    Text = Name,
+                    ToolTip = ToolTip,
+                    BKG = Bkg,
+                    Tag = this
+                };
+            }
+
+            public override string ID { get; }
+            public override string Name { get; }
+            public override string ToolTip { get; }
+            public override object Bkg { get; }
+
+            public static List<Unit> anns = new List<Unit>()
+            {
+                new Ann("CHNB","切尔诺伯格","长期剿灭委托"),
+                new Ann("LMOB","龙门外环","长期剿灭委托"),
+                new Ann("LMDT","龙门市区","长期剿灭委托"),
+                new Ann("TT","当期委托","轮换剿灭委托",picColor: ColorTranslator.FromHtml("#DDDDDD"))
+            };
+        }
+
         public SCHT()
         {
             InitializeComponent();
@@ -31,23 +148,31 @@ namespace ArkHelper.Pages.OtherList
             status_togglebutton.IsChecked = App.Data.scht.status;
             server_combobox.SelectedValue = schtData.server.id;
             ann_useCard_checkbox.IsChecked = schtData.ann.allowToUseCard;
-            if (!schtData.first.unit.Contains("custom"))
+            //UI:装载FirstUnit
+            foreach (var _unit in Unit.units)
             {
-                ((RadioButton)GetType().GetField(schtData.first.unit.Replace("PR-", "PR") + "First", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(this)).IsChecked = true;
+                var _btn = _unit.GetBtn();
+                _btn.IsChecked = schtData.first.unit == _unit.ID;
+                _btn.Click += First_Unit_Selected;
+                FirstGrid.Children.Add(_btn);
             }
-            else
+            //UI:装载SecondUnit
+            foreach (var _unit in Unit.units.FindAll(t => t.ID == "custom" || t.ID == "LS"))
             {
-                customFirst.IsChecked = true;
+                var _btn = _unit.GetBtn();
+                _btn.IsChecked = schtData.second.unit == _unit.ID;
+                _btn.Click += Second_Unit_Selected;
+                SecondGrid.Children.Add(_btn);
             }
-            if (!schtData.second.unit.Contains("custom"))
+            //UI:装载Ann
+            foreach (var _ann in Ann.anns)
             {
-                ((RadioButton)GetType().GetField(schtData.second.unit + "Second", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(this)).IsChecked = true;
+                var _btn = _ann.GetBtn();
+                _btn.IsChecked = schtData.ann.select == _ann.ID;
+                _btn.Click += ann_Selected;
+                AnnGrid.Children.Add(_btn);
             }
-            else
-            {
-                customSecond.IsChecked = true;
-            }
-            ((RadioButton)GetType().GetField(schtData.ann.select, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(this)).IsChecked = true;
+
             ann_custom_time_status_checkbox.IsChecked = schtData.ann.customTime;
 
             string[] strArr = { "一", "二", "三", "四", "五", "六", "日" };
@@ -113,10 +238,21 @@ namespace ArkHelper.Pages.OtherList
             SimuSel.Visibility = Visibility.Collapsed;
         }
 
+        private bool GetUnitCheckStatusInArea(string id,UIElement uIElement)
+        {
+            foreach (var _btn in (uIElement as WrapPanel).Children)
+            {
+                var btn = _btn as UnitButton;
+                var cls = btn.Tag as Unit;
+                var ret = (cls).ID == id;
+                if (ret) { return ret; }
+            }
+            return false;
+        }
         private void VisChange()
         {
-            cuscpi.Visibility= first_unit.Visibility = second_unit.Visibility = ann_stack.Visibility = ct_stack.Visibility = server_stack.Visibility = (bool)(status_togglebutton.IsChecked) ? Visibility.Visible : Visibility.Collapsed;
-            if ((bool)status_togglebutton.IsChecked && ((bool)LSFirst.IsChecked || (bool)customFirst.IsChecked)) { second_unit.Visibility = Visibility.Collapsed; }
+            cuscpi.Visibility = first_unit.Visibility = second_unit.Visibility = ann_stack.Visibility = ct_stack.Visibility = server_stack.Visibility = (bool)(status_togglebutton.IsChecked) ? Visibility.Visible : Visibility.Collapsed;
+            if ((bool)status_togglebutton.IsChecked && (GetUnitCheckStatusInArea("LS",FirstGrid) || GetUnitCheckStatusInArea("custom", FirstGrid))) { second_unit.Visibility = Visibility.Collapsed; }
         }
         private void CreateNewTime(DateTime num, bool isForce = false)
         {
@@ -255,7 +391,7 @@ namespace ArkHelper.Pages.OtherList
             if (!inited) return;
 
             //检测是哪个button被激活
-            var unit = (sender as RadioButton).Name.Replace("First", "").Replace("PR", "PR-"); //first.unit
+            var unit = ((sender as UnitButton).Tag as Unit).ID;
 
             //备选状态切换
             second_unit.Visibility = (unit == "LS" || unit == "custom") ? Visibility.Collapsed : Visibility.Visible;
@@ -268,7 +404,15 @@ namespace ArkHelper.Pages.OtherList
                 //返回空值则选取默认值
                 if (cpiAddress == "")
                 {
-                    LSFirst.IsChecked = true;
+                    foreach (var _btn in FirstGrid.Children)
+                    {
+                        var btn = _btn as UnitButton;
+                        if ((btn.Tag as Unit).ID == "LS")
+                        {
+                            btn.IsChecked = true;
+                            break;
+                        }
+                    }
                     return;
                 }
                 else
@@ -286,7 +430,7 @@ namespace ArkHelper.Pages.OtherList
         {
             if (!inited) return;
 
-            var unit = (sender as RadioButton).Name.Replace("Second", "");
+            var unit = ((sender as UnitButton).Tag as Unit).ID;
 
             if (unit.Contains("custom"))
             {
@@ -295,7 +439,15 @@ namespace ArkHelper.Pages.OtherList
                 //返回空值则选取默认值
                 if (cpiAddress == "")
                 {
-                    LSSecond.IsChecked = true;
+                    foreach (var _btn in SecondGrid.Children)
+                    {
+                        var btn = _btn as UnitButton;
+                        if ((btn.Tag as Unit).ID == "LS")
+                        {
+                            btn.IsChecked = true;
+                            break;
+                        }
+                    }
                     return;
                 }
                 else
@@ -312,7 +464,7 @@ namespace ArkHelper.Pages.OtherList
         private void ann_Selected(object sender, RoutedEventArgs e)
         {
             //检测是哪个button被激活
-            schtData.ann.select = (sender as RadioButton).Name;
+            schtData.ann.select = ((sender as UnitButton).Tag as Unit).ID;
         }
         private void ann_custom_time_status_checkbox_Click(object sender, RoutedEventArgs e)
         {
@@ -362,7 +514,8 @@ namespace ArkHelper.Pages.OtherList
             {
                 /*RegistryKey registryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
                 registryKey.SetValue("ArkHelper", Address.akh + "\\ArkHelper.exe");//申请开机启动
-                */dialog.IsOpen = false;
+                */
+                dialog.IsOpen = false;
                 App.Data.scht.showGuide = false;
                 helper.Visibility = Visibility.Visible;
                 App.Data.scht.showHelper = true;
@@ -395,7 +548,7 @@ namespace ArkHelper.Pages.OtherList
                                                      day: nowTime.Day,
                                                      hour: ableToRunTimeInList.Hour,
                                                      minute: ableToRunTimeInList.Minute,
-                                                     second: 59) + new TimeSpan(i,0,0,0);
+                                                     second: 59) + new TimeSpan(i, 0, 0, 0);
                         if (time >= nowTime
                             && App.Data.scht.ct.weekFliter[ArkHelperDataStandard.GetWeekSubInChinese(time.DayOfWeek)])
                         {
@@ -493,9 +646,9 @@ namespace ArkHelper.Pages.OtherList
             App.Data.scht.ct.times.Sort();
             App.Data.scht.ct.forceTimes.Sort();
             int aa = 0;
-            foreach(var item in ctWeek.Children)
+            foreach (var item in ctWeek.Children)
             {
-                foreach(var item2 in (item as WrapPanel).Children)
+                foreach (var item2 in (item as WrapPanel).Children)
                 {
                     if (item2.GetType() == typeof(CheckBox))
                     {
@@ -514,7 +667,7 @@ namespace ArkHelper.Pages.OtherList
         private void Page_Unloaded(object sender, RoutedEventArgs e)
         {
             SimuSelect.SSelected -= CSimuSelWrap;
-
+            WithSystem.GarbageCollect();
         }
 
         private void ann_useCard_checkbox_Click(object sender, RoutedEventArgs e)
