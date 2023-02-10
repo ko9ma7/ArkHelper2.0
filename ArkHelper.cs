@@ -1244,10 +1244,17 @@ namespace ArkHelper
     /// </summary>
     public static class Address
     {
+#if DEBUG
+        /// <summary>
+        /// 数据存储（ProgramData）
+        /// </summary>
+        public readonly static string programData = Environment.GetEnvironmentVariable("ProgramData") + @"\ArkHelperDebug";
+#else
         /// <summary>
         /// 数据存储（ProgramData）
         /// </summary>
         public readonly static string programData = Environment.GetEnvironmentVariable("ProgramData") + @"\ArkHelper";
+#endif
         /// <summary>
         /// data地址
         /// </summary>
