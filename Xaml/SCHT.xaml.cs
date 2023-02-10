@@ -244,15 +244,18 @@ namespace ArkHelper.Pages.OtherList
             {
                 var btn = _btn as UnitButton;
                 var cls = btn.Tag as Unit;
-                var ret = (cls).ID == id;
-                if (ret) { return ret; }
+                if(cls.ID== id)
+                {
+                    return btn.IsChecked;
+                }
             }
             return false;
         }
         private void VisChange()
         {
             cuscpi.Visibility = first_unit.Visibility = second_unit.Visibility = ann_stack.Visibility = ct_stack.Visibility = server_stack.Visibility = (bool)(status_togglebutton.IsChecked) ? Visibility.Visible : Visibility.Collapsed;
-            if ((bool)status_togglebutton.IsChecked && (GetUnitCheckStatusInArea("LS",FirstGrid) || GetUnitCheckStatusInArea("custom", FirstGrid))) { second_unit.Visibility = Visibility.Collapsed; }
+            if ((bool)status_togglebutton.IsChecked && (GetUnitCheckStatusInArea("LS",FirstGrid) || GetUnitCheckStatusInArea("custom", FirstGrid))) 
+            { second_unit.Visibility = Visibility.Collapsed; }
         }
         private void CreateNewTime(DateTime num, bool isForce = false)
         {
