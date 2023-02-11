@@ -576,7 +576,7 @@ namespace ArkHelper.Pages.OtherList
                         void ClueShop()
                         {
                             if (!AMmode) return;
-                            Akhcmd("shell input tap 941 550", "采购中心", 3);
+                            Akhcmd("shell input tap 941 550", "采购中心", 4);
                             Akhcmd("shell input tap 1307 121", "信用交易所", 2);
                             Akhcmd("shell input tap 1146 48", "领取信用", 3);
                             Akhcmd("shell input tap 722 719", "收取", 2);
