@@ -1,4 +1,5 @@
 ﻿using ArkHelper.Modules.Connect;
+using ArkHelper.Modules.MaterialCalc;
 using ArkHelper.Pages;
 using ArkHelper.Xaml;
 using Microsoft.Toolkit.Uwp.Notifications;
@@ -167,6 +168,7 @@ namespace ArkHelper
             #endregion            
 
             PinnedData.Server.Load();//fu
+            Info.Init();
 
 #if DEBUG
             App.Data.arkHelper.debug = true;

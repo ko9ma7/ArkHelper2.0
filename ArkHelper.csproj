@@ -120,6 +120,10 @@
     <Compile Include="Modules\Connect\XAML\ConnectionController.xaml.cs">
       <DependentUpon>ConnectionController.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Modules\MaterialCalc\Material.cs" />
+    <Compile Include="Modules\MaterialCalc\Xaml\MaterialUnit.xaml.cs">
+      <DependentUpon>MaterialUnit.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Modules\MB\MBImplementation.cs" />
     <Compile Include="Modules\SCHT\Xaml\UnitButton.xaml.cs">
       <DependentUpon>UnitButton.xaml</DependentUpon>
@@ -165,7 +169,7 @@
     <Compile Include="Xaml\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Xaml\MaterialCalc.xaml.cs">
+    <Compile Include="Modules\MaterialCalc\Xaml\MaterialCalc.xaml.cs">
       <DependentUpon>MaterialCalc.xaml</DependentUpon>
     </Compile>
     <Compile Include="Xaml\NewUser\Check.xaml.cs">
@@ -209,6 +213,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Modules\Connect\XAML\ConnectionController.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Modules\MaterialCalc\Xaml\MaterialUnit.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -272,7 +280,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Xaml\MaterialCalc.xaml">
+    <Page Include="Modules\MaterialCalc\Xaml\MaterialCalc.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
