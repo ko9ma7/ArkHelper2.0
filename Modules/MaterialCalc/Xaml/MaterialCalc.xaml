@@ -4,6 +4,7 @@
       xmlns:akhc="clr-namespace:ArkHelper.Xaml.Control"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:local="clr-namespace:ArkHelper.Modules.MaterialCalc.Xaml"
+      xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       Title="MaterialCalc"
       d:DesignHeight="450"
@@ -13,6 +14,42 @@
     <ScrollViewer>
         <StackPanel Name="Levels" Margin="20,0,20,0">
             <akhc:Title Icon="Material" Text="材料计算器" />
+            <WrapPanel Margin="5,0,0,20">
+                <ComboBox Name="mode"
+                          Width="220"
+                          materialDesign:HintAssist.Hint="计算模式"
+                          FontSize="{StaticResource h3}"
+                          Style="{StaticResource MaterialDesignFilledComboBox}">
+                    <ComboBoxItem IsSelected="True" Tag="Auto">智能计算</ComboBoxItem>
+                    <ComboBoxItem Tag="UntilEqualZero">全部转换为不可合成材料</ComboBoxItem>
+                </ComboBox>
+                <Button Margin="20,0,0,0"
+                        Background="{DynamicResource MaterialDesignTextFieldBoxBackground}"
+                        Click="Button_Click"
+                        Style="{StaticResource MaterialDesignIconButton}"
+                        ToolTip="开始计算">
+                    <materialDesign:PackIcon Kind="Play" />
+                </Button>
+                <Button Margin="20,0,0,0"
+                        Background="{DynamicResource MaterialDesignTextFieldBoxBackground}"
+                        Click="Button_Click_2"
+                        Style="{StaticResource MaterialDesignIconButton}"
+                        ToolTip="清空">
+                    <materialDesign:PackIcon Kind="BinEmpty" />
+                </Button>
+                <Button Margin="20,0,0,0"
+                        Background="{DynamicResource MaterialDesignTextFieldBoxBackground}"
+                        Click="Button_Click_1"
+                        Style="{StaticResource MaterialDesignIconButton}"
+                        ToolTip="导出为Json">
+                    <materialDesign:PackIcon Kind="ExportVariant" />
+                </Button>
+                <CheckBox Margin="20,0,0,0"
+                          Name="vis"
+                          Click="CheckBox_Click"
+                          Content="只显示数值不为零的材料"
+                          FontSize="{StaticResource h3}" />
+            </WrapPanel>
         </StackPanel>
     </ScrollViewer>
 

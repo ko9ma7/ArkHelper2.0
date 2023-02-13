@@ -69,13 +69,4 @@ namespace ArkHelper.Modules.MaterialCalc
         public Dictionary<Material, int> equal = new Dictionary<Material, int>();
         public int level { get; set; }
     }
-    public class MaterialStatus
-    {
-        public int RequireNumber { get; set; }
-
-        public MaterialStatus()
-        {
-            RequireNumber = 0;
-        }
-    }
 }

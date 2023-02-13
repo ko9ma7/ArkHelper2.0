@@ -44,15 +44,18 @@ namespace ArkHelper.Modules.MaterialCalc.Xaml
             Number = startNumber;
             thisMaterial = material;
 
-            string res = "合成方案：\n";
-            int i = 1;
-            foreach(var pair in thisMaterial.equal)
+            if (material.equal.Count != 0)
             {
-                res += pair.Key.name + "*" + pair.Value;
-                if (i != thisMaterial.equal.Count) res += " + ";
-                i++;
+                string res = "合成方案：\n";
+                int i = 1;
+                foreach (var pair in thisMaterial.equal)
+                {
+                    res += pair.Key.name + "*" + pair.Value;
+                    if (i != thisMaterial.equal.Count) res += " + ";
+                    i++;
+                }
+                UIpic.ToolTip = res;
             }
-            UIpic.ToolTip = res;
             CheckMask();
         }
 
