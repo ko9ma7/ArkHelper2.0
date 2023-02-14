@@ -570,8 +570,7 @@ namespace ArkHelper.Pages.OtherList
                             Akhcmd("shell input tap 1122 188", "访问基建", 5);
                             for (int i = 1; i <= 10; i++) { Akhcmd("shell input tap 1334 706", "访问下位", 5); }
                             Akhcmd("shell input tap 299 46", "菜单", 2);
-                            Akhcmd("shell input tap 103 305", "首页", 1);
-                            Akhcmd("shell input tap 962 555", "确认", 5);
+                            Akhcmd("shell input tap 103 305", "首页", 5);
                         }
                         void ClueShop()
                         {

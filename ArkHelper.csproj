@@ -112,6 +112,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Modules\API\PenguinStatsv2.cs" />
     <Compile Include="Modules\Connect\ADBConnector.cs" />
     <Compile Include="Modules\Connect\ADBInteraction.cs" />
     <Compile Include="Modules\Connect\XAML\ConnectionCard.xaml.cs">
