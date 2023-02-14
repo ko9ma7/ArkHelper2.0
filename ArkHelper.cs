@@ -74,7 +74,7 @@ namespace ArkHelper
             }
         }
 
-        public static Data Current = new Data("2.0.1.1", "local", false, Data.VersionType.beta);
+        public static Data Current = new Data("2.0.2.0", "local", false, Data.VersionType.realese);
 
         /// <summary>
         /// 更新
