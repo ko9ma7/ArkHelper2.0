@@ -74,7 +74,7 @@ namespace ArkHelper
             }
         }
 
-        public static Data Current = new Data("2.0.1.1", "local", false, Data.VersionType.beta);
+        public static Data Current = new Data("2.0.2.0", "local", false, Data.VersionType.realese);
 
         /// <summary>
         /// 更新
@@ -1244,10 +1244,17 @@ namespace ArkHelper
     /// </summary>
     public static class Address
     {
+#if DEBUG
+        /// <summary>
+        /// 数据存储（ProgramData）
+        /// </summary>
+        public readonly static string programData = Environment.GetEnvironmentVariable("ProgramData") + @"\ArkHelperDebug";
+#else
         /// <summary>
         /// 数据存储（ProgramData）
         /// </summary>
         public readonly static string programData = Environment.GetEnvironmentVariable("ProgramData") + @"\ArkHelper";
+#endif
         /// <summary>
         /// data地址
         /// </summary>

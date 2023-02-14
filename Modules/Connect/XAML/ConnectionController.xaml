@@ -148,11 +148,12 @@
                     <WrapPanel>
                         <WrapPanel.Resources>
                             <Style BasedOn="{StaticResource MaterialDesignOutlinedButton}" TargetType="Button">
-                                <Setter Property="Margin" Value="0,0,8,0" />
+                                <Setter Property="Margin" Value="0,8,8,0" />
                             </Style>
                         </WrapPanel.Resources>
                         <Button Click="Button_Click_1" Content="查询连接设备" />
                         <Button Click="Button_Click_2" Content="向所选设备发出一条指令" />
+                        <Button Click="Button_Click_3" Content="重新启动ADB服务" />
                         <!--<Button Content="测试连接设备" />-->
                     </WrapPanel>
                     <arkc:ChapterTitle Margin="0,20,0,5"
@@ -160,7 +161,7 @@
                                        Text="注意" />
                     <TextBlock FontSize="{StaticResource h3}">
                         <Run Text="      " />
-                        若模拟器已连接，但操作设备选择列表为空，请重新启动模拟器。<LineBreak />
+                        若模拟器已连接，但操作设备选择列表为空，请重新启动模拟器或ADB服务。<LineBreak />
                         <Run Text="      " />
                         请不要在ArkHelper运行时启动其它的ADB实例，这会对彼此造成干扰。您应在完全关闭ArkHelper后再使用其它的ADB实例。<LineBreak />
                         <Run Text="      " />

@@ -20,10 +20,12 @@ namespace ArkHelper.Modules.Connect
         public static void KillServer()
         {
             ADBInteraction.GetOutput("kill-server");
+            Output.Log("ADB server killed");
         }
         public static void StartServer()
         {
             ADBInteraction.GetOutput("start-server");
+            Output.Log("ADB server started");
         }
     }
 

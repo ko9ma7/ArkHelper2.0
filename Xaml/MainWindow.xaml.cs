@@ -70,7 +70,7 @@ namespace ArkHelper.Xaml
                     new Menu("Message","信息流终端",PackIconKind.AndroidMessages),
                     new Menu("UserData_Gacha", "寻访记录查询",PackIconKind.AccountCheck),
                     new Menu("SCHT", "SCHT控制台",PackIconKind.ThermostatAuto),
-                    //new Menu("材料计算器","MaterialCalc",PackIconKind.Material),
+                    new Menu("MaterialCalc","材料计算器",PackIconKind.Material,xamlFileAddress:"/Modules/MaterialCalc/Xaml/MaterialCalc.xaml"),
                     new Menu("SCHTRunning", "SCHT运行时", PackIconKind.ThermostatAuto)
                     {
                         IsCollapsed = true,

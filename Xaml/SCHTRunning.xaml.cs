@@ -570,13 +570,12 @@ namespace ArkHelper.Pages.OtherList
                             Akhcmd("shell input tap 1122 188", "访问基建", 5);
                             for (int i = 1; i <= 10; i++) { Akhcmd("shell input tap 1334 706", "访问下位", 5); }
                             Akhcmd("shell input tap 299 46", "菜单", 2);
-                            Akhcmd("shell input tap 103 305", "首页", 1);
-                            Akhcmd("shell input tap 962 555", "确认", 5);
+                            Akhcmd("shell input tap 103 305", "首页", 5);
                         }
                         void ClueShop()
                         {
                             if (!AMmode) return;
-                            Akhcmd("shell input tap 941 550", "采购中心", 3);
+                            Akhcmd("shell input tap 941 550", "采购中心", 4);
                             Akhcmd("shell input tap 1307 121", "信用交易所", 2);
                             Akhcmd("shell input tap 1146 48", "领取信用", 3);
                             Akhcmd("shell input tap 722 719", "收取", 2);
@@ -801,6 +800,10 @@ namespace ArkHelper.Pages.OtherList
                         ExitGame();//退出游戏
                     });
                     ThisTaskStopEvent = (s, ea) =>
+                    {
+                        thread.Abort();
+                    };
+                    AllStopEvent += (s, ea) =>
                     {
                         thread.Abort();
                     };

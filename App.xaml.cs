@@ -1,4 +1,5 @@
 ﻿using ArkHelper.Modules.Connect;
+using ArkHelper.Modules.MaterialCalc;
 using ArkHelper.Pages;
 using ArkHelper.Xaml;
 using Microsoft.Toolkit.Uwp.Notifications;
@@ -57,7 +58,8 @@ namespace ArkHelper
             }
             try
             {
-                File.WriteAllText(Address.config, JsonSerializer.Serialize(App.Data));
+                var str = JsonSerializer.Serialize(App.Data,new JsonSerializerOptions() { WriteIndented = true});
+                File.WriteAllText(Address.config, str);
             }
             catch { }
         }
@@ -166,6 +168,7 @@ namespace ArkHelper
             #endregion            
 
             PinnedData.Server.Load();//fu
+            Info.Init();
 
 #if DEBUG
             App.Data.arkHelper.debug = true;
@@ -197,7 +200,7 @@ namespace ArkHelper
                 MessageInit.Start();
             #endregion
             #region 按频率持续保存配置
-            Task SaveDataBg = Task.Run(() =>
+            Task SaveDataBg = new Task(() =>
             {
                 while (true)
                 {
@@ -208,7 +211,7 @@ namespace ArkHelper
             });
             #endregion
             #region 启动ADB连接
-            Task adbConnect = Task.Run(() =>
+            Task adbConnect = new Task(() =>
             {
                 foreach (var simu in App.Data.simulator.customs)
                     ConnectionInfo.Connections.Add(simu,new ConnectionInfo.ConnectStatus());
@@ -224,7 +227,7 @@ namespace ArkHelper
             });
             #endregion
             #region SCHT等待
-            Task SCHT = Task.Run(() =>
+            Task SCHT = new Task(() =>
             {
                 for (; ; Thread.Sleep(1000))
                 {
@@ -243,6 +246,7 @@ namespace ArkHelper
                     //&& false
                     ) goto end;
 
+                    //HACK 校验ADB是否可用后再启动（原进入校验删除）
                     if (isTimeEq(Pages.OtherList.SCHT.GetNextRunTime()))
                     {
                         Data.scht.ct.forceTimes.RemoveAll(dt => isTimeEq(dt));
@@ -260,8 +264,10 @@ namespace ArkHelper
                 }
             });
             #endregion
+            SaveDataBg.Start();
+            adbConnect.Start();
+            SCHT.Start();
         }
-
         private static void CloseMainWindow()
         {
             foreach (Window window in Application.Current.Windows)

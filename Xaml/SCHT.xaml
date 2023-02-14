@@ -7,6 +7,7 @@
       xmlns:local1="clr-namespace:ArkHelper"
       xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:scht="clr-namespace:ArkHelper.Modules.SCHT.Xaml"
       Title="SCHT"
       d:Background="White"
       d:DesignHeight="1000"
@@ -15,50 +16,12 @@
       Unloaded="Page_Unloaded"
       mc:Ignorable="d">
     <Page.Resources>
-        <!--  作战单元样式  -->
-        <Style x:Key="cpbtn" TargetType="{x:Type RadioButton}">
-            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="Padding" Value="0" />
-            <Setter Property="Width" Value="110" />
-            <Setter Property="Height" Value="60" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="HorizontalAlignment" Value="Center" />
-            <Setter Property="Margin" Value="0,0,10,10" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type RadioButton}">
-                        <Grid>
-                            <!--  默认状态  -->
-                            <Border Background="{TemplateBinding Background}"
-                                    CornerRadius="5"
-                                    Visibility="Visible" />
-                            <Border x:Name="A"
-                                    BorderBrush="#DE3f76b2"
-                                    BorderThickness="2"
-                                    CornerRadius="4"
-                                    Visibility="Collapsed" />
-                            <TextBlock HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"
-                                       FontSize="15"
-                                       Text="{TemplateBinding ContentStringFormat}">
-                                <TextBlock.Foreground>
-                                    <SolidColorBrush Opacity="0.85" Color="#EE000000" />
-                                </TextBlock.Foreground>
-                            </TextBlock>
-                        </Grid>
-                        <!--  行为  -->
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="A" Property="Visibility" Value="Visible" />
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
+        <Style TargetType="scht:UnitButton">
+            <Setter Property="Margin" Value="5" />
         </Style>
     </Page.Resources>
     <materialDesign:DialogHost Name="dialog">
+        <!--  对话框内容  -->
         <materialDesign:DialogHost.DialogContent>
             <Grid Width="600" Height="400">
                 <Grid Name="GuidePage1" Visibility="Visible">
@@ -118,12 +81,14 @@
                 </Button>
             </Grid>
         </materialDesign:DialogHost.DialogContent>
+        <!--  底层内容  -->
         <ScrollViewer>
             <StackPanel>
                 <akhc:Title DockPanel.Dock="Top"
                             Icon="ThermostatAuto"
                             Text="RHODES ISLAND（TM） 定时事项处理指挥器控制台" />
 
+                <!--  帮助  -->
                 <StackPanel Name="helper"
                             Margin="0,0,40,20"
                             DockPanel.Dock="Top"
@@ -172,6 +137,7 @@
                     </Border>
                 </StackPanel>
 
+                <!--  实际设置区  -->
                 <Grid Margin="0,0,20,0" DockPanel.Dock="Top">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="130" />
@@ -224,115 +190,7 @@
                                 Style="{StaticResource title}"
                                 Visibility="{Binding ElementName=first_unit, Path=Visibility}">
                         <akhc:Break />
-                        <WrapPanel Margin="0,7,0,-10">
-                            <RadioButton x:Name="LSFirst"
-                                         Checked="First_Unit_Selected"
-                                         Style="{DynamicResource cpbtn}"
-                                         ToolTip="关卡编号：LS&#x0a;掉落物：作战记录">
-                                <RadioButton.Background>
-                                    <ImageBrush ImageSource="/Asset/SCHT/LS.png" />
-                                </RadioButton.Background>
-                                <RadioButton.ContentStringFormat>战术演习</RadioButton.ContentStringFormat>
-                            </RadioButton>
-                            <RadioButton x:Name="CEFirst"
-                                         Checked="First_Unit_Selected"
-                                         Style="{DynamicResource cpbtn}"
-                                         ToolTip="关卡编号：CE&#x0a;掉落物：龙门币">
-                                <RadioButton.Background>
-                                    <ImageBrush ImageSource="/Asset/SCHT/CE.png" />
-                                </RadioButton.Background>
-                                <RadioButton.ContentStringFormat>
-                                    货物运送
-                                </RadioButton.ContentStringFormat>
-                            </RadioButton>
-                            <RadioButton x:Name="APFirst"
-                                         Checked="First_Unit_Selected"
-                                         Style="{DynamicResource cpbtn}"
-                                         ToolTip="关卡编号：AP&#x0a;掉落物：采购凭证">
-                                <RadioButton.Background>
-                                    <ImageBrush ImageSource="/Asset/SCHT/AP.png" />
-                                </RadioButton.Background>
-                                <RadioButton.ContentStringFormat>
-                                    粉碎防御
-                                </RadioButton.ContentStringFormat>
-                            </RadioButton>
-                            <RadioButton x:Name="SKFirst"
-                                         Checked="First_Unit_Selected"
-                                         Style="{DynamicResource cpbtn}"
-                                         ToolTip="关卡编号：SK&#x0a;掉落物：碳、家具零件">
-                                <RadioButton.Background>
-                                    <ImageBrush ImageSource="/Asset/SCHT/SK.png" />
-                                </RadioButton.Background>
-                                <RadioButton.ContentStringFormat>
-                                    资源保障
-                                </RadioButton.ContentStringFormat>
-                            </RadioButton>
-                            <RadioButton x:Name="CAFirst"
-                                         Checked="First_Unit_Selected"
-                                         Style="{DynamicResource cpbtn}"
-                                         ToolTip="关卡编号：CA&#x0a;掉落物：技巧概要">
-                                <RadioButton.Background>
-                                    <ImageBrush ImageSource="/Asset/SCHT/CA.png" />
-                                </RadioButton.Background>
-                                <RadioButton.ContentStringFormat>
-                                    空中威胁
-                                </RadioButton.ContentStringFormat>
-                            </RadioButton>
-                            <RadioButton x:Name="PRAFirst"
-                                         Checked="First_Unit_Selected"
-                                         Style="{DynamicResource cpbtn}"
-                                         ToolTip="关卡编号：PR-A&#x0a;掉落物：医疗、重装芯片">
-                                <RadioButton.Background>
-                                    <ImageBrush ImageSource="/Asset/SCHT/chips.png" />
-                                </RadioButton.Background>
-                                <RadioButton.ContentStringFormat>
-                                    固若金汤
-                                </RadioButton.ContentStringFormat>
-                            </RadioButton>
-                            <RadioButton x:Name="PRBFirst"
-                                         Checked="First_Unit_Selected"
-                                         Style="{DynamicResource cpbtn}"
-                                         ToolTip="关卡编号：PR-B&#x0a;掉落物：术师、狙击芯片">
-                                <RadioButton.Background>
-                                    <ImageBrush ImageSource="/Asset/SCHT/chips.png" />
-                                </RadioButton.Background>
-                                <RadioButton.ContentStringFormat>
-                                    摧枯拉朽
-                                </RadioButton.ContentStringFormat>
-                            </RadioButton>
-                            <RadioButton x:Name="PRCFirst"
-                                         Checked="First_Unit_Selected"
-                                         Style="{DynamicResource cpbtn}"
-                                         ToolTip="关卡编号：PR-C&#x0a;掉落物：辅助、先锋芯片">
-                                <RadioButton.Background>
-                                    <ImageBrush ImageSource="/Asset/SCHT/chips.png" />
-                                </RadioButton.Background>
-                                <RadioButton.ContentStringFormat>
-                                    势不可当
-                                </RadioButton.ContentStringFormat>
-                            </RadioButton>
-                            <RadioButton x:Name="PRDFirst"
-                                         Checked="First_Unit_Selected"
-                                         Style="{DynamicResource cpbtn}"
-                                         ToolTip="关卡编号：PR-D&#x0a;掉落物：特种、近卫芯片">
-                                <RadioButton.Background>
-                                    <ImageBrush ImageSource="/Asset/SCHT/chips.png" />
-                                </RadioButton.Background>
-                                <RadioButton.ContentStringFormat>
-                                    身先士卒
-                                </RadioButton.ContentStringFormat>
-                            </RadioButton>
-                            <RadioButton x:Name="customFirst"
-                                         Checked="First_Unit_Selected"
-                                         Style="{DynamicResource cpbtn}">
-                                <RadioButton.Background>
-                                    <SolidColorBrush Color="#DDDDDD" />
-                                </RadioButton.Background>
-                                <RadioButton.ContentStringFormat>
-                                    自定义
-                                </RadioButton.ContentStringFormat>
-                            </RadioButton>
-                        </WrapPanel>
+                        <WrapPanel Name="FirstGrid" Margin="0,7,0,-10" />
                     </StackPanel>
 
                     <StackPanel x:Name="second_unit"
@@ -351,27 +209,7 @@
                                 Style="{StaticResource title}"
                                 Visibility="{Binding ElementName=second_unit, Path=Visibility}">
 
-                        <WrapPanel Margin="0,7,0,-10">
-                            <RadioButton x:Name="LSSecond"
-                                         Checked="Second_Unit_Selected"
-                                         Style="{DynamicResource cpbtn}"
-                                         ToolTip="关卡编号：LS&#x0a;掉落物：作战记录">
-                                <RadioButton.Background>
-                                    <ImageBrush ImageSource="/Asset/SCHT/LS.png" />
-                                </RadioButton.Background>
-                                <RadioButton.ContentStringFormat>战术演习</RadioButton.ContentStringFormat>
-                            </RadioButton>
-                            <RadioButton x:Name="customSecond"
-                                         Checked="Second_Unit_Selected"
-                                         Style="{DynamicResource cpbtn}">
-                                <RadioButton.Background>
-                                    <SolidColorBrush Color="#DDDDDD" />
-                                </RadioButton.Background>
-                                <RadioButton.ContentStringFormat>
-                                    自定义
-                                </RadioButton.ContentStringFormat>
-                            </RadioButton>
-                        </WrapPanel>
+                        <WrapPanel Name="SecondGrid" Margin="0,7,0,-10" />
                     </StackPanel>
 
                     <StackPanel x:Name="ann_stack"
@@ -395,49 +233,7 @@
                         <WrapPanel Margin="0,10,0,0"
                                    Orientation="Vertical"
                                    Visibility="{Binding ElementName=ann_status_togglebutton, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <WrapPanel>
-                                <RadioButton x:Name="CHNB"
-                                             Checked="ann_Selected"
-                                             Style="{DynamicResource cpbtn}"
-                                             ToolTip="类型：长期剿灭委托&#x0a;区域：乌萨斯">
-                                    <RadioButton.Background>
-                                        <ImageBrush ImageSource="/Asset/SCHT/CHNB.png" />
-                                    </RadioButton.Background>
-                                    <RadioButton.ContentStringFormat>切尔诺伯格</RadioButton.ContentStringFormat>
-                                </RadioButton>
-                                <RadioButton x:Name="LMOB"
-                                             Checked="ann_Selected"
-                                             Style="{DynamicResource cpbtn}"
-                                             ToolTip="类型：长期剿灭委托&#x0a;区域：炎国龙门">
-                                    <RadioButton.Background>
-                                        <ImageBrush ImageSource="/Asset/SCHT/LMOB.png" />
-                                    </RadioButton.Background>
-                                    <RadioButton.ContentStringFormat>
-                                        龙门外环
-                                    </RadioButton.ContentStringFormat>
-                                </RadioButton>
-                                <RadioButton x:Name="LMDT"
-                                             Checked="ann_Selected"
-                                             Style="{DynamicResource cpbtn}"
-                                             ToolTip="类型：长期剿灭委托&#x0a;区域：炎国龙门">
-                                    <RadioButton.Background>
-                                        <ImageBrush ImageSource="/Asset/SCHT/LMDT.png" />
-                                    </RadioButton.Background>
-                                    <RadioButton.ContentStringFormat>
-                                        龙门市区
-                                    </RadioButton.ContentStringFormat>
-                                </RadioButton>
-                                <RadioButton x:Name="TT"
-                                             Checked="ann_Selected"
-                                             Style="{DynamicResource cpbtn}">
-                                    <RadioButton.Background>
-                                        <SolidColorBrush Color="#DDDDDD" />
-                                    </RadioButton.Background>
-                                    <RadioButton.ContentStringFormat>
-                                        当期委托
-                                    </RadioButton.ContentStringFormat>
-                                </RadioButton>
-                            </WrapPanel>
+                            <WrapPanel x:Name="AnnGrid" />
                             <WrapPanel Orientation="Vertical">
                                 <WrapPanel>
                                     <CheckBox x:Name="ann_custom_time_status_checkbox"
