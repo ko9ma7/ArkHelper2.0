@@ -23,7 +23,7 @@
                 <akhc:SimuSupport />
                 <LineBreak />
                 <LineBreak />
-                <Run>请查看你的模拟器是否受支持。若否，你需要：</Run>
+                <Run>请查看你的模拟器是否受支持。若否，你需要在新手向导结束后，进入设置-模拟器连接管理，适配你自己的模拟器。</Run>
             </TextBlock>
             <!--  fu  -->
         </StackPanel>

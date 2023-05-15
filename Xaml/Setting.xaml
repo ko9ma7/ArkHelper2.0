@@ -130,7 +130,7 @@
 
 
                         <TextBlock FontSize="{StaticResource p}">
-                            <Hyperlink Click="Hyperlink_EULA">《ArkHelper最终用户许可协议》</Hyperlink>
+                            <Hyperlink Click="Hyperlink_EULA">《ArkHelper免责声明》</Hyperlink>
                             <Hyperlink Click="Hyperlink_PriPol">《ArkHelper隐私政策》</Hyperlink>
                         </TextBlock>
                         <WrapPanel>
